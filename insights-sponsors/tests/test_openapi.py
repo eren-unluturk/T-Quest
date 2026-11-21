@@ -14,6 +14,7 @@ EXPECTED = {
     "/physical-rewards/catalog": ["get"],
     "/recommendations": ["get"],
     "/analytics/me": ["get"],
+    "/analytics/boston": ["get"],
     "/consent": ["get", "post"],
     "/consent/{scope}": ["delete"],
 }
@@ -54,8 +55,10 @@ def test_query_params_present():
 
 def test_version_and_changelog():
     info = load()["info"]
-    assert info["version"] == "0.1.1"
-    assert any(e.startswith("0.1.1:") and "409" in e and "ConsentRequired" in e for e in info["x-changelog"])
+    assert info["version"] == "0.2.0"
+    log = info["x-changelog"]
+    assert any(e.startswith("0.2.0:") and "/analytics/boston" in e for e in log)
+    assert any(e.startswith("0.1.1:") and "409" in e and "ConsentRequired" in e for e in log)
 
 
 def test_post_consent_documents_409_policy_mismatch():

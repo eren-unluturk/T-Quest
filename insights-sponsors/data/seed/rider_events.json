@@ -1530,12 +1530,57 @@
   "mode": "light_rail"
  },
  {
+  "user_id": "user-4",
+  "days_ago": 12,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-5",
+  "days_ago": 12,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-6",
+  "days_ago": 12,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
   "user_id": "user-1",
   "days_ago": 12,
   "hour": 9,
   "event_type": "checkin",
   "stop_id": "place-pktrm",
   "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-4",
+  "days_ago": 12,
+  "hour": 12,
+  "event_type": "checkin",
+  "stop_id": "place-aqucl",
+  "route_id": "Blue",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-5",
+  "days_ago": 12,
+  "hour": 12,
+  "event_type": "checkin",
+  "stop_id": "place-aqucl",
+  "route_id": "Blue",
   "mode": "subway"
  },
  {
@@ -1548,6 +1593,33 @@
   "mode": "subway"
  },
  {
+  "user_id": "user-4",
+  "days_ago": 11,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-5",
+  "days_ago": 11,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-6",
+  "days_ago": 11,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
   "user_id": "user-3",
   "days_ago": 11,
   "hour": 18,
@@ -1555,6 +1627,33 @@
   "stop_id": "place-north",
   "route_id": "Green",
   "mode": "light_rail"
+ },
+ {
+  "user_id": "user-4",
+  "days_ago": 11,
+  "hour": 18,
+  "event_type": "checkin",
+  "stop_id": "place-harsq",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-5",
+  "days_ago": 11,
+  "hour": 18,
+  "event_type": "checkin",
+  "stop_id": "place-harsq",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-6",
+  "days_ago": 11,
+  "hour": 18,
+  "event_type": "checkin",
+  "stop_id": "place-harsq",
+  "route_id": "Red",
+  "mode": "subway"
  },
  {
   "user_id": "user-1",
@@ -1618,6 +1717,33 @@
   "stop_id": "place-kencl",
   "route_id": "Green",
   "mode": "light_rail"
+ },
+ {
+  "user_id": "user-4",
+  "days_ago": 10,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-5",
+  "days_ago": 10,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-6",
+  "days_ago": 10,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
  },
  {
   "user_id": "user-2",
@@ -2007,6 +2133,51 @@
   "mode": "subway"
  },
  {
+  "user_id": "user-4",
+  "days_ago": 3,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-5",
+  "days_ago": 3,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-6",
+  "days_ago": 3,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-4",
+  "days_ago": 3,
+  "hour": 12,
+  "event_type": "checkin",
+  "stop_id": "place-aqucl",
+  "route_id": "Blue",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-5",
+  "days_ago": 3,
+  "hour": 12,
+  "event_type": "checkin",
+  "stop_id": "place-aqucl",
+  "route_id": "Blue",
+  "mode": "subway"
+ },
+ {
   "user_id": "user-1",
   "days_ago": 3,
   "hour": 17,
@@ -2088,6 +2259,33 @@
   "mode": "light_rail"
  },
  {
+  "user_id": "user-4",
+  "days_ago": 2,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-5",
+  "days_ago": 2,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-6",
+  "days_ago": 2,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
   "user_id": "user-2",
   "days_ago": 2,
   "hour": 9,
@@ -2131,6 +2329,33 @@
   "stop_id": "place-coecl",
   "route_id": "Green",
   "mode": "light_rail"
+ },
+ {
+  "user_id": "user-4",
+  "days_ago": 2,
+  "hour": 18,
+  "event_type": "checkin",
+  "stop_id": "place-harsq",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-5",
+  "days_ago": 2,
+  "hour": 18,
+  "event_type": "checkin",
+  "stop_id": "place-harsq",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-6",
+  "days_ago": 2,
+  "hour": 18,
+  "event_type": "checkin",
+  "stop_id": "place-harsq",
+  "route_id": "Red",
+  "mode": "subway"
  },
  {
   "user_id": "user-2",
@@ -2184,6 +2409,33 @@
   "event_type": "checkin",
   "stop_id": "place-haecl",
   "route_id": "Orange",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-4",
+  "days_ago": 1,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-5",
+  "days_ago": 1,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
+  "mode": "subway"
+ },
+ {
+  "user_id": "user-6",
+  "days_ago": 1,
+  "hour": 8,
+  "event_type": "checkin",
+  "stop_id": "place-pktrm",
+  "route_id": "Red",
   "mode": "subway"
  },
  {

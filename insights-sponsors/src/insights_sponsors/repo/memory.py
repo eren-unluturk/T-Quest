@@ -170,6 +170,9 @@ class MemoryRepository:
             if e.user_id == user_id and (since is None or e.time >= since)
         ]
 
+    def rider_events_all(self, since: datetime) -> list[RiderEvent]:
+        return [e for e in self._events if e.time >= since]
+
     def stop_popularity(self, since: datetime) -> dict[str, int]:
         counts = Counter(
             e.stop_id

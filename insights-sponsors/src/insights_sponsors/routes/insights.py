@@ -2,9 +2,9 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query
 
-from ..analytics import compute_analytics
+from ..analytics import boston_analytics, compute_analytics
 from ..auth import current_user_id
-from ..models import MyAnalytics, Recommendations
+from ..models import BostonAnalytics, MyAnalytics, Recommendations
 from ..recommend import recommend
 from ..repo import Repository, get_repository
 
@@ -18,6 +18,15 @@ def analytics_me(
     period: Literal["week", "month", "all"] = "month",
 ):
     return compute_analytics(repo, user_id, period)
+
+
+@router.get("/analytics/boston", response_model=BostonAnalytics)
+def analytics_boston(
+    _user: Annotated[str, Depends(current_user_id)],
+    repo: Annotated[Repository, Depends(get_repository)],
+    period: Literal["week", "month"] = "week",
+):
+    return boston_analytics(repo, period)
 
 
 @router.get("/recommendations", response_model=Recommendations)

@@ -61,6 +61,11 @@ class Repository(Protocol):
         self, user_id: str, since: datetime | None = None
     ) -> list[RiderEvent]: ...
 
+    def rider_events_all(self, since: datetime) -> list[RiderEvent]:
+        """Every rider's events since `since`. For aggregate city views only: callers
+        must reduce to counts with a minimum-riders rule and never return user ids."""
+        ...
+
     def stop_popularity(self, since: datetime) -> dict[str, int]:
         """Check-ins per stop across all riders since `since` (aggregate only)."""
         ...

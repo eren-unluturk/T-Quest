@@ -10,6 +10,8 @@ FILES = [
     "recs_routes.sql",
     "recs_place_affinity.sql",
 ]
+CITY_FILE = "analytics_boston.sql"
+CITY_PARAMS = {"since", "prev_since", "min_users", "limit"}
 AGGREGATES = ("time_bucket", "user_stop_daily", "stop_popularity_hourly", "home_line")
 ALLOWED_PARAMS = {"user_id", "since", "limit"}
 
@@ -23,6 +25,23 @@ def test_sql_file(name):
     params = set(re.findall(r"%\((\w+)\)s", text))
     assert "user_id" in params
     assert params <= ALLOWED_PARAMS, params
+
+
+def test_boston_sql_is_aggregate_only_and_k_anonymous():
+    text = (SQL / CITY_FILE).read_text(encoding="utf-8")
+    assert "time_bucket('1 day'" in text and "stop_popularity_hourly" in text
+    params = set(re.findall(r"%\((\w+)\)s", text))
+    assert params == CITY_PARAMS, params
+    assert "user_id" not in params
+    assert "HAVING count(DISTINCT" in text and "%(min_users)s" in text
+    assert "k-anonymity" in text
+    for name in ("totals", "busiest_stops", "trending_neighborhoods", "lines_by_day"):
+        assert f"-- name: {name}" in text
+    # no query returns a user id column
+    select_lists = re.findall(r"SELECT(.*?)FROM", text, flags=re.S)
+    assert not any(re.search(r"\buser_id\b", s) for s in select_lists if "count(DISTINCT" not in s)
+    body = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith("--"))
+    assert re.search(r"\b(FROM|JOIN)\s+place_visits\b", body) is None
 
 
 def test_place_affinity_states_consent_gate():

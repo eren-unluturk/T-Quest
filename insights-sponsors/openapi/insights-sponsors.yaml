@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
   title: T-Quest insights-sponsors API
-  version: 0.1.1
+  version: 0.2.0
   x-changelog:
+    - '0.2.0: add GET /analytics/boston (anonymous city analytics, k=3)'
     - '0.1.1: document 409 on POST /consent and ConsentRequired'
     - '0.1.0: first draft'
   description: |
@@ -156,6 +157,31 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/MyAnalytics'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /analytics/boston:
+    get:
+      summary: Anonymous city-wide analytics
+      description: |
+        Aggregate view of all riders: busiest stops, trending neighborhoods and line
+        activity. Privacy rule (k-anonymity): any bucket backed by fewer than 3
+        distinct riders is suppressed. Busiest-stop and neighborhood entries with
+        fewer than 3 distinct riders are left out, days or lines with fewer than 3
+        riders are left out of `lines`, and `active_riders` (and `total_checkins`)
+        are 0 when fewer than 3 riders were active. No user id is ever returned.
+        Trending neighborhoods compare the period with the previous period of equal
+        length, need at least 5 check-ins in the current period, and are the top 5 by
+        `change_pct`. A previous period with no data, or with fewer than 3 riders,
+        counts as +100%.
+      parameters:
+        - name: period
+          in: query
+          schema: {type: string, enum: [week, month], default: week}
+      responses:
+        '200':
+          description: City analytics for the period
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/BostonAnalytics'}
         '401': {$ref: '#/components/responses/Unauthorized'}
   /consent:
     get:
@@ -390,6 +416,52 @@ components:
         neighborhoods_explored:
           type: array
           items: {type: string}
+    BusiestStop:
+      type: object
+      required: [stop_id, stop_name, checkins]
+      properties:
+        stop_id: {type: string}
+        stop_name: {type: string}
+        checkins: {type: integer}
+    TrendingNeighborhood:
+      type: object
+      required: [neighborhood, checkins, change_pct]
+      properties:
+        neighborhood: {type: string}
+        checkins: {type: integer}
+        change_pct: {type: number, description: Percent change in check-ins versus the previous period of equal length}
+    DayCount:
+      type: object
+      required: [day, checkins]
+      properties:
+        day: {type: string, format: date}
+        checkins: {type: integer}
+    LineActivity:
+      type: object
+      required: [route_id, checkins, by_day]
+      properties:
+        route_id: {type: string}
+        checkins: {type: integer}
+        by_day:
+          type: array
+          items: {$ref: '#/components/schemas/DayCount'}
+    BostonAnalytics:
+      type: object
+      required: [period, generated_at, total_checkins, active_riders, busiest_stops, trending_neighborhoods, lines]
+      properties:
+        period: {type: string, enum: [week, month]}
+        generated_at: {type: string, format: date-time}
+        total_checkins: {type: integer}
+        active_riders: {type: integer}
+        busiest_stops:
+          type: array
+          items: {$ref: '#/components/schemas/BusiestStop'}
+        trending_neighborhoods:
+          type: array
+          items: {$ref: '#/components/schemas/TrendingNeighborhood'}
+        lines:
+          type: array
+          items: {$ref: '#/components/schemas/LineActivity'}
     ConsentScope:
       type: string
       enum: [location, place_visits]

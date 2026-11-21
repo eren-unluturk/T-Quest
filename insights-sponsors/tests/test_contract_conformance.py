@@ -38,7 +38,7 @@ def is_public(path: str, method: str) -> bool:
 
 
 def test_operations_found():
-    assert len(OPERATIONS) == 11
+    assert len(OPERATIONS) == 12
 
 
 @pytest.mark.parametrize("path,method", OPERATIONS, ids=[f"{m.upper()} {p}" for p, m in OPERATIONS])

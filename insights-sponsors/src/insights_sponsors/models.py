@@ -191,3 +191,36 @@ class PlaceVisit(BaseModel):
     lon: float
     place_category: str
     store_id: str | None = None
+
+
+class BusiestStop(BaseModel):
+    stop_id: str
+    stop_name: str
+    checkins: int
+
+
+class TrendingNeighborhood(BaseModel):
+    neighborhood: str
+    checkins: int
+    change_pct: float
+
+
+class DayCount(BaseModel):
+    day: date
+    checkins: int
+
+
+class LineActivity(BaseModel):
+    route_id: str
+    checkins: int
+    by_day: list[DayCount]
+
+
+class BostonAnalytics(BaseModel):
+    period: Literal["week", "month"]
+    generated_at: datetime
+    total_checkins: int
+    active_riders: int
+    busiest_stops: list[BusiestStop]
+    trending_neighborhoods: list[TrendingNeighborhood]
+    lines: list[LineActivity]

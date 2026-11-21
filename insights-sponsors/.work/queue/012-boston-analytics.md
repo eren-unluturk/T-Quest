@@ -1,7 +1,7 @@
 ---
 id: 012
 title: City-wide Boston analytics endpoint (GET /analytics/boston)
-status: ready
+status: done
 issue: 3
 depends_on: [011]
 ---
