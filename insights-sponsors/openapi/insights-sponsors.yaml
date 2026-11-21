@@ -1,7 +1,10 @@
 openapi: 3.0.3
 info:
   title: T-Quest insights-sponsors API
-  version: 0.1.0
+  version: 0.1.1
+  x-changelog:
+    - '0.1.1: document 409 on POST /consent and ConsentRequired'
+    - '0.1.0: first draft'
   description: |
     Tourist content, sponsor offers, store partners, the physical-reward catalog,
     route analytics, recommendations and consent. Owner: insights-sponsors (Eren).
@@ -124,7 +127,8 @@ paths:
       summary: Route, neighborhood and stop recommendations
       description: |
         SQL-based over Tiger Data aggregates. Place-visit signals are used only
-        when the place_visits consent is granted.
+        when the place_visits consent is granted. This route never returns 403:
+        without that consent the place-visit signals are silently skipped.
       parameters:
         - name: kind
           in: query
@@ -156,6 +160,10 @@ paths:
   /consent:
     get:
       summary: The caller's consent records
+      description: |
+        Consent state per scope. Routes that gate on a consent return the reusable
+        ConsentRequired response (403, detail "consent required: <scope>"). No route
+        does that yet; the response is kept in components for future routes.
       responses:
         '200':
           description: One record per scope
@@ -179,7 +187,12 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Consent'}
         '401': {$ref: '#/components/responses/Unauthorized'}
-        '422': {description: Unknown scope or policy version}
+        '409':
+          description: policy_version is not the current policy version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PolicyMismatch'}
+        '422': {description: Unknown scope or malformed body}
   /consent/{scope}:
     delete:
       summary: Revoke consent for a scope
@@ -208,6 +221,11 @@ components:
       required: true
       schema: {type: string}
   responses:
+    ConsentRequired:
+      description: 'Consent required: <scope>. The caller has not granted (or has revoked) the consent this route needs.'
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
     Unauthorized:
       description: Missing or malformed bearer token
       content:
@@ -219,6 +237,12 @@ components:
       required: [detail]
       properties:
         detail: {type: string}
+    PolicyMismatch:
+      type: object
+      required: [detail, current]
+      properties:
+        detail: {type: string}
+        current: {type: string, description: The current policy version}
     Fact:
       type: object
       required: [id, kind, title, body]

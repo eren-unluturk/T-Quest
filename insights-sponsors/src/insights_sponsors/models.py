@@ -17,6 +17,11 @@ class Error(BaseModel):
     detail: str
 
 
+class PolicyMismatch(BaseModel):
+    detail: str
+    current: str
+
+
 class Stop(BaseModel):
     """Internal: a seeded MBTA stop."""
 

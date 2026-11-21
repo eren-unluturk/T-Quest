@@ -1,7 +1,7 @@
 ---
 id: 011
 title: Document consent error responses in the OpenAPI draft
-status: ready
+status: done
 issue: 8
 depends_on: [005]
 ---

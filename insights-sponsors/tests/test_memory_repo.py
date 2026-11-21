@@ -134,7 +134,7 @@ def test_models_match_openapi_fields():
         required = {k for k, f in model.model_fields.items() if f.is_required()}
         assert required == set(schema.get("required", [])), name
         checked += 1
-    assert checked == 14
+    assert checked == 15
 
 
 def test_seed_covers_neighborhoods_and_bus(repo):

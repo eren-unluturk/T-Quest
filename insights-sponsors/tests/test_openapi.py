@@ -50,3 +50,38 @@ def test_query_params_present():
     assert {"stop_id", "store_id", "category", "eligible_only"} <= names("/offers")
     assert {"kind", "limit"} <= names("/recommendations")
     assert {"period"} <= names("/analytics/me")
+
+
+def test_version_and_changelog():
+    info = load()["info"]
+    assert info["version"] == "0.1.1"
+    assert any(e.startswith("0.1.1:") and "409" in e and "ConsentRequired" in e for e in info["x-changelog"])
+
+
+def test_post_consent_documents_409_policy_mismatch():
+    spec = load()
+    resp = spec["paths"]["/consent"]["post"]["responses"]["409"]
+    assert resp["content"]["application/json"]["schema"] == {"$ref": "#/components/schemas/PolicyMismatch"}
+    assert spec["components"]["schemas"]["PolicyMismatch"]["required"] == ["detail", "current"]
+
+
+def test_consent_required_response_exists():
+    spec = load()
+    resp = spec["components"]["responses"]["ConsentRequired"]
+    assert "consent required" in resp["description"].lower()
+    assert resp["content"]["application/json"]["schema"] == {"$ref": "#/components/schemas/Error"}
+
+
+def test_recommendations_description_says_no_403():
+    spec = load()
+    op = spec["paths"]["/recommendations"]["get"]
+    assert "never returns 403" in op["description"]
+    assert "403" not in op["responses"]
+
+
+def test_409_body_from_the_app_matches_policy_mismatch(client, auth_headers):
+    from openapi_shape import check_shape
+
+    r = client.post("/consent", json={"scope": "location", "policy_version": "1999-01-01"}, headers=auth_headers)
+    assert r.status_code == 409
+    check_shape({"$ref": "#/components/schemas/PolicyMismatch"}, r.json())
