@@ -17,3 +17,33 @@ INSERT INTO users (id, username, display_name) VALUES
     ('00000000-0000-0000-0000-000000000001', 'alice', 'Alice'),
     ('00000000-0000-0000-0000-000000000002', 'bob',   'Bob')
 ON CONFLICT DO NOTHING;
+
+-- Rewards seed
+INSERT INTO sponsors (id, name, category, website) VALUES
+    ('10000000-0000-0000-0000-000000000001', 'Demo Coffee Co', 'food', 'https://example.com')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO stores (id, sponsor_id, name, address, lat, lon, nearest_stop_id) VALUES
+    ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
+     'Demo Coffee - Park St', '1 Park St, Boston, MA', 42.3566, -71.0620, 'place-pktrm')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO offers (id, sponsor_id, store_id, title, description, kind, min_rank, discount_pct) VALUES
+    ('30000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
+     '20000000-0000-0000-0000-000000000001', 'Local pick: house latte',
+     'Native placement near Park Street', 'local_pick', 1, NULL)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO badges (id, name, description, kind) VALUES
+    ('freedom-trail', 'Freedom Trail', 'Visit the Freedom Trail stops', 'trail'),
+    ('rank-3', 'Rank 3', 'Reach rank 3', 'rank')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO physical_rewards (id, sponsor_id, name, item_type, badge_id, min_rank, per_user_limit) VALUES
+    ('40000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
+     'Freedom Trail sticker', 'sticker', 'freedom-trail', 1, 1)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO store_inventory (store_id, physical_reward_id, stock) VALUES
+    ('20000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001', 50)
+ON CONFLICT DO NOTHING;

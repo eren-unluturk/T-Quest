@@ -1,7 +1,7 @@
 ---
 id: 003
 title: Rewards schema - sponsors, stores, offers, rewards, quests, badges, physical rewards, redemptions
-status: ready
+status: done
 issue: 6
 depends_on: [002]
 ---
