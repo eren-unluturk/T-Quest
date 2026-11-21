@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from game_engine.checkin import distance_m, validate_checkin
 from game_engine.points import Ledger, checkin_points
-from game_engine.ranks import rank_for
+from game_engine.ranks import rank_for, rank_info
 from game_engine.redemption import RedemptionBook, RedemptionError
 
 NOW = datetime(2026, 11, 21, 12, 0, 0)
@@ -72,10 +72,24 @@ class PointsTests(unittest.TestCase):
 
 class RankTests(unittest.TestCase):
     def test_tiers(self):
-        self.assertEqual(rank_for(0), (1, 3, 1000))
-        self.assertEqual(rank_for(999), (1, 3, 1000))
-        self.assertEqual(rank_for(1000), (2, 5, 4000))
-        self.assertEqual(rank_for(30000), (5, 12, None))
+        self.assertEqual(rank_for(0), (1, 3, 500))
+        self.assertEqual(rank_for(499), (1, 3, 500))
+        self.assertEqual(rank_for(500), (2, 4, 1500))
+        self.assertEqual(rank_for(40000), (8, 12, None))
+
+
+class RankInfoTests(unittest.TestCase):
+    def test_names_and_next(self):
+        info = rank_info(0)
+        self.assertEqual((info["name"], info["avatar_key"], info["next_rank_name"], info["points_to_next"]),
+                         ("Harbor Seal", "harbor-seal", "Town Crier", 500))
+        top = rank_info(50000)
+        self.assertEqual((top["name"], top["next_rank"], top["points_to_next"]), ("Patriot", None, None))
+
+    def test_eight_ranks_discount_capped(self):
+        from game_engine import config
+        self.assertEqual(len(config.RANKS), 8)
+        self.assertLessEqual(max(t[2] for t in config.RANKS), 12)
 
 
 class RedemptionTests(unittest.TestCase):

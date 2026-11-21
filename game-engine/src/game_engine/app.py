@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from . import badges, config
 from .checkin import validate_checkin
 from .points import Ledger, checkin_points
-from .ranks import rank_for
+from .ranks import rank_for, rank_info
 from .redemption import RedemptionBook, RedemptionError
 from .social import FriendBook, FriendError, leaderboard, points_in_period
 
@@ -171,9 +171,7 @@ def get_points(user: str = Depends(current_user)):
 
 @app.get("/me/rank")
 def get_rank(user: str = Depends(current_user)):
-    life = ledger_of(user).lifetime
-    rank, disc, nxt = rank_for(life)
-    return {"rank": rank, "lifetime_points": life, "next_rank_at": nxt, "discount_pct": disc}
+    return rank_info(ledger_of(user).lifetime)
 
 
 @app.get("/me/collection")
