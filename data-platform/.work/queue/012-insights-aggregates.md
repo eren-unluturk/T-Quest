@@ -1,7 +1,7 @@
 ---
 id: 012
 title: Add insights-sponsors aggregates and align home_line with game-engine (checkins_30d)
-status: ready
+status: done
 issue: 22
 depends_on: [006, 010]
 ---

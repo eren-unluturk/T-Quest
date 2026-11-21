@@ -171,12 +171,12 @@ LEADERBOARD_RAW = """
 
 HOME_LINE_RAW = """
     WITH recent AS (
-        SELECT user_id, route_id, count(*) AS rides_28d FROM rider_events
+        SELECT user_id, route_id, count(*) AS checkins_28d FROM rider_events
         WHERE event_type IN ('checkin', 'ride_start') AND route_id IS NOT NULL
           AND time >= time_bucket('7 days', now() - interval '28 days') GROUP BY user_id, route_id),
-    ranked AS (SELECT *, row_number() OVER (PARTITION BY user_id ORDER BY rides_28d DESC, route_id) AS rn
+    ranked AS (SELECT *, row_number() OVER (PARTITION BY user_id ORDER BY checkins_28d DESC, route_id) AS rn
                FROM recent)
-    SELECT user_id, route_id, rides_28d FROM ranked WHERE rn = 1 AND rides_28d >= 5"""
+    SELECT user_id, route_id, checkins_28d FROM ranked WHERE rn = 1 AND checkins_28d >= 5"""
 
 VEHICLES_AT_STOP = """
     SELECT DISTINCT ON (vehicle_id) vehicle_id, time, route_id, stop_id, lat, lon FROM vehicles

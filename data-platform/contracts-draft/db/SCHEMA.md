@@ -23,12 +23,12 @@ Notes: game-engine owns unlock and rank rules, so `badges` and `ranks` are its t
 | `store_partners` | `stores` |
 | `physical_rewards.kind` | `physical_rewards.item_type` |
 | `store_inventory.quantity` | `store_inventory.stock` |
-| `home line checkins_28d` | `home_line.checkins_28d` (column is `rides_28d` until migration 0006 renames it) |
+| `home line checkins_28d` | `home_line.checkins_28d` (renamed from `rides_28d` in migration 0006) |
 | rank (`user_id, rank`) | view `user_rank` |
 | badges (`user_id, badge_id`) | table `user_collections` |
 | fun facts | `fun_facts` |
 | `consent.granted` | `consent.granted` (generated: `revoked_at is null`) |
-| aggregates `user_stop_daily`, `stop_popularity_hourly` | planned in migration 0006 |
+| aggregates `user_stop_daily`, `stop_popularity_hourly` | same names, migration 0006 (also `user_stop_hourly`) |
 
 ## Extensions (0000)
 `timescaledb`, `pgcrypto`.
@@ -128,7 +128,7 @@ Written by insights-sponsors only after `place_visits` consent. `id uuid`, `time
 - `leaderboard_daily` (CAGG on `points_ledger`, 1 day): `day, user_id, route_id, points_earned, entries`. Refresh every 5 minutes (30 day window). Real-time aggregation on.
 - `leaderboard(p_scope, p_period, p_user, p_route, p_limit)`: scope `global|friends|line`, period `week|month|all`; returns `position, user_id, username, points`; ties share a position.
 - `home_line_weekly` (CAGG on `rider_events`, 7 days, checkin and ride_start with a route): `week, user_id, route_id, rides`. Refresh every 15 minutes (90 day window).
-- `home_line` (view): `user_id, route_id, rides_28d`; most-ridden route over the last four weekly buckets, at least 5 rides; `users.home_line_override` wins when set.
+- `home_line` (view): `user_id, route_id, checkins_28d`; most-ridden route over the last four weekly buckets, at least 5 check-ins; `users.home_line_override` wins when set.
 - `users_affected_by_alert(p_alert_id)`: users whose `home_line.route_id` appears in the alert's `alert_entities`.
 - `personal_stats_daily` (CAGG on `rider_events`, 1 day): `day, user_id, checkins, bus_events, rail_events`.
 - `user_stop_visits` (view): `user_id, stop_id, first_visit, visits` over checkin and visit events.
@@ -140,5 +140,8 @@ Written by insights-sponsors only after `place_visits` consent. `id uuid`, `time
 - `active_alerts`: `alerts` whose active window contains `now()` (null start counts as started, null end as open).
 - `expire_redemptions() returns integer`: sets `status = 'expired'` for issued rows past `expires_at`; not scheduled.
 
-## Planned
-Migration 0006: `user_stop_daily`, `user_stop_hourly`, view `stop_popularity_hourly`, and `home_line.checkins_28d` (rename of `rides_28d`).
+## Insights aggregates (0006)
+- `user_stop_daily` (CAGG on `rider_events` where `stop_id is not null`, 1 day): `bucket, user_id, stop_id, route_id, visits`. Refresh every 15 minutes (30 day window), real-time aggregation on.
+- `user_stop_hourly` (CAGG, 1 hour): `bucket, stop_id, user_id, checkins` (check-in events only). Same policy.
+- `stop_popularity_hourly` (view over `user_stop_hourly`): `bucket, stop_id, checkins, unique_users`.
+- `home_line` column `rides_28d` was renamed `checkins_28d`; `users_affected_by_alert` was recreated on top of it.

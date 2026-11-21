@@ -110,7 +110,7 @@ def test_home_line_and_affected_users(conn):
         rows = {
             r[0]: r[1:]
             for r in conn.execute(
-                "SELECT user_id, route_id, rides_28d FROM home_line WHERE user_id = ANY(%s)", ([d, e, f],)
+                "SELECT user_id, route_id, checkins_28d FROM home_line WHERE user_id = ANY(%s)", ([d, e, f],)
             ).fetchall()
         }
         assert rows[d] == (r1, 6)
