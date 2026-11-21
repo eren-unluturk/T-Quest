@@ -1,0 +1,260 @@
+openapi: 3.0.3
+info:
+  title: T-Quest game-engine API
+  version: 0.1.0
+  description: |
+    Game logic for T-Quest: check-ins, points, ranks, quests, badges, friends,
+    leaderboards, and redemptions. Owner: game-engine (Tobi).
+    DRAFT. Numbers in x-rules are proposals; sponsors and data-platform must ack.
+    Auth: bearer token on every route except POST /redemptions/verify (store key).
+    Location is accepted only when the user has given consent.
+servers:
+  - url: http://localhost:8002
+security:
+  - bearerAuth: []
+x-rules:
+  checkin:
+    max_distance_m: 75
+    vehicle_seen_within_s: 300
+    cooldown_per_stop_s: 1800
+    requires_location_consent: true
+  points:
+    first_visit_stop: 20
+    repeat_visit_stop: 2
+    repeat_visits_counted_per_stop_per_day: 1
+    daily_checkin_points_cap: 100
+    complete_line: 300
+    delay_compensation: 50
+    ledger: append-only
+  ranks:
+    - {rank: 1, min_points: 0,     discount_pct: 3}
+    - {rank: 2, min_points: 1000,  discount_pct: 5}
+    - {rank: 3, min_points: 4000,  discount_pct: 7}
+    - {rank: 4, min_points: 12000, discount_pct: 10}
+    - {rank: 5, min_points: 30000, discount_pct: 12, perk: one sponsor-funded free item per month}
+  redemption_limits:
+    per_user_per_store_per_week: 1
+    max_discount_value_usd: 5
+    code_ttl_hours: 24
+    single_use: true
+    funded_by: sponsor
+paths:
+  /checkins:
+    post:
+      summary: Check in at a stop
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CheckinRequest'}
+      responses:
+        '201':
+          description: Accepted; points added to the ledger
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CheckinResult'}
+        '403': {description: Location consent missing}
+        '409': {description: Cooldown active for this stop}
+        '422': {description: Too far from stop, or no vehicle seen nearby}
+  /me/points:
+    get:
+      summary: Points balance and recent ledger entries
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PointsSummary'}
+  /me/rank:
+    get:
+      summary: Current rank, next rank, discount percent
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Rank'}
+  /me/collection:
+    get:
+      summary: Collected stops, badges, and physical rewards earned
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Collection'}
+  /quests:
+    get:
+      summary: Active quests, including sponsored ones
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Quest'}
+  /leaderboards:
+    get:
+      summary: Leaderboard by scope and period
+      parameters:
+        - {name: scope, in: query, schema: {type: string, enum: [global, friends, line]}}
+        - {name: period, in: query, schema: {type: string, enum: [week, month, all]}}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/LeaderboardRow'}
+  /friends:
+    get:
+      summary: List friends
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Friend'}
+    post:
+      summary: Add a friend by username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties:
+                username: {type: string}
+      responses:
+        '201': {description: Friend added}
+  /redemptions:
+    post:
+      summary: Spend points or use rank on a reward; returns a single-use code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [offer_id]
+              properties:
+                offer_id: {type: string}
+      responses:
+        '201':
+          description: Code issued
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Redemption'}
+        '403': {description: Rank or badge requirement not met}
+        '409': {description: Weekly store limit reached, or out of stock}
+  /redemptions/verify:
+    post:
+      summary: Store scans or enters a code; marks it claimed
+      security:
+        - storeKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, store_id]
+              properties:
+                code: {type: string}
+                store_id: {type: string}
+      responses:
+        '200':
+          description: Code valid and now claimed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Redemption'}
+        '404': {description: Unknown code}
+        '410': {description: Code expired or already used}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer}
+    storeKey: {type: apiKey, in: header, name: X-Store-Key}
+  schemas:
+    CheckinRequest:
+      type: object
+      required: [stop_id, lat, lon, client_time]
+      properties:
+        stop_id: {type: string}
+        lat: {type: number}
+        lon: {type: number}
+        client_time: {type: string, format: date-time}
+        mode: {type: string, enum: [subway, bus]}
+    CheckinResult:
+      type: object
+      properties:
+        checkin_id: {type: string}
+        points_awarded: {type: integer}
+        first_visit: {type: boolean}
+        new_rank: {type: integer, nullable: true}
+        badges_unlocked:
+          type: array
+          items: {type: string}
+    PointsSummary:
+      type: object
+      properties:
+        balance: {type: integer}
+        lifetime: {type: integer}
+        recent:
+          type: array
+          items:
+            type: object
+            properties:
+              at: {type: string, format: date-time}
+              delta: {type: integer}
+              reason: {type: string}
+    Rank:
+      type: object
+      properties:
+        rank: {type: integer}
+        lifetime_points: {type: integer}
+        next_rank_at: {type: integer, nullable: true}
+        discount_pct: {type: integer}
+    Collection:
+      type: object
+      properties:
+        stops:
+          type: array
+          items: {type: string}
+        badges:
+          type: array
+          items: {type: string}
+        physical_rewards:
+          type: array
+          items: {type: string}
+    Quest:
+      type: object
+      properties:
+        id: {type: string}
+        title: {type: string}
+        sponsor_id: {type: string, nullable: true}
+        goal: {type: string}
+        reward_points: {type: integer}
+        reward_badge_id: {type: string, nullable: true}
+    LeaderboardRow:
+      type: object
+      properties:
+        position: {type: integer}
+        username: {type: string}
+        points: {type: integer}
+    Friend:
+      type: object
+      properties:
+        username: {type: string}
+        rank: {type: integer}
+    Redemption:
+      type: object
+      properties:
+        code: {type: string}
+        offer_id: {type: string}
+        status: {type: string, enum: [issued, claimed, expired]}
+        expires_at: {type: string, format: date-time}
