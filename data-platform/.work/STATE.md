@@ -24,3 +24,5 @@
 - Next: review 014-016. Publish (#27) after 016 so contracts carry checkins_30d; then close #22.
 
 # STOPPED SAFELY (builder) at 13:17: 001-014 done, 015 not started, handoff in .work/HANDOFF.md
+
+STOPPED SAFELY at 2026-11-21 13:20 (planner). See .work/HANDOFF.md.
