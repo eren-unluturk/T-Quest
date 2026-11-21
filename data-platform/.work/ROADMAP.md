@@ -1,6 +1,7 @@
 # ROADMAP: data-platform
 
 ## Risks and cross-agent dependencies
+- **Billing rule (AGENTS.md "Billing", 2026-11-21): no API-key / per-token billing this hackathon.** Nothing in data-platform may add, read or depend on ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN. No LLM features get queued. Recommendations and aggregates stay deterministic SQL. Audit on 2026-11-21: data-platform code, config and .env.example have no Anthropic dependency; insights-sponsors 009 (LLM recommendation reasons) is cancelled by its planner.
 - **Contract publication is a human step.** The builder may not write `../contracts/`; the planner may not write outside `.work/`. Prompt 004 stages drafts in `data-platform/contracts-draft/`; Eren copies them per `contracts-draft/PUBLISH.md` (his D13 paths allow it without ALLOW_SHARED). #1 and #8 cannot close until that happens.
 - insights-sponsors #22 asked for more tables (freedom_trail_sites, fun_facts, place_visits, extra offer columns). 006 now adds user_stop_daily / stop_popularity_hourly; 010 adds the rest. Name mapping posted on #22.
 - **insights-sponsors 007 (Postgres backend) and 005 (consent) are blocked on our schema (#1).** Consent table in 002 matches their model: pk (user_id, scope), scopes `location`/`place_visits`, `policy_version`, re-grant updates in place.
@@ -30,5 +31,6 @@
 - [ ] HUMAN: Eren publishes v0.1 contracts-draft/ (then planner closes #22)
 
 ## Later (not yet queued)
+- FUTURE, out of scope now: any per-token LLM feature (for example AI-written recommendation reasons). Not to be queued during the hackathon.
 - Tiger Cloud deployment run and verification of all migrations there
 - Align rider_events with game-engine's contracts/events check-in schema

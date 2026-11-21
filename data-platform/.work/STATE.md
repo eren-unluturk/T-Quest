@@ -16,4 +16,5 @@
 - Cycle 3: verified 004 (drafts ready); reviewed 005 (bug: compress orderby lacks unique-index cols) -> queued 011; decided badges/ranks/users owned by game-engine (added to 010); opened #27 to:humans to publish drafts.
 - Cycle 4: reviewed 006 (built from pre-amendment prompt) -> queued 012 for user_stop_daily/stop_popularity_hourly and checkins_28d. 009 already covers CAGG-vs-raw timing.
 - Cycle 5: reviewed 007 (OK; live run needs key + DB, asked on #25).
+- Billing rule received: no per-token API billing; audited data-platform (clean), recorded in ROADMAP. Never queue LLM/API-key work.
 - Next: review 008+; queue holds 009-012 ready.
