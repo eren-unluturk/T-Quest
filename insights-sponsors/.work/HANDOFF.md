@@ -1,4 +1,13 @@
-# HANDOFF: insights-sponsors (safe stop 2026-11-21 13:17)
+# HANDOFF: insights-sponsors (updated 2026-11-21, unattended run)
+
+## Latest (read this first)
+- wip branch work is on main. Postgres backend now serves stops, offers, physical rewards, nearby spots, tourist content (`DATA_BACKEND=postgres`, run with a stale shell DATABASE_URL unset). Consent, place visits, analytics and recommendations still use memory (prompts 015-017 remain).
+- New: nearby spots (`/stops/{id}/nearby`, `/categories`, `/labels`, `/spots/{id}`), `/rank-tiers`, `/offers?rank=&placement=`, `/stops/{id}/content`, `/loading-facts`. Contract v0.5.0 is in contracts/api/insights-sponsors.yaml.
+- Load data: `python scripts/load_seed.py` then `python -m ingest_content.run` (both idempotent). Tests: `python -m pytest -q` (195 pass; db tests need migration 0010/0011 and a reachable database).
+- Label rule: only declared or certified labels are exposed; the three demo sponsors hold local-independent as pending until Eren confirms.
+- Open decisions for Eren: confirm real partnerships and labels; MHC/MAPC terms; set a real contact in the ingest User-Agent; rank-4 badge (#5).
+
+## Earlier handoff (2026-11-21 13:17)
 
 ## Status
 The insights-sponsors service runs fully on the in-memory backend with real Boston seed data. Every route in the OpenAPI draft (v0.3.0, 14 operations) is implemented and checked by a conformance test, and 149 tests pass. That covers content, catalog, consent, place visits, personal analytics, Boston analytics and recommendations. The Tiger Data (Postgres) backend has not been built yet. Prompt 014 was interrupted early, its partial work is on a wip branch, and 015-017 are queued and not started. The contract is still a draft inside our folder and waits on a human to copy it into `contracts/` (#26).

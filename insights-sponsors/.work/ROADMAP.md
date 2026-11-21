@@ -27,7 +27,7 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 ## Phase 3: analytics and recommendations
 - [x] 006 Analytics and recs: SQL drafts plus in-memory (queue/006-analytics-recs-sql-draft.md, #3) verified, #3 closed
 - [-] 007 superseded by 014
-- [ ] 014 Postgres backend: catalog, content, consent, place visits (queue/014-postgres-catalog-content-consent.md, #1) IN PROGRESS at safe stop (see HANDOFF.md)
+- [x] 014 (partial, verified on live DB) Postgres backend: stops, offers, physical rewards, nearby spots, tourist content. Consent and place visits still memory (queue/014-postgres-catalog-content-consent.md, #1) IN PROGRESS at safe stop (see HANDOFF.md)
 - [ ] 015 Bus parity in seed, analytics, recs (queue/015-bus-parity-seed.md) not started
 - [ ] 016 Analytics, recs and Boston analytics on Postgres, plus latency bench (queue/016-postgres-analytics-recs.md, #1) not started
 - [ ] 017 store_id validation and demo smoke script (queue/017-store-id-validation-demo-smoke.md) not started
@@ -66,3 +66,9 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 
 ## SAFE STOP 2026-11-21 13:17
 Stopped on request. 014 in progress with the builder; 015-017 ready and not started. See HANDOFF.md.
+
+## Update 2026-11-21 (unattended run)
+- [x] 018 Nearby spots, categories, identity labels (migration 0010), demo sponsors, rank tiers, /offers rank and placement filters. Verified: 195 tests, 5 live-DB tests.
+- [x] 019 Tourist content ingestion (migration 0011, `python -m ingest_content.run`), GET /stops/{id}/content, /loading-facts. Counts in docs/DATA_SOURCES.md.
+- [x] 020 contracts/api/insights-sponsors.yaml published (v0.5.0), #26 delivered.
+- [ ] Analytics, recommendations, consent and place visits on Postgres (015/016/017 unchanged, not started)

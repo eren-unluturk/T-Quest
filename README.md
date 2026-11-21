@@ -21,9 +21,9 @@ Status is derived from each agent's `.work/ROADMAP.md` and handoff notes. See [P
 - insights-sponsors service: stop facts, Freedom Trail, loading-screen facts, offers, physical-reward catalog, consent, place visits, personal and Boston analytics, deterministic recommendations. Runs on an in-memory backend with seed data (OpenAPI draft v0.3.0).
 - game-engine service (Tobi): check-in, points, rank, redemption, badges, quests, friends, leaderboards, home line and delay compensation rules, on an in-memory backend, with its OpenAPI published.
 
-**In progress**
-- insights-sponsors Postgres backend: sponsors, offers, physical rewards, and the **nearby-spots feature** (every stop lists nearby spots; filter by category and by verified identity label; sponsors get native highlighted placement, other spots are free listings).
-- Tourist content ingestion from open sources (Analyze Boston, MassGIS/MACRIS, Digital Commonwealth), with attribution stored per record.
+**In progress** (code exists, see handoff for what is verified)
+- insights-sponsors on Postgres for catalog, offers, physical rewards, tourist content and the **nearby-spots feature** (consent, place visits and analytics still run in memory) (every stop lists nearby spots; filter by category and by verified identity label; sponsors get native highlighted placement, other spots are free listings).
+- Tourist content: ingestion built and run (Analyze Boston, MHC inventory, Digital Commonwealth, Freedom Trail seed) with attribution per record; MHC terms still to confirm, see docs/DATA_SOURCES.md.
 
 **Planned**
 - Rider-facing apps (client-bryan, client-isabella). They wait on sketches and Figma in `design/`; nobody invents UI.
