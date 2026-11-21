@@ -1,7 +1,7 @@
 """Badge unlock rules and sponsored quests. Pure functions; no database.
 
-The line, trail and quest data below is FAKE placeholder data. Replace it with
-the real catalog from insights-sponsors (issue #7) when it arrives.
+LINES and FREEDOM_TRAIL below are FAKE demo data (used by the in-memory store).
+PgStore builds a real Catalog from the database instead.
 """
 from dataclasses import dataclass
 from typing import Optional
@@ -31,20 +31,40 @@ def line_badge_id(line_id):
     return "line-%s-complete" % line_id.lower()
 
 
-def unlocked_badges(*, visited_stops, rank, already_have):
+@dataclass(frozen=True)
+class Catalog:
+    """Where badges come from.
+
+    lines: badge id -> list of station sets. A line badge is earned when ALL
+    stations of at least one set are visited (one set per route, so a Green
+    Line rider needs every station of one branch).
+    trail: stations of the Freedom Trail. Empty means the badge is switched off.
+    """
+    lines: dict
+    trail: frozenset
+
+
+# Fake catalog for the in-memory demo and unit tests
+DEFAULT_CATALOG = Catalog(
+    lines={line_badge_id(k): [frozenset(v)] for k, v in LINES.items()},
+    trail=frozenset(FREEDOM_TRAIL),
+)
+
+
+def unlocked_badges(*, visited_stops, rank, already_have, catalog=None):
     """Return the set of badge ids newly earned. Never repeats a badge."""
+    catalog = catalog or DEFAULT_CATALOG
     visited = set(visited_stops)
     earned = set()
-    for line_id, stops in LINES.items():
-        if stops <= visited:
-            earned.add(line_badge_id(line_id))
-    if FREEDOM_TRAIL <= visited:
+    for badge_id, station_sets in catalog.lines.items():
+        if any(s and s <= visited for s in station_sets):
+            earned.add(badge_id)
+    if catalog.trail and catalog.trail <= visited:
         earned.add("freedom-trail")
     for min_rank, badge in RANK_BADGES.items():
         if rank >= min_rank:
             earned.add(badge)
     return earned - set(already_have)
-
 
 def physical_rewards_for(badge_ids):
     return {PHYSICAL_REWARDS[b] for b in badge_ids if b in PHYSICAL_REWARDS}

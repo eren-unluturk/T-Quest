@@ -41,6 +41,24 @@ class BadgeTests(unittest.TestCase):
         self.assertEqual(badges.physical_rewards_for({"line-red-complete", "nope"}), {"red-line-patch"})
 
 
+class CatalogTests(unittest.TestCase):
+    def test_catalog_needs_every_station_of_one_route(self):
+        from game_engine.badges import Catalog
+        cat = Catalog(lines={"line-x-complete": [frozenset({"a", "b"}), frozenset({"a", "c"})]},
+                      trail=frozenset({"a", "b"}))
+        got = unlocked_badges(visited_stops={"a", "c"}, rank=1, already_have=set(), catalog=cat)
+        self.assertEqual(got, {"line-x-complete"})
+        got = unlocked_badges(visited_stops={"b", "c"}, rank=1, already_have=set(), catalog=cat)
+        self.assertEqual(got, set())
+        got = unlocked_badges(visited_stops={"a", "b"}, rank=1, already_have=set(), catalog=cat)
+        self.assertEqual(got, {"line-x-complete", "freedom-trail"})
+
+    def test_empty_trail_is_off(self):
+        from game_engine.badges import Catalog
+        cat = Catalog(lines={}, trail=frozenset())
+        self.assertEqual(unlocked_badges(visited_stops={"a"}, rank=1, already_have=set(), catalog=cat), set())
+
+
 class QuestTests(unittest.TestCase):
     q = Quest("q1", "Coffee run", frozenset({"a", "b"}), 40, "coffee", "shop1")
 

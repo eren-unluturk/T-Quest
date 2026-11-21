@@ -67,6 +67,8 @@ class PgStore:
     def __init__(self, conn):
         self.conn = conn
         self._ids = {}
+        self._catalog = None
+        self._catalog_at = 0
 
     def _q(self, sql, params=(), one=False, many=False):
         with self.conn.cursor() as cur:
@@ -133,9 +135,34 @@ class PgStore:
         return [_naive(r[0]) for r in rows]
 
     def visited_stops(self, user):
-        rows = self._q("select distinct stop_id from rider_events where user_id=%s and event_type='checkin' "
-                       "and not is_synthetic and stop_id is not null", (self._uid(user),), many=True)
+        """Visited STATIONS: a platform check-in counts for its parent station."""
+        rows = self._q("select distinct coalesce(s.parent_station, s.id) from rider_events e "
+                       "join stops s on s.id = e.stop_id where e.user_id=%s and e.event_type='checkin' "
+                       "and not e.is_synthetic", (self._uid(user),), many=True)
         return {r[0] for r in rows}
+
+    def catalog(self):
+        """Real badge catalog from route_stops and Freedom Trail data (cached 10 min)."""
+        import time
+        if self._catalog and time.time() - self._catalog_at < 600:
+            return self._catalog
+        rows = self._q(
+            "select r.line_id, r.id, array_agg(distinct coalesce(s.parent_station, s.id)) "
+            "from routes r join route_stops rs on rs.route_id = r.id join stops s on s.id = rs.stop_id "
+            "where r.mode in ('subway','light_rail') and r.line_id is not null group by r.line_id, r.id", many=True)
+        lines = {}
+        for line_id, _route_id, stations in rows:
+            badge_id = "line-%s-complete" % line_id.removeprefix("line-").lower()
+            lines.setdefault(badge_id, []).append(frozenset(stations))
+        trail = self._q(
+            "select coalesce(parent_station, id) from stops where is_freedom_trail "
+            "union select coalesce(s.parent_station, s.id) from freedom_trail_sites f "
+            "join stops s on s.id = f.nearest_stop_id", many=True)
+        trail = frozenset(r[0] for r in trail)
+        # Fewer than 2 stations means the trail data is not loaded yet: keep the badge off.
+        self._catalog = badge_rules.Catalog(lines=lines, trail=trail if len(trail) >= 2 else frozenset())
+        self._catalog_at = time.time()
+        return self._catalog
 
     def record_checkin(self, user, stop_id, lat, lon, client_time, at, points, mode=None):
         self._q("insert into rider_events (time, user_id, event_type, stop_id, mode, lat, lon, client_time, "

@@ -57,6 +57,9 @@ class MemoryStore:
     def quests(self):
         return list(DEMO_QUESTS)
 
+    def catalog(self):
+        return badges.DEFAULT_CATALOG
+
     def offer(self, offer_id):
         return DEMO_OFFERS.get(offer_id)
 
