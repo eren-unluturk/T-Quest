@@ -8,26 +8,26 @@ from typing import Optional
 
 # line id -> set of stop ids on that line (fake)
 LINES = {
-    "green-b": {"park", "boylston", "arlington", "copley"},
-    "red": {"alewife", "harvard", "park", "downtown", "south-station"},
+    "Green-B": {"park", "boylston", "arlington", "copley"},
+    "Red": {"alewife", "harvard", "park", "downtown", "south-station"},
 }
 
 # Freedom Trail stops (fake)
 FREEDOM_TRAIL = {"park", "downtown", "state", "haymarket"}
 
 # rank number -> badge id
-RANK_BADGES = {3: "rank-3-patch", 5: "rank-5-patch"}
+RANK_BADGES = {3: "rank-3", 5: "rank-5"}
 
 # badge id -> physical reward it unlocks (fake)
 PHYSICAL_REWARDS = {
-    "line-red": "red-line-patch",
+    "line-red-complete": "red-line-patch",
     "freedom-trail": "freedom-trail-sticker",
-    "rank-3-patch": "rank-3-patch",
+    "rank-3": "rank-3",
 }
 
 
 def line_badge_id(line_id):
-    return "line-" + line_id
+    return "line-%s-complete" % line_id.lower()
 
 
 def unlocked_badges(*, visited_stops, rank, already_have):
