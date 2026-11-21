@@ -26,3 +26,5 @@
 # STOPPED SAFELY (builder) at 13:17: 001-014 done, 015 not started, handoff in .work/HANDOFF.md
 
 STOPPED SAFELY at 2026-11-21 13:20 (planner). See .work/HANDOFF.md.
+
+# Builder session 2026-11-21: 016 and contracts done; DB steps blocked by missing password in DATABASE_URL (see HANDOFF.md)
