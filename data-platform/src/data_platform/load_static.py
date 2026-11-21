@@ -72,12 +72,28 @@ ON CONFLICT (route_id, stop_id, direction_id) DO UPDATE SET stop_sequence = EXCL
 """
 
 
+# stops.mode (added in 0005): primary mode of each stop, rail preferred over bus.
+BACKFILL_STOP_MODE = """
+UPDATE stops s
+   SET mode = x.mode
+  FROM (SELECT DISTINCT ON (rs.stop_id) rs.stop_id, r.mode
+          FROM route_stops rs
+          JOIN routes r ON r.id = rs.route_id
+         WHERE r.mode IS NOT NULL
+         ORDER BY rs.stop_id,
+                  CASE r.mode WHEN 'subway' THEN 1 WHEN 'light_rail' THEN 2
+                              WHEN 'commuter_rail' THEN 3 WHEN 'ferry' THEN 4 ELSE 5 END) x
+ WHERE s.id = x.stop_id AND s.mode IS DISTINCT FROM x.mode
+"""
+
+
 def write_static(conn, routes: list[dict], stops: list[dict], route_stops: list[dict]) -> None:
     with conn.transaction():
         with conn.cursor() as cur:
             cur.executemany(UPSERT_ROUTE, routes)
             cur.executemany(UPSERT_STOP, stops)
             cur.executemany(UPSERT_ROUTE_STOP, route_stops)
+            cur.execute(BACKFILL_STOP_MODE)
 
 
 async def run() -> dict:

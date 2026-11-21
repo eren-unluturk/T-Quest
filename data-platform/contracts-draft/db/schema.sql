@@ -1,6 +1,6 @@
 -- GENERATED FILE. Migrations in data-platform/migrations/ are the source of truth.
--- NOTE: this is a concatenation of migrations 0000-0002, NOT a pg_dump. It was built
--- on a machine without docker. To replace it with a real dump, run from data-platform/:
+-- NOTE: this is a concatenation of migrations 0000 to 0005, NOT a pg_dump. It was built
+-- without a database. To replace it with a real dump, run from data-platform/:
 --   docker compose up -d; python -m data_platform.migrate
 --   docker compose exec db pg_dump -U postgres -d tquest --schema-only --no-owner > contracts-draft/db/schema.sql
 -- (then re-add this header).
@@ -314,4 +314,342 @@ BEGIN
     RETURN n;
 END;
 $$ LANGUAGE plpgsql;
+
+-- ===== migrations/0003_realtime.sql =====
+-- MBTA realtime: vehicles and predictions hypertables (compressed, with retention),
+-- alerts and alert_entities, active_alerts view. Idempotent.
+
+CREATE TABLE IF NOT EXISTS vehicles (
+    time           timestamptz NOT NULL,   -- poll time
+    vehicle_id     text NOT NULL,
+    route_id       text,
+    trip_id        text,
+    stop_id        text,
+    direction_id   smallint,
+    current_status text,
+    lat            double precision,
+    lon            double precision,
+    bearing        real,
+    speed          real,
+    label          text,
+    updated_at     timestamptz             -- from MBTA
+);
+SELECT create_hypertable('vehicles', 'time',
+    chunk_time_interval => INTERVAL '1 day', if_not_exists => TRUE);
+CREATE UNIQUE INDEX IF NOT EXISTS vehicles_vehicle_time_uq ON vehicles (vehicle_id, time);
+CREATE INDEX IF NOT EXISTS vehicles_stop_time_idx  ON vehicles (stop_id, time DESC);
+CREATE INDEX IF NOT EXISTS vehicles_route_time_idx ON vehicles (route_id, time DESC);
+
+CREATE TABLE IF NOT EXISTS predictions (
+    time                  timestamptz NOT NULL,   -- poll time
+    prediction_id         text NOT NULL,
+    stop_id               text,
+    route_id              text,
+    trip_id               text,
+    direction_id          smallint,
+    arrival_time          timestamptz,
+    departure_time        timestamptz,
+    status                text,
+    schedule_relationship text
+);
+SELECT create_hypertable('predictions', 'time',
+    chunk_time_interval => INTERVAL '1 day', if_not_exists => TRUE);
+CREATE UNIQUE INDEX IF NOT EXISTS predictions_pred_time_uq ON predictions (prediction_id, time);
+CREATE INDEX IF NOT EXISTS predictions_stop_time_idx ON predictions (stop_id, time DESC);
+
+ALTER TABLE vehicles SET (
+    timescaledb.compress,
+    timescaledb.compress_segmentby = 'route_id',
+    timescaledb.compress_orderby = 'time DESC'
+);
+ALTER TABLE predictions SET (
+    timescaledb.compress,
+    timescaledb.compress_segmentby = 'route_id',
+    timescaledb.compress_orderby = 'time DESC'
+);
+
+SELECT add_compression_policy('vehicles',    INTERVAL '1 day',  if_not_exists => TRUE);
+SELECT add_compression_policy('predictions', INTERVAL '1 day',  if_not_exists => TRUE);
+SELECT add_retention_policy('vehicles',      INTERVAL '30 days', if_not_exists => TRUE);
+SELECT add_retention_policy('predictions',   INTERVAL '30 days', if_not_exists => TRUE);
+
+CREATE TABLE IF NOT EXISTS alerts (
+    id            text PRIMARY KEY,
+    effect        text,
+    cause         text,
+    severity      int,
+    header        text,
+    description   text,
+    lifecycle     text,
+    active_start  timestamptz,
+    active_end    timestamptz,
+    first_seen_at timestamptz DEFAULT now(),
+    last_seen_at  timestamptz DEFAULT now(),
+    raw           jsonb
+);
+
+CREATE TABLE IF NOT EXISTS alert_entities (
+    alert_id     text NOT NULL REFERENCES alerts (id) ON DELETE CASCADE,
+    route_id     text,
+    stop_id      text,
+    route_type   int,
+    direction_id smallint
+);
+CREATE INDEX IF NOT EXISTS alert_entities_alert_idx ON alert_entities (alert_id);
+CREATE INDEX IF NOT EXISTS alert_entities_route_idx ON alert_entities (route_id);
+CREATE INDEX IF NOT EXISTS alert_entities_stop_idx  ON alert_entities (stop_id);
+
+-- Alerts whose active window contains now(). A null start counts as already started.
+CREATE OR REPLACE VIEW active_alerts AS
+    SELECT *
+    FROM alerts
+    WHERE (active_start IS NULL OR active_start <= now())
+      AND (active_end IS NULL OR active_end > now());
+
+-- ===== migrations/0004_aggregates.sql =====
+-- migrate:no-transaction
+-- Continuous aggregates and the views/functions on top: leaderboards, home line,
+-- personal stats. Idempotent. Each statement runs on its own (see migrate.py).
+
+-- ------------------------------------------------------------ leaderboard
+CREATE MATERIALIZED VIEW IF NOT EXISTS leaderboard_daily
+WITH (timescaledb.continuous, timescaledb.materialized_only = false) AS
+SELECT time_bucket('1 day', at)                  AS day,
+       user_id,
+       route_id,
+       sum(delta) FILTER (WHERE delta > 0)       AS points_earned,
+       count(*)                                  AS entries
+FROM points_ledger
+GROUP BY time_bucket('1 day', at), user_id, route_id
+WITH NO DATA;
+
+SELECT add_continuous_aggregate_policy('leaderboard_daily',
+    start_offset => INTERVAL '30 days',
+    end_offset => INTERVAL '1 hour',
+    schedule_interval => INTERVAL '5 minutes',
+    if_not_exists => TRUE);
+
+-- scope: global | friends | line. period: week | month | all. Ties share a position.
+CREATE OR REPLACE FUNCTION leaderboard(
+    p_scope  text,
+    p_period text,
+    p_user   uuid DEFAULT NULL,
+    p_route  text DEFAULT NULL,
+    p_limit  int  DEFAULT 50
+) RETURNS TABLE ("position" int, user_id uuid, username text, points bigint)
+LANGUAGE sql STABLE AS $fn$
+    WITH totals AS (
+        SELECT l.user_id AS uid, sum(l.points_earned)::bigint AS pts
+        FROM leaderboard_daily l
+        WHERE (p_period = 'all'
+               OR l.day >= time_bucket('1 day', now() - CASE p_period
+                                                          WHEN 'week'  THEN INTERVAL '7 days'
+                                                          WHEN 'month' THEN INTERVAL '30 days'
+                                                        END))
+          AND (p_scope <> 'line' OR l.route_id = p_route)
+          AND (p_scope <> 'friends'
+               OR l.user_id = p_user
+               OR l.user_id IN (SELECT f.friend_id FROM friends f WHERE f.user_id = p_user))
+        GROUP BY l.user_id
+    )
+    SELECT (rank() OVER (ORDER BY t.pts DESC NULLS LAST))::int,
+           t.uid,
+           u.username,
+           coalesce(t.pts, 0)::bigint
+    FROM totals t
+    JOIN users u ON u.id = t.uid
+    ORDER BY 1, u.username
+    LIMIT p_limit
+$fn$;
+
+-- -------------------------------------------------------------- home line
+CREATE MATERIALIZED VIEW IF NOT EXISTS home_line_weekly
+WITH (timescaledb.continuous, timescaledb.materialized_only = false) AS
+SELECT time_bucket('7 days', time) AS week,
+       user_id,
+       route_id,
+       count(*)                    AS rides
+FROM rider_events
+WHERE event_type IN ('checkin', 'ride_start') AND route_id IS NOT NULL
+GROUP BY time_bucket('7 days', time), user_id, route_id
+WITH NO DATA;
+
+SELECT add_continuous_aggregate_policy('home_line_weekly',
+    start_offset => INTERVAL '90 days',
+    end_offset => INTERVAL '1 hour',
+    schedule_interval => INTERVAL '15 minutes',
+    if_not_exists => TRUE);
+
+-- Most-ridden route over the last 4 weekly buckets, at least 5 rides.
+-- users.home_line_override wins when set.
+CREATE OR REPLACE VIEW home_line AS
+    WITH recent AS (
+        SELECT w.user_id, w.route_id, sum(w.rides)::bigint AS rides_28d
+        FROM home_line_weekly w
+        WHERE w.week >= time_bucket('7 days', now() - INTERVAL '28 days')
+        GROUP BY w.user_id, w.route_id
+    ), ranked AS (
+        SELECT r.*, row_number() OVER (PARTITION BY r.user_id
+                                       ORDER BY r.rides_28d DESC, r.route_id) AS rn
+        FROM recent r
+    ), best AS (
+        SELECT user_id, route_id, rides_28d FROM ranked WHERE rn = 1 AND rides_28d >= 5
+    )
+    SELECT u.id AS user_id,
+           coalesce(u.home_line_override, b.route_id) AS route_id,
+           b.rides_28d
+    FROM users u
+    LEFT JOIN best b ON b.user_id = u.id
+    WHERE u.home_line_override IS NOT NULL OR b.route_id IS NOT NULL;
+
+-- Needs alert_entities from 0003. Skipped (with a notice) when that table is missing.
+DO $do$
+BEGIN
+    IF to_regclass('public.alert_entities') IS NULL THEN
+        RAISE NOTICE 'alert_entities missing: users_affected_by_alert not created';
+    ELSE
+        EXECUTE $create$
+            CREATE OR REPLACE FUNCTION users_affected_by_alert(p_alert_id text)
+            RETURNS TABLE (user_id uuid)
+            LANGUAGE sql STABLE AS $body$
+                SELECT DISTINCT h.user_id
+                FROM home_line h
+                JOIN alert_entities e ON e.route_id = h.route_id
+                WHERE e.alert_id = p_alert_id
+            $body$
+        $create$;
+    END IF;
+END
+$do$;
+
+-- --------------------------------------------------------- personal stats
+CREATE MATERIALIZED VIEW IF NOT EXISTS personal_stats_daily
+WITH (timescaledb.continuous, timescaledb.materialized_only = false) AS
+SELECT time_bucket('1 day', time)                                 AS day,
+       user_id,
+       count(*) FILTER (WHERE event_type = 'checkin')             AS checkins,
+       count(*) FILTER (WHERE mode = 'bus')                       AS bus_events,
+       count(*) FILTER (WHERE mode IN ('subway', 'light_rail'))   AS rail_events
+FROM rider_events
+GROUP BY time_bucket('1 day', time), user_id
+WITH NO DATA;
+
+SELECT add_continuous_aggregate_policy('personal_stats_daily',
+    start_offset => INTERVAL '30 days',
+    end_offset => INTERVAL '1 hour',
+    schedule_interval => INTERVAL '5 minutes',
+    if_not_exists => TRUE);
+
+-- Distinct-stop counts: DISTINCT is not allowed in continuous aggregates, so a plain view.
+CREATE OR REPLACE VIEW user_stop_visits AS
+    SELECT user_id,
+           stop_id,
+           min(time) AS first_visit,
+           count(*)  AS visits
+    FROM rider_events
+    WHERE stop_id IS NOT NULL AND event_type IN ('checkin', 'visit')
+    GROUP BY user_id, stop_id;
+
+-- ===== migrations/0005_schema_v01.sql =====
+-- Schema v0.1: insights-sponsors additions (#22) and user_rank covering every user. Idempotent.
+
+-- 1. stops.mode: primary mode of the stop (rail wins over bus).
+ALTER TABLE stops ADD COLUMN IF NOT EXISTS mode text;
+ALTER TABLE stops DROP CONSTRAINT IF EXISTS stops_mode_check;
+ALTER TABLE stops ADD CONSTRAINT stops_mode_check
+    CHECK (mode IN ('subway','light_rail','bus','commuter_rail','ferry'));
+
+UPDATE stops s
+   SET mode = x.mode
+  FROM (SELECT DISTINCT ON (rs.stop_id) rs.stop_id, r.mode
+          FROM route_stops rs
+          JOIN routes r ON r.id = rs.route_id
+         WHERE r.mode IS NOT NULL
+         ORDER BY rs.stop_id,
+                  CASE r.mode WHEN 'subway' THEN 1 WHEN 'light_rail' THEN 2
+                              WHEN 'commuter_rail' THEN 3 WHEN 'ferry' THEN 4 ELSE 5 END) x
+ WHERE s.id = x.stop_id AND s.mode IS NULL;
+
+-- 2. stop_facts ordering and tags.
+ALTER TABLE stop_facts ADD COLUMN IF NOT EXISTS sort int NOT NULL DEFAULT 0;
+ALTER TABLE stop_facts ADD COLUMN IF NOT EXISTS tags text[] NOT NULL DEFAULT '{}';
+
+-- 3. freedom_trail_sites
+CREATE TABLE IF NOT EXISTS freedom_trail_sites (
+    id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    sort_order      int NOT NULL,
+    name            text NOT NULL,
+    lat             double precision,
+    lon             double precision,
+    nearest_stop_id text REFERENCES stops (id),
+    blurb           text
+);
+CREATE INDEX IF NOT EXISTS freedom_trail_sites_stop_idx ON freedom_trail_sites (nearest_stop_id);
+
+-- 4. fun_facts (loading-screen facts)
+CREATE TABLE IF NOT EXISTS fun_facts (
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    body       text NOT NULL,
+    tags       text[] NOT NULL DEFAULT '{}',
+    created_at timestamptz DEFAULT now()
+);
+
+-- 5. stores.category
+ALTER TABLE stores ADD COLUMN IF NOT EXISTS category text;
+ALTER TABLE stores DROP CONSTRAINT IF EXISTS stores_category_check;
+ALTER TABLE stores ADD CONSTRAINT stores_category_check
+    CHECK (category IN ('food','clothing','sports','retail','other'));
+
+-- 6. offers: badge gate, per-user limit, placement, wider kind.
+ALTER TABLE offers ADD COLUMN IF NOT EXISTS required_badge_id text REFERENCES badges (id);
+ALTER TABLE offers ADD COLUMN IF NOT EXISTS per_user_limit int;
+ALTER TABLE offers ADD COLUMN IF NOT EXISTS placement text;
+ALTER TABLE offers DROP CONSTRAINT IF EXISTS offers_placement_check;
+ALTER TABLE offers ADD CONSTRAINT offers_placement_check
+    CHECK (placement IN ('local_pick','sponsored_quest'));
+ALTER TABLE offers DROP CONSTRAINT IF EXISTS offers_kind_check;
+ALTER TABLE offers ADD CONSTRAINT offers_kind_check
+    CHECK (kind IN ('discount','free_item','points_item','local_pick'));
+
+-- 7. physical_rewards.description
+ALTER TABLE physical_rewards ADD COLUMN IF NOT EXISTS description text;
+
+-- 8. consent.granted mirrors revoked_at.
+ALTER TABLE consent ADD COLUMN IF NOT EXISTS granted boolean
+    GENERATED ALWAYS AS (revoked_at IS NULL) STORED;
+
+-- 9. place_visits: written by insights-sponsors only after 'place_visits' consent.
+-- No foreign keys (hypertable). Raw visits are kept 90 days for privacy.
+CREATE TABLE IF NOT EXISTS place_visits (
+    id             uuid NOT NULL DEFAULT gen_random_uuid(),
+    time           timestamptz NOT NULL,
+    user_id        uuid NOT NULL,
+    lat            double precision,
+    lon            double precision,
+    place_category text,
+    store_id       uuid,
+    PRIMARY KEY (id, time)
+);
+SELECT create_hypertable('place_visits', 'time',
+    chunk_time_interval => INTERVAL '7 days', if_not_exists => TRUE);
+CREATE INDEX IF NOT EXISTS place_visits_user_time_idx ON place_visits (user_id, time DESC);
+SELECT add_retention_policy('place_visits', INTERVAL '90 days', if_not_exists => TRUE);
+
+-- 10. user_rank now lists every user; users with no points are rank 1 / lifetime 0.
+-- Same column names, order and types as 0001, so CREATE OR REPLACE is enough.
+CREATE OR REPLACE VIEW user_rank AS
+    SELECT u.id AS user_id,
+           coalesce(p.balance, 0)  AS balance,
+           coalesce(p.lifetime, 0) AS lifetime,
+           r.rank,
+           r.discount_pct
+    FROM users u
+    LEFT JOIN user_points p ON p.user_id = u.id
+    JOIN LATERAL (
+        SELECT rank, discount_pct
+        FROM ranks
+        WHERE min_lifetime_points <= coalesce(p.lifetime, 0)
+        ORDER BY min_lifetime_points DESC
+        LIMIT 1
+    ) r ON true;
 

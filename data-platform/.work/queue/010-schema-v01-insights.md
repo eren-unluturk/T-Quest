@@ -1,7 +1,7 @@
 ---
 id: 010
 title: Schema v0.1 - insights-sponsors additions (#22) and user_rank for zero-point users
-status: ready
+status: done
 issue: 22
 depends_on: [004, 006]
 ---
