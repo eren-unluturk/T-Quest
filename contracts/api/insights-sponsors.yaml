@@ -1,0 +1,705 @@
+openapi: 3.0.3
+info:
+  title: T-Quest insights-sponsors API
+  version: 0.4.0
+  x-changelog:
+    - '0.4.0: add GET /stops/{stop_id}/nearby, /categories, /labels, /spots/{spot_id}, /rank-tiers; /offers gains rank and placement filters; Offer.store_id nullable and Offer.demo added'
+    - '0.3.0: add POST and DELETE /place-visits (consent-gated ingest); revoking place_visits deletes stored visits'
+    - '0.2.0: add GET /analytics/boston (anonymous city analytics, k=3)'
+    - '0.1.1: document 409 on POST /consent and ConsentRequired'
+    - '0.1.0: first draft'
+  description: |
+    Tourist content, sponsor offers, store partners, the physical-reward catalog,
+    route analytics, recommendations and consent. Owner: insights-sponsors (Eren).
+    DRAFT. Lives in insights-sponsors/openapi/ until promoted to contracts/api/insights-sponsors.yaml.
+    Auth: bearer token on every route except GET /fun-facts (loading screen).
+    The user id comes from the session. Non-MBTA location use requires consent (403 otherwise).
+    game-engine owns redemption issuing (POST /redemptions) and store verification
+    (POST /redemptions/verify). This service owns the catalog those routes reference by offer_id.
+    Rank and discount numbers come from game-engine.yaml x-rules.ranks.
+    Sponsor placements are native (local picks, sponsored quests), never pop-ups.
+servers:
+  - url: http://localhost:8002
+security:
+  - bearerAuth: []
+paths:
+  /stops/{stop_id}/facts:
+    get:
+      summary: Fast facts, history and Freedom Trail notes for a stop
+      parameters:
+        - {$ref: '#/components/parameters/StopId'}
+      responses:
+        '200':
+          description: Facts for the stop
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StopFacts'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {description: Unknown stop}
+  /stops/{stop_id}/local-picks:
+    get:
+      summary: Native sponsor placements near a stop
+      description: Local picks are native placements shown inside the stop view, never pop-ups.
+      parameters:
+        - {$ref: '#/components/parameters/StopId'}
+        - name: limit
+          in: query
+          schema: {type: integer, default: 5, minimum: 1, maximum: 20}
+      responses:
+        '200':
+          description: Nearby partner stores with their offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/LocalPick'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {description: Unknown stop}
+  /freedom-trail:
+    get:
+      summary: Freedom Trail sites in walking order
+      responses:
+        '200':
+          description: Trail sites
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/TrailSite'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /fun-facts:
+    get:
+      summary: Loading-screen fun facts
+      security: []
+      parameters:
+        - name: limit
+          in: query
+          schema: {type: integer, default: 10, minimum: 1, maximum: 50}
+        - name: random
+          in: query
+          schema: {type: boolean, default: true}
+      responses:
+        '200':
+          description: Fun facts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/FunFact'}
+  /offers:
+    get:
+      summary: Sponsor offers
+      parameters:
+        - name: stop_id
+          in: query
+          schema: {type: string}
+        - name: store_id
+          in: query
+          schema: {type: string}
+        - name: category
+          in: query
+          schema: {type: string, enum: [food, clothing, sports, other]}
+        - name: eligible_only
+          in: query
+          description: When true, only offers the caller's rank and badges qualify for.
+          schema: {type: boolean, default: false}
+        - name: rank
+          in: query
+          description: Offers available at this rank tier (min_rank <= rank).
+          schema: {type: integer, minimum: 1, maximum: 5}
+        - name: placement
+          in: query
+          description: local_pick or sponsored_quest (native placements, never pop-ups).
+          schema: {type: string, enum: [local_pick, sponsored_quest]}
+      responses:
+        '200':
+          description: Offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Offer'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /physical-rewards/catalog:
+    get:
+      summary: Sticker and patch catalog
+      description: Each physical reward maps to a badge. Redemption is issued and verified by game-engine.
+      responses:
+        '200':
+          description: Catalog entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/PhysicalReward'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /recommendations:
+    get:
+      summary: Route, neighborhood and stop recommendations
+      description: |
+        SQL-based over Tiger Data aggregates. Place-visit signals are used only
+        when the place_visits consent is granted. This route never returns 403:
+        without that consent the place-visit signals are silently skipped.
+      parameters:
+        - name: kind
+          in: query
+          schema: {type: string, enum: [route, neighborhood, stop]}
+        - name: limit
+          in: query
+          schema: {type: integer, default: 5, minimum: 1, maximum: 50}
+      responses:
+        '200':
+          description: Recommendations
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Recommendations'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /analytics/me:
+    get:
+      summary: The caller's route analytics
+      parameters:
+        - name: period
+          in: query
+          schema: {type: string, enum: [week, month, all], default: month}
+      responses:
+        '200':
+          description: Analytics for the period
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MyAnalytics'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /analytics/boston:
+    get:
+      summary: Anonymous city-wide analytics
+      description: |
+        Aggregate view of all riders: busiest stops, trending neighborhoods and line
+        activity. Privacy rule (k-anonymity): any bucket backed by fewer than 3
+        distinct riders is suppressed. Busiest-stop and neighborhood entries with
+        fewer than 3 distinct riders are left out, days or lines with fewer than 3
+        riders are left out of `lines`, and `active_riders` (and `total_checkins`)
+        are 0 when fewer than 3 riders were active. No user id is ever returned.
+        Trending neighborhoods compare the period with the previous period of equal
+        length, need at least 5 check-ins in the current period, and are the top 5 by
+        `change_pct`. A previous period with no data, or with fewer than 3 riders,
+        counts as +100%.
+      parameters:
+        - name: period
+          in: query
+          schema: {type: string, enum: [week, month], default: week}
+      responses:
+        '200':
+          description: City analytics for the period
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/BostonAnalytics'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /consent:
+    get:
+      summary: The caller's consent records
+      description: |
+        Consent state per scope. Routes that gate on a consent return the reusable
+        ConsentRequired response (403, detail "consent required: <scope>").
+        POST /place-visits is the first route that does.
+      responses:
+        '200':
+          description: One record per scope
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Consent'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      summary: Grant consent for a scope
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Consent granted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409':
+          description: policy_version is not the current policy version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PolicyMismatch'}
+        '422': {description: Unknown scope or malformed body}
+  /place-visits:
+    post:
+      summary: Record a visit to a place (requires place_visits consent)
+      description: |
+        Only accepted while the caller has granted the place_visits consent; otherwise
+        403 ConsentRequired. Privacy rules: coordinates are rounded to 3 decimals
+        (about 100 m) before storage; visited_at more than 7 days in the past or more
+        than 5 minutes in the future is rejected with 422; data is kept for 90 days.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PlaceVisitIn'}
+      responses:
+        '201':
+          description: Visit stored
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PlaceVisitAck'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/ConsentRequired'}
+        '422': {description: 'Coordinates out of range, unknown category, or visited_at outside the accepted window'}
+    delete:
+      summary: Erase all of the caller's stored place visits
+      description: Works without consent, so a user can always erase their data.
+      responses:
+        '200':
+          description: Number of visits deleted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PlaceVisitsDeleted'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /consent/{scope}:
+    delete:
+      summary: Revoke consent for a scope
+      description: |
+        Revoking place_visits stops future use and deletes the user's stored place
+        visits. Revoking is idempotent.
+      parameters:
+        - name: scope
+          in: path
+          required: true
+          schema: {$ref: '#/components/schemas/ConsentScope'}
+      responses:
+        '200':
+          description: Consent revoked (granted false)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /stops/{stop_id}/nearby:
+    get:
+      summary: Everything nearby a stop, with optional category and label filters
+      description: |
+        Returns all active nearby spots with no filters. Filters combine: category (repeatable, OR),
+        label (repeatable; match=all by default, any optional), sponsored, q (name search).
+        Only declared or certified labels are ever returned or matched; pending labels are invisible.
+        facets hold category and label counts for the whole stop (before category/label filters).
+        Sponsored spots are native placements and carry their offers. Demo spots have demo=true.
+      parameters:
+        - {$ref: '#/components/parameters/StopId'}
+        - {name: category, in: query, schema: {type: array, items: {type: string}}, style: form, explode: true}
+        - {name: label, in: query, schema: {type: array, items: {type: string}}, style: form, explode: true}
+        - {name: match, in: query, schema: {type: string, enum: [any, all], default: all}}
+        - {name: sponsored, in: query, schema: {type: boolean}}
+        - {name: include_demo, in: query, schema: {type: boolean, default: true}}
+        - {name: q, in: query, schema: {type: string}}
+        - {name: sort, in: query, schema: {type: string, enum: [distance, name, sponsored_first], default: distance}}
+        - {name: limit, in: query, schema: {type: integer, default: 50, minimum: 1, maximum: 100}}
+        - {name: offset, in: query, schema: {type: integer, default: 0, minimum: 0}}
+      responses:
+        '200':
+          description: Nearby spots and filter facets
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/NearbyResponse'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {description: Unknown stop}
+  /categories:
+    get:
+      summary: Spot categories
+      responses:
+        '200':
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/CategoryRef'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /labels:
+    get:
+      summary: Identity label types (display wording is configurable)
+      responses:
+        '200':
+          description: Label types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [slug, display_name]
+                  properties:
+                    slug: {type: string}
+                    display_name: {type: string}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /spots/{spot_id}:
+    get:
+      summary: One nearby spot
+      parameters:
+        - {name: spot_id, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: The spot (declared or certified labels only)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Spot'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {description: Unknown spot}
+  /rank-tiers:
+    get:
+      summary: Placeholder rank-tier discounts and the offers available at each tier
+      description: Percentages mirror game-engine's rank table (3/5/7/10/12); the top tier unlocks a free item. Demo placeholders.
+      responses:
+        '200':
+          description: Tiers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/RankTier'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer}
+  parameters:
+    StopId:
+      name: stop_id
+      in: path
+      required: true
+      schema: {type: string}
+  responses:
+    ConsentRequired:
+      description: 'Consent required: <scope>. The caller has not granted (or has revoked) the consent this route needs.'
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+    Unauthorized:
+      description: Missing or malformed bearer token
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+  schemas:
+    CategoryRef:
+      type: object
+      required: [slug, display_name]
+      properties:
+        slug: {type: string}
+        display_name: {type: string}
+    SpotLabel:
+      type: object
+      required: [slug, display_name, status]
+      properties:
+        slug: {type: string}
+        display_name: {type: string}
+        status: {type: string, enum: [declared, certified]}
+        evidence_url: {type: string, nullable: true}
+        declaration_note: {type: string, nullable: true}
+        verified_at: {type: string, format: date-time, nullable: true}
+        verified_by: {type: string, nullable: true}
+    Spot:
+      type: object
+      required: [id, name, category, placement_type, demo, labels, offers]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        category: {$ref: '#/components/schemas/CategoryRef'}
+        address: {type: string, nullable: true}
+        lat: {type: number, nullable: true}
+        lon: {type: number, nullable: true}
+        placement_type: {type: string, enum: [sponsored, listed]}
+        demo: {type: boolean}
+        sponsor_id: {type: string, nullable: true}
+        distance_m: {type: number, nullable: true}
+        source: {type: string}
+        labels:
+          type: array
+          items: {$ref: '#/components/schemas/SpotLabel'}
+        offers:
+          type: array
+          items: {$ref: '#/components/schemas/Offer'}
+    FacetCount:
+      type: object
+      required: [slug, display_name, count]
+      properties:
+        slug: {type: string}
+        display_name: {type: string}
+        count: {type: integer}
+    NearbyResponse:
+      type: object
+      required: [stop_id, total, limit, offset, spots, facets]
+      properties:
+        stop_id: {type: string}
+        total: {type: integer}
+        limit: {type: integer}
+        offset: {type: integer}
+        spots:
+          type: array
+          items: {$ref: '#/components/schemas/Spot'}
+        facets:
+          type: object
+          required: [categories, labels]
+          properties:
+            categories:
+              type: array
+              items: {$ref: '#/components/schemas/FacetCount'}
+            labels:
+              type: array
+              items: {$ref: '#/components/schemas/FacetCount'}
+    RankTier:
+      type: object
+      required: [rank, discount_pct, free_item, offers]
+      properties:
+        rank: {type: integer}
+        discount_pct: {type: integer}
+        free_item: {type: boolean}
+        demo: {type: boolean}
+        offers:
+          type: array
+          items: {$ref: '#/components/schemas/Offer'}
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail: {type: string}
+    PolicyMismatch:
+      type: object
+      required: [detail, current]
+      properties:
+        detail: {type: string}
+        current: {type: string, description: The current policy version}
+    Fact:
+      type: object
+      required: [id, kind, title, body]
+      properties:
+        id: {type: string}
+        kind: {type: string, enum: [fast_fact, history, freedom_trail]}
+        title: {type: string}
+        body: {type: string}
+        source_url: {type: string, nullable: true}
+    StopFacts:
+      type: object
+      required: [stop_id, stop_name, facts]
+      properties:
+        stop_id: {type: string}
+        stop_name: {type: string}
+        facts:
+          type: array
+          items: {$ref: '#/components/schemas/Fact'}
+    StorePartner:
+      type: object
+      required: [id, name, category, lat, lon, nearest_stop_id, address]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        category: {type: string, enum: [food, clothing, sports, other]}
+        lat: {type: number}
+        lon: {type: number}
+        nearest_stop_id: {type: string}
+        address: {type: string}
+    Offer:
+      type: object
+      required: [id, sponsor_id, title, description, kind, min_rank, per_user_limit, starts_at, placement]
+      properties:
+        id: {type: string}
+        sponsor_id: {type: string}
+        store_id: {type: string, nullable: true}
+        title: {type: string}
+        description: {type: string}
+        kind: {type: string, enum: [discount, free_item, points_item]}
+        discount_pct: {type: integer, nullable: true}
+        points_cost: {type: integer, nullable: true}
+        min_rank: {type: integer, minimum: 1, maximum: 5}
+        required_badge_id: {type: string, nullable: true}
+        per_user_limit: {type: integer}
+        starts_at: {type: string, format: date-time}
+        ends_at: {type: string, format: date-time, nullable: true}
+        placement: {type: string, enum: [local_pick, sponsored_quest]}
+        demo: {type: boolean, description: 'true when the sponsor is a demo placeholder; no real partnership'}
+    LocalPick:
+      type: object
+      required: [store, offers, distance_m]
+      properties:
+        store: {$ref: '#/components/schemas/StorePartner'}
+        offers:
+          type: array
+          items: {$ref: '#/components/schemas/Offer'}
+        distance_m: {type: number}
+    TrailSite:
+      type: object
+      required: [id, order, name, lat, lon, nearest_stop_id, blurb]
+      properties:
+        id: {type: string}
+        order: {type: integer}
+        name: {type: string}
+        lat: {type: number}
+        lon: {type: number}
+        nearest_stop_id: {type: string}
+        blurb: {type: string}
+    FunFact:
+      type: object
+      required: [id, body, tags]
+      properties:
+        id: {type: string}
+        body: {type: string}
+        tags:
+          type: array
+          items: {type: string}
+    PhysicalReward:
+      type: object
+      required: [id, kind, name, description, badge_id, min_rank, per_user_limit, stores]
+      properties:
+        id: {type: string}
+        kind: {type: string, enum: [sticker, patch]}
+        name: {type: string}
+        description: {type: string}
+        badge_id: {type: string}
+        min_rank: {type: integer, minimum: 1, maximum: 5}
+        per_user_limit: {type: integer}
+        image_url: {type: string, nullable: true}
+        stores:
+          type: array
+          items:
+            type: object
+            required: [store_id, in_stock]
+            properties:
+              store_id: {type: string}
+              in_stock: {type: boolean}
+    Recommendation:
+      type: object
+      required: [kind, id, title, reason, score, sponsored]
+      properties:
+        kind: {type: string, enum: [route, neighborhood, stop]}
+        id: {type: string}
+        title: {type: string}
+        reason: {type: string}
+        score: {type: number}
+        sponsored: {type: boolean}
+        sponsor_id: {type: string, nullable: true}
+    Recommendations:
+      type: object
+      required: [generated_at, items]
+      properties:
+        generated_at: {type: string, format: date-time}
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Recommendation'}
+    MyAnalytics:
+      type: object
+      required: [user_id, period, stops_visited, unique_stops, lines_ridden, by_week, top_stops, neighborhoods_explored]
+      properties:
+        user_id: {type: string}
+        period: {type: string, enum: [week, month, all]}
+        stops_visited: {type: integer}
+        unique_stops: {type: integer}
+        lines_ridden:
+          type: array
+          items: {type: string}
+        home_line: {type: string, nullable: true}
+        by_week:
+          type: array
+          items:
+            type: object
+            required: [week_start, checkins, unique_stops]
+            properties:
+              week_start: {type: string, format: date}
+              checkins: {type: integer}
+              unique_stops: {type: integer}
+        top_stops:
+          type: array
+          items:
+            type: object
+            required: [stop_id, visits]
+            properties:
+              stop_id: {type: string}
+              visits: {type: integer}
+        neighborhoods_explored:
+          type: array
+          items: {type: string}
+    BusiestStop:
+      type: object
+      required: [stop_id, stop_name, checkins]
+      properties:
+        stop_id: {type: string}
+        stop_name: {type: string}
+        checkins: {type: integer}
+    TrendingNeighborhood:
+      type: object
+      required: [neighborhood, checkins, change_pct]
+      properties:
+        neighborhood: {type: string}
+        checkins: {type: integer}
+        change_pct: {type: number, description: Percent change in check-ins versus the previous period of equal length}
+    DayCount:
+      type: object
+      required: [day, checkins]
+      properties:
+        day: {type: string, format: date}
+        checkins: {type: integer}
+    LineActivity:
+      type: object
+      required: [route_id, checkins, by_day]
+      properties:
+        route_id: {type: string}
+        checkins: {type: integer}
+        by_day:
+          type: array
+          items: {$ref: '#/components/schemas/DayCount'}
+    BostonAnalytics:
+      type: object
+      required: [period, generated_at, total_checkins, active_riders, busiest_stops, trending_neighborhoods, lines]
+      properties:
+        period: {type: string, enum: [week, month]}
+        generated_at: {type: string, format: date-time}
+        total_checkins: {type: integer}
+        active_riders: {type: integer}
+        busiest_stops:
+          type: array
+          items: {$ref: '#/components/schemas/BusiestStop'}
+        trending_neighborhoods:
+          type: array
+          items: {$ref: '#/components/schemas/TrendingNeighborhood'}
+        lines:
+          type: array
+          items: {$ref: '#/components/schemas/LineActivity'}
+    PlaceVisitIn:
+      type: object
+      required: [lat, lon, visited_at, place_category]
+      properties:
+        lat: {type: number, minimum: -90, maximum: 90}
+        lon: {type: number, minimum: -180, maximum: 180}
+        visited_at: {type: string, format: date-time}
+        place_category: {type: string, enum: [food, clothing, sports, other]}
+        store_id: {type: string, nullable: true}
+    PlaceVisitAck:
+      type: object
+      required: [accepted, retained_days]
+      properties:
+        accepted: {type: boolean}
+        retained_days: {type: integer}
+    PlaceVisitsDeleted:
+      type: object
+      required: [deleted]
+      properties:
+        deleted: {type: integer}
+    ConsentScope:
+      type: string
+      enum: [location, place_visits]
+    Consent:
+      type: object
+      required: [scope, granted, policy_version]
+      properties:
+        scope: {$ref: '#/components/schemas/ConsentScope'}
+        granted: {type: boolean}
+        granted_at: {type: string, format: date-time, nullable: true}
+        revoked_at: {type: string, format: date-time, nullable: true}
+        policy_version: {type: string}
+    ConsentRequest:
+      type: object
+      required: [scope, policy_version]
+      properties:
+        scope: {$ref: '#/components/schemas/ConsentScope'}
+        policy_version: {type: string}

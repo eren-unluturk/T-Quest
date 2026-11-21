@@ -10,11 +10,18 @@ def _memory_repo() -> MemoryRepository:
     return MemoryRepository()
 
 
+@lru_cache(maxsize=1)
+def _postgres_repo() -> Repository:
+    from .postgres import PostgresRepository
+
+    return PostgresRepository()
+
+
 def get_repository() -> Repository:
     """FastAPI dependency: the process-wide repository."""
     if settings.data_backend == "memory":
         return _memory_repo()
-    raise NotImplementedError("postgres backend is not implemented yet")
+    return _postgres_repo()
 
 
 __all__ = ["Repository", "MemoryRepository", "get_repository"]

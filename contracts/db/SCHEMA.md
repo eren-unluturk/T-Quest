@@ -157,3 +157,6 @@ Scheduled trips per `(route_id fk, direction_id, hour_of_day 0-23, America/New_Y
 ## Compression (0008)
 - `rider_events` compression: segmentby `user_id`, orderby `time DESC, id` (the primary key columns must be in the set); policy compresses chunks older than 7 days. Measured about 9.5x total size reduction (see docs/TIGER_DATA_RESULTS.md).
 - Verified against a live TimescaleDB 2.32.1 on PostgreSQL 18: migrations 0000-0008 apply cleanly and idempotently. `schema.sql` is still the concatenation of the migrations, not a pg_dump.
+
+## Migration 0010: nearby spots and identity labels
+Tables `spot_categories`, `label_types`, `nearby_spots`, `spot_stop_links`, `spot_labels`; view `spot_labels_public` (declared or certified only; the API reads this view). `spot_labels` has a CHECK: a declared or certified label must carry evidence_url or declaration_note, verified_at and verified_by. `sponsors.demo_placeholder` and `stores.demo_placeholder` flag demo data. Readers must never expose `pending` labels.

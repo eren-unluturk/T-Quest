@@ -90,3 +90,11 @@ Format: decision, alternatives, why. Append new entries; do not rewrite others'.
 ## D-client-1. Client framework: React (decided by Isabella, 2026-11-21)
 - Alternatives: React Native/Expo, Flutter.
 - Why: the team knows React, it is quick to demo at a hackathon, and the screens are already designed. Web vs native (React + Vite, or React Native/Expo) to be confirmed with client-bryan on #10.
+
+## D17. Nearby spots, verified identity labels, demo sponsors (insights-sponsors, 2026-11-21)
+- Decision: migration 0010 adds spot_categories, label_types, nearby_spots, spot_stop_links, spot_labels and the view spot_labels_public. The API reads only the view; a CHECK forbids declared/certified labels without evidence, verifier and date. Pending labels are never returned and never match a filter (tested in memory and on the live database).
+- Demo data: Boston Red Sox (Fenway, Kenmore), Mint Julep (43 Brattle St, Cambridge, Harvard) and Diesel Cafe (257 Elm St, Somerville, Davis) are demo placeholders (demo_placeholder = true, `demo` in responses). Their only label is local-independent at status pending until Eren confirms. "Sample ... (demo)" spots are fictional. Rank-tier percentages are game-engine's 3/5/7/10/12 as placeholders.
+- Also: `python scripts/load_seed.py` inserts badge slugs that offers and physical rewards reference if missing (line-green-complete, line-red-complete, rank-4, rank-5), ON CONFLICT DO NOTHING. game-engine has no rank-4 badge of its own (see #5).
+- Postgres backend covers stops, offers, physical rewards and nearby spots; consent, place visits and analytics inputs still use the memory repository until prompt 016.
+- Redemption boundary (#5): game-engine owns redemptions and store verification; insights-sponsors serves the read-side catalog (offers, rank tiers, physical rewards with per-store in_stock) and the eligibility rule.
+- Why: lets riders filter by community while keeping ownership claims evidence-based.
