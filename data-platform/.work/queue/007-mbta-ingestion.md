@@ -1,7 +1,7 @@
 ---
 id: 007
 title: MBTA static loader and realtime ingestion worker
-status: ready
+status: done
 depends_on: [005]
 ---
 ## Goal

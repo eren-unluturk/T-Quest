@@ -33,3 +33,14 @@ Run tests with `pytest -q`. Tests that need a database skip when it is unreachab
 2. Set `DATABASE_URL` in `.env` to the service URL, with `sslmode=require`:
    `postgres://tsdbadmin:<password>@<host>:<port>/tsdb?sslmode=require`
 3. Run the same command: `python -m data_platform.migrate`.
+
+## Load MBTA data
+Set `MBTA_API_KEY` in `.env` (free key from api-v3.mbta.com; without a key the API allows only about 20 requests/min, which is not enough for the static load).
+
+```powershell
+python -m data_platform.load_static          # routes, stops, route_stops (upsert, safe to re-run)
+python -m data_platform.ingest --once        # one cycle: vehicles, predictions, alerts
+python -m data_platform.ingest --interval 15 # poll every 15 seconds until stopped
+```
+Predictions are polled for subway and light-rail routes only (the MBTA API requires a route filter), so run `load_static` first. A failed cycle is logged and the loop continues.
+
