@@ -6,10 +6,11 @@
 - **game-engine** has in-memory ledger/redemption rules (`game-engine/src/game_engine/`) and will propose a check-in event JSON Schema in `contracts/events/`. `rider_events` columns in 002 follow CheckinRequest; adjust when their schema lands.
 - game-engine needs "vehicle seen at stop within 300 s": served by `/vehicles?stop_id=&since_s=` (008) on `vehicles` (005).
 - Attribution check fails on history commit 6732e8d (a teammate's Co-authored-by trailer, merged via PR #19). Fix requires a history rewrite + force-push, which agents may not do. Raised to humans.
+- **No database on this machine (#25, to:humans).** Docker and Postgres are absent; all DB acceptance checks are deferred until a Tiger Cloud DATABASE_URL or Docker is available. Items are ticked only after a DB run.
 - MBTA_API_KEY needed for live ingestion (007); prompt falls back to fixtures.
 
 ## Phase 1: schema v0 and contracts (unblocks game-engine, insights-sponsors, clients)
-- [ ] 001 Scaffold service, docker-compose, env, migration runner (queue/001-scaffold-compose-migrations.md, #1)
+- [ ] 001 Scaffold service, docker-compose, env, migration runner (queue/001-scaffold-compose-migrations.md, #1) -- reviewed: code OK, DB criteria unverified (no DB, #25)
 - [ ] 002 Core schema: transit, users, consent, friends, rider_events, points_ledger, ranks (queue/002-core-schema.md, #4, #6)
 - [ ] 003 Rewards schema: sponsors, stores, offers, rewards, quests, badges, physical rewards, redemptions (queue/003-rewards-schema.md, #4, #6)
 - [ ] 004 Schema contract doc + data-platform OpenAPI drafts (queue/004-contract-drafts.md, #1, #8)
