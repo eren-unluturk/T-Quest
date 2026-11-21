@@ -19,7 +19,7 @@ const root = git(['rev-parse', '--show-toplevel'], cwd).stdout.trim();
 const EXCLUDED = [
   /^AGENTS\.md$/, /(^|\/)CLAUDE\.md$/, /(^|\/)AGENT\.md$/, /^\.work\/(PLANNER|BUILDER)\.md$/, /\/\.work\/(PLANNER|BUILDER)\.md$/,
   /^docs\/(ONBOARDING|DUO)\.md$/, /^\.githooks\//, /^\.claude-template\//, /(^|\/)\.claude\//,
-  /^tests\//, /^scripts\/check-attribution\.mjs$/,
+  /^tests\//, /^scripts\/(check-attribution|seed-work)\.mjs$/,
 ];
 // In files, only unambiguous attribution forms count (prose may legitimately say "generated with").
 const fileHit = (l) => /^\s*[-*>]*\s*Co-Authored-By\s*:/i.test(l) || /^\s*Claude-Session\s*:/i.test(l)
