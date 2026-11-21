@@ -22,15 +22,16 @@
 
 ## Phase 2: Tiger Data features
 - [ ] 005 MBTA realtime tables with compression and retention (queue/005-realtime-tables.md) -- reviewed: compression orderby conflicts with unique indexes, fix in 011; DB unverified
-- [ ] 011 Fix compression settings vs unique indexes (queue/011-fix-compression-unique.md)
+- [x] 011 Fix compression settings vs unique indexes (queue/011-fix-compression-unique.md) -- verified (text test passes; live compression still pending #25)
 - [ ] 012 Insights aggregates + home_line aligned with game-engine delay.py, checkins_30d (queue/012-insights-aggregates.md, #22, #4)
 - [ ] 013 DB-free SQL syntax check with the real Postgres parser (queue/013-sql-syntax-check.md)
 - [ ] 014 One-command verification run for when a DB exists (queue/014-verify-command.md, #25)
+- [ ] 015 Dockerfile + compose services for API and ingestion (queue/015-containerize-services.md)
 - [ ] 006 Continuous aggregates: leaderboard, home line, personal stats (queue/006-continuous-aggregates.md, #4) -- reviewed: OK (runner no-transaction fix good), DB unverified; missed the #22 amendment -> 012
 - [ ] 007 MBTA static loader and realtime ingestion worker (queue/007-mbta-ingestion.md) -- reviewed: OK (parse/mock tests pass); live load needs MBTA_API_KEY + DB (#25)
 - [ ] 008 Read API implementation (queue/008-read-api.md, #8) -- reviewed: OK (paths/params match spec; SQL DB-unverified). OpenAPI draft tweaked (limit/since_s defaults), so publish the current draft (#27)
 - [ ] 009 Demo benchmark: compression ratio and aggregate latency (queue/009-benchmarks.md) -- reviewed: code OK; no numbers until a DB run (#25)
-- [ ] 010 Schema v0.1: insights-sponsors additions + user_rank for all users (queue/010-schema-v01-insights.md, #22)
+- [ ] 010 Schema v0.1: insights-sponsors additions + user_rank for all users (queue/010-schema-v01-insights.md, #22) -- reviewed: OK (SCHEMA.md now covers 0000-0005), DB unverified
 - [ ] HUMAN: Eren publishes v0.1 contracts-draft/ (then planner closes #22)
 
 ## Later (not yet queued)

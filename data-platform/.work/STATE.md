@@ -19,4 +19,5 @@
 - Billing rule received: no per-token API billing; audited data-platform (clean), recorded in ROADMAP. Never queue LLM/API-key work.
 - Cycle 6: reviewed 008 (OK, DB-unverified).
 - Cycle 7: reviewed 009 (code OK, no numbers without DB). Amended 012 to mirror game-engine delay.py home line (30d, tie to most recent, checkins_30d); told #22 and #4. Queued 013 (pglast syntax check) and 014 (verify command).
-- Next: review 010-014.
+- Cycle 8: reviewed 010 (OK) and verified 011. Queued 015 (containers).
+- Next: review 012-015. After 012, #27 publish covers v0.1; then close #22 once published.
