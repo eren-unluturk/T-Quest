@@ -47,3 +47,14 @@ Billing rule: use a local docker TimescaleDB (`../data-platform/docker-compose.y
 - Analytics and recommendations on Postgres (later prompt, after data-platform 012). Schema changes: if a column is missing, mark this `blocked` and name the exact column in the report.
 
 Commits and PR/issue text must contain no Co-Authored-By or any agent attribution.
+
+## Resume notes (builder, safe stop)
+- Branch `wip/insights-sponsors-014` (pushed) holds the only finished part: step 4 badge rename (`badge.line.green.complete` -> `line-green-complete`, `badge.freedom-trail.complete` -> `freedom-trail`, `badge.rank.N` -> `rank-N`) in data/seed/offers.json, data/seed/physical_rewards.json, tests/test_catalog.py, tests/test_memory_repo.py; pyproject.toml gets `psycopg-pool>=3.2` and a `db` pytest marker. 149 tests passed with it. Merge or cherry-pick it into main first.
+- Not started: repo/ids.py, repo/postgres.py, repo/__init__.py switch plus lifespan pool close, scripts/load_seed.py, tests/test_postgres_repo.py, unit tests for ids/resolve_user, README "Postgres mode".
+- Design worked out, not yet written (the last file write was cancelled):
+  - ids.py: NAMESPACE = uuid5(NAMESPACE_URL, "https://t-quest/insights-sponsors"); `slug_to_uuid`, `parse_uuid`, `to_uuid`.
+  - Add `resolve_user(token)` to the Protocol (memory returns the token). Postgres: valid uuid as is, else users.username lookup, insert only when auth_mode == "dev".
+  - Migration facts (read from data-platform/migrations 0001, 0002, 0005): sponsors.category is required by a CHECK (food, clothing, sports, retail, other), so derive it from the sponsor's stores. stores.sponsor_id is NOT NULL and our stores.json has none, so derive it from the store's first offer. consent has a generated `granted` column, granted_at NOT NULL, so revoking a never-granted scope must not insert a row. offers.kind allows points_item after 0005; read local_pick as discount. offers.store_id NULL means all of the sponsor's stores: expand with a join. stop_facts.id is bigserial (return str); fun_facts needs explicit created_at in the loader to keep seed order. stops.mode may be light_rail etc: map non-bus to "subway". Loader fills NULL neighborhood/mode on existing stops but never overwrites; badges and store_inventory use DO NOTHING.
+  - In postgres mode analytics/recommendations/boston routes should still use memory data but real consent and place visits: add a composite repo (consent and place-visit methods to Postgres, rest to memory), a `get_insights_repository` dependency used by routes/insights.py, and override it in tests/conftest.py next to `get_repository`.
+  - No Docker or Postgres was available in this environment, so DB tests could not be run; psycopg-pool 3.3.3 is installed locally.
+- Tool quirk: long bash heredocs containing quotes fail to parse here; write files with the Write/Edit tools.
