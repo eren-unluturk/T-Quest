@@ -81,3 +81,8 @@ Format: decision, alternatives, why. Append new entries; do not rewrite others'.
 - Scan on 2026-11-21: git history, working tree, commit messages and issues/PRs contain no real key (no `sk-ant-` strings). The variable NAME appeared in `.env.example` (removed) and in `insights-sponsors/.work/queue/009-ai-recommendation-reasons.md` plus `insights-sponsors/.work/ROADMAP.md`. Task 009 plans an optional LLM call keyed by ANTHROPIC_API_KEY, which conflicts with this rule; it must not be built that way (raised with the owner, not edited here).
 
 - D15 addendum: API-key / per-token billing is explicitly NOT part of this hackathon project. It may be a future feature; until then no code, task, config or doc may depend on an Anthropic key.
+
+## D16. home_line column is checkins_30d on a true 30-day window
+- Decision: `home_line.checkins_30d` replaces `checkins_28d` (and earlier `rides_28d`). Migration 0006 carries the rename; migration 0007 moves the view to a 30-day window over the new `user_route_daily` CAGG, ties go to the most recently ridden line, minimum 5 rides, override wins. Same rule as game-engine `delay.py`.
+- Alternatives: keep 28 days and only rename the column (name would not match behaviour).
+- Why: matches #22 and game-engine's delay rule. No consumer ever received `checkins_28d` as a published contract.
