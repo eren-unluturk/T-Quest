@@ -10,7 +10,7 @@ import psycopg
 from psycopg.rows import dict_row
 
 from ..config import settings
-from ..models import Offer, PhysicalReward, RewardStore, Stop
+from ..models import ContentItem, LoadingFact, Offer, PhysicalReward, RewardStore, Stop
 from ..spots import CategoryRef, Spot, SpotLabel, public_labels
 from .memory import MemoryRepository
 
@@ -87,6 +87,20 @@ class PostgresRepository(MemoryRepository):
                                min_rank=r["min_rank"], per_user_limit=r["per_user_limit"],
                                image_url=r["image_url"], stores=inv.get(r["id"], []))
                 for r in rows]
+
+    # tourist content
+    def stop_content(self, stop_id: str) -> list[ContentItem]:
+        rows = self._q(
+            """SELECT c.id, c.title, c.short_description, c.category, c.lat, c.lon, sc.distance_m, c.source_id,
+                      c.source_url, c.license, c.attribution, c.commercial_ok, c.needs_verify
+                 FROM stop_content sc JOIN content_items c ON c.id = sc.content_id
+                WHERE sc.stop_id = %s ORDER BY sc.distance_m, c.title""", (stop_id,))
+        return [ContentItem(**{**r, "id": str(r["id"]), "distance_m": round(r["distance_m"], 1)}) for r in rows]
+
+    def loading_facts(self) -> list[LoadingFact]:
+        return [LoadingFact(id=str(r["id"]), body=r["body"], tags=r["tags"], source_url=r["source_url"],
+                            attribution=r["attribution"])
+                for r in self._q("SELECT id, body, tags, source_url, attribution FROM loading_facts ORDER BY body")]
 
     # nearby spots
     def spot_categories(self) -> list[CategoryRef]:

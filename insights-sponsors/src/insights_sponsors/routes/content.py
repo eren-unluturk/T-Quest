@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from ..auth import current_user_id
-from ..models import FunFact, StopFacts, TrailSite
+from ..models import ContentItem, FunFact, LoadingFact, StopFacts, TrailSite
 from ..repo import Repository, get_repository
 
 router = APIRouter()
@@ -40,3 +40,29 @@ def fun_facts(
     if random_order:
         facts = random.sample(facts, k=min(limit, len(facts)))
     return facts[:limit]
+
+
+@router.get("/stops/{stop_id}/content", response_model=list[ContentItem])
+def stop_content(
+    stop_id: str,
+    _user: Annotated[str, Depends(current_user_id)],
+    repo: Annotated[Repository, Depends(get_repository)],
+    category: str | None = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+):
+    """Open-source tourist content within about 500 m of the stop. Every item carries source_url,
+    license and attribution; clients must display the attribution."""
+    if repo.get_stop(stop_id) is None:
+        raise HTTPException(status_code=404, detail="unknown stop")
+    items = repo.stop_content(stop_id)
+    if category:
+        items = [i for i in items if i.category == category]
+    return items[:limit]
+
+
+@router.get("/loading-facts", response_model=list[LoadingFact])
+def loading_facts(
+    repo: Annotated[Repository, Depends(get_repository)],
+    limit: Annotated[int, Query(ge=1, le=50)] = 10,
+):
+    return repo.loading_facts()[:limit]

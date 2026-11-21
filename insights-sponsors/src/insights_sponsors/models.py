@@ -90,6 +90,30 @@ class LocalPick(BaseModel):
     distance_m: float
 
 
+class ContentItem(BaseModel):
+    id: str
+    title: str
+    short_description: str | None = None
+    category: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+    distance_m: float | None = None
+    source_id: str
+    source_url: str
+    license: str
+    attribution: str
+    commercial_ok: bool
+    needs_verify: bool = False
+
+
+class LoadingFact(BaseModel):
+    id: str
+    body: str
+    tags: list[str]
+    source_url: str | None = None
+    attribution: str
+
+
 class TrailSite(BaseModel):
     id: str
     order: int
@@ -98,6 +122,8 @@ class TrailSite(BaseModel):
     lon: float
     nearest_stop_id: str
     blurb: str
+    source_url: str | None = "https://www.thefreedomtrail.org"
+    attribution: str = "Written by the T-Quest team. Verify before publishing."
 
 
 class FunFact(BaseModel):

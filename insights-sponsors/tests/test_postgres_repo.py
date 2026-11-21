@@ -113,3 +113,15 @@ def test_offers_rewards_and_spot_detail_on_postgres(client):
     assert one["address"] == "43 Brattle St, Cambridge" and one["labels"] == [] and one["demo"] is True
     assert client.get("/spots/not-a-uuid", headers=AUTH).status_code == 404
     assert client.get("/stops/place-nope/nearby", headers=AUTH).status_code == 404
+
+
+def test_tourist_content_on_postgres(client):
+    with psycopg.connect(settings.database_url) as c:
+        n = c.execute("SELECT count(*) FROM content_items").fetchone()[0]
+    if n == 0:
+        pytest.skip("run python -m ingest_content.run first")
+    r = client.get("/stops/place-pktrm/content", headers=AUTH)
+    assert r.status_code == 200 and r.json()
+    for i in r.json():
+        assert i["attribution"] and i["source_url"] and i["license"] and i["distance_m"] <= 500
+    assert len(client.get("/loading-facts", params={"limit": 50}).json()) >= 20

@@ -160,3 +160,6 @@ Scheduled trips per `(route_id fk, direction_id, hour_of_day 0-23, America/New_Y
 
 ## Migration 0010: nearby spots and identity labels
 Tables `spot_categories`, `label_types`, `nearby_spots`, `spot_stop_links`, `spot_labels`; view `spot_labels_public` (declared or certified only; the API reads this view). `spot_labels` has a CHECK: a declared or certified label must carry evidence_url or declaration_note, verified_at and verified_by. `sponsors.demo_placeholder` and `stores.demo_placeholder` flag demo data. Readers must never expose `pending` labels.
+
+## Migration 0011: tourist content
+`content_sources`, `content_items` (source, source_url, license, attribution, commercial_ok, retrieved_at, needs_verify), `stop_content` (items within about 500 m of a stop), `loading_facts`. Written by `insights-sponsors/ingest_content`. Clients must display attribution.

@@ -7,6 +7,8 @@ from pathlib import Path
 from ..spots import CategoryRef, Spot, SpotLabel, public_labels
 from .ids import slug_to_uuid
 from ..models import (
+    ContentItem,
+    LoadingFact,
     Category,
     Consent,
     ConsentScope,
@@ -219,6 +221,28 @@ class MemoryRepository:
 
     def physical_rewards(self) -> list[PhysicalReward]:
         return list(self._rewards)
+
+    def stop_content(self, stop_id: str) -> list[ContentItem]:
+        """Memory mode serves only the hand-written Freedom Trail sites within 500 m."""
+        stop = self._stops.get(stop_id)
+        if stop is None:
+            return []
+        out = []
+        for t in self._trail:
+            d = haversine_m(stop.lat, stop.lon, t.lat, t.lon)
+            if d <= 500:
+                out.append(ContentItem(
+                    id=t.id, title=t.name, short_description=t.blurb, category="freedom-trail",
+                    lat=t.lat, lon=t.lon, distance_m=round(d, 1), source_id="freedom-trail-seed",
+                    source_url=t.source_url or "https://www.thefreedomtrail.org",
+                    license="Original short text by the T-Quest team", attribution=t.attribution,
+                    commercial_ok=True, needs_verify=True))
+        return sorted(out, key=lambda i: i.distance_m)
+
+    def loading_facts(self) -> list[LoadingFact]:
+        return [LoadingFact(id=f.id, body=f.body, tags=f.tags, source_url=None,
+                            attribution="Written by the T-Quest team. Verify before publishing.")
+                for f in self._fun_facts]
 
     def trail_sites(self) -> list[TrailSite]:
         return list(self._trail)
