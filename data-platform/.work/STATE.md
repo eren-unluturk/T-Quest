@@ -13,4 +13,5 @@
 - Waiting on: builder reports for 001+. Eren to publish contracts-draft/ after 004.
 - Reviewed reports: 001, 002, 003 (code OK; all DB checks unverified, no docker/postgres, #25).
 - Cycle 2: acked #22; amended 006 (checkins_28d, user_stop_daily, stop_popularity_hourly); queued 010 (schema v0.1 for #22 + user_rank fix).
-- Next: review 004 report; when a DB exists, queue a verification prompt re-running all DB tests.
+- Cycle 3: verified 004 (drafts ready); reviewed 005 (bug: compress orderby lacks unique-index cols) -> queued 011; decided badges/ranks/users owned by game-engine (added to 010); opened #27 to:humans to publish drafts.
+- Next: review 006+; when a DB exists, queue a verification prompt re-running all DB tests.

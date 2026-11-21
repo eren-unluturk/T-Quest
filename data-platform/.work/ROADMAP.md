@@ -14,11 +14,12 @@
 - [ ] 001 Scaffold service, docker-compose, env, migration runner (queue/001-scaffold-compose-migrations.md, #1) -- reviewed: code OK, DB criteria unverified (no DB, #25)
 - [ ] 002 Core schema: transit, users, consent, friends, rider_events, points_ledger, ranks (queue/002-core-schema.md, #4, #6) -- reviewed: OK, DB unverified; user_rank zero-point gap fixed in 010
 - [ ] 003 Rewards schema: sponsors, stores, offers, rewards, quests, badges, physical rewards, redemptions (queue/003-rewards-schema.md, #4, #6) -- reviewed: OK, DB unverified
-- [ ] 004 Schema contract doc + data-platform OpenAPI drafts (queue/004-contract-drafts.md, #1, #8)
-- [ ] HUMAN: Eren publishes contracts-draft/ into contracts/ (then planner closes #1, #4, #6 and replies on #8)
+- [x] 004 Schema contract doc + data-platform OpenAPI drafts (queue/004-contract-drafts.md, #1, #8) -- verified (schema.sql is a concatenation until a DB exists)
+- [ ] HUMAN: Eren publishes contracts-draft/ into contracts/ (#27; then planner closes #1, #4, #6 and replies on #8)
 
 ## Phase 2: Tiger Data features
-- [ ] 005 MBTA realtime tables with compression and retention (queue/005-realtime-tables.md)
+- [ ] 005 MBTA realtime tables with compression and retention (queue/005-realtime-tables.md) -- reviewed: compression orderby conflicts with unique indexes, fix in 011; DB unverified
+- [ ] 011 Fix compression settings vs unique indexes (queue/011-fix-compression-unique.md)
 - [ ] 006 Continuous aggregates: leaderboard, home line, personal stats (queue/006-continuous-aggregates.md, #4)
 - [ ] 007 MBTA static loader and realtime ingestion worker (queue/007-mbta-ingestion.md)
 - [ ] 008 Read API implementation (queue/008-read-api.md, #8)
