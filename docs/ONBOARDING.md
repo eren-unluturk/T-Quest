@@ -18,3 +18,8 @@ Day to day: `/inbox` between tasks, `/send` to ask another agent, `/ack`, `/done
 
 After editing `.claude-template/`, run `node scripts/sync-claude-config.mjs` and commit with `ALLOW_SHARED=1`.
 Tests: `node --test tests/`.
+
+## Duo workflow (planner + builder)
+After setup, start your pair: VS Code Terminal > Run Task > **Duo up: <you>** (or `node scripts/duo.mjs <agent> planner` and `... builder`). Say **start** in each planner terminal and **go** in each builder terminal. The planner writes prompts and handles GitHub; the builder implements them and writes reports in `.work/reports/`. Four sessions at once use plan limits fast: use Sonnet everywhere if limits are hit. Details: docs/DUO.md.
+
+Hooks and checks: `setup-me.mjs` sets the hooks path and syncs the Claude config; `doctor.mjs` verifies hooks, identity, gh, Node and the attribution audit (`scripts/check-attribution.mjs`).

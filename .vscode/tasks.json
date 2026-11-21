@@ -1,14 +1,230 @@
 {
   "version": "2.0.0",
   "tasks": [
-    { "label": "Inbox", "type": "shell", "command": "node scripts/inbox.mjs", "problemMatcher": [] },
+    {
+      "label": "Inbox",
+      "type": "shell",
+      "command": "node scripts/inbox.mjs",
+      "problemMatcher": []
+    },
     {
       "label": "Watch inbox",
       "type": "shell",
       "command": "node scripts/watch-inbox.mjs",
       "isBackground": true,
       "problemMatcher": [],
-      "presentation": { "panel": "dedicated", "reveal": "always" }
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Duo: data-platform planner",
+      "type": "shell",
+      "command": "node scripts/duo.mjs data-platform planner",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "group": "duo-eren",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "Duo: data-platform builder",
+      "type": "shell",
+      "command": "node scripts/duo.mjs data-platform builder",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "group": "duo-eren",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "Duo: insights-sponsors planner",
+      "type": "shell",
+      "command": "node scripts/duo.mjs insights-sponsors planner",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "group": "duo-eren",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "Duo: insights-sponsors builder",
+      "type": "shell",
+      "command": "node scripts/duo.mjs insights-sponsors builder",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "group": "duo-eren",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "Duo: game-engine planner",
+      "type": "shell",
+      "command": "node scripts/duo.mjs game-engine planner",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "group": "duo-tobi",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "Duo: game-engine builder",
+      "type": "shell",
+      "command": "node scripts/duo.mjs game-engine builder",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "group": "duo-tobi",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "Duo: client-bryan planner",
+      "type": "shell",
+      "command": "node scripts/duo.mjs client-bryan planner",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "group": "duo-bryan",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "Duo: client-bryan builder",
+      "type": "shell",
+      "command": "node scripts/duo.mjs client-bryan builder",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "group": "duo-bryan",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "Duo: client-isabella planner",
+      "type": "shell",
+      "command": "node scripts/duo.mjs client-isabella planner",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "group": "duo-isabella",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "Duo: client-isabella builder",
+      "type": "shell",
+      "command": "node scripts/duo.mjs client-isabella builder",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always",
+        "group": "duo-isabella",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "Duo up: eren",
+      "dependsOn": [
+        "Duo: data-platform planner",
+        "Duo: data-platform builder",
+        "Duo: insights-sponsors planner",
+        "Duo: insights-sponsors builder"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "Duo up: tobi",
+      "dependsOn": [
+        "Duo: game-engine planner",
+        "Duo: game-engine builder"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "Duo up: bryan",
+      "dependsOn": [
+        "Duo: client-bryan planner",
+        "Duo: client-bryan builder"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "Duo up: isabella",
+      "dependsOn": [
+        "Duo: client-isabella planner",
+        "Duo: client-isabella builder"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
     }
   ]
 }
