@@ -1,7 +1,7 @@
 ---
 id: 005
 title: Consent endpoints and the consent guard
-status: ready
+status: done
 issue:
 depends_on: [003]
 ---

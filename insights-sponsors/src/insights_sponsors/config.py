@@ -16,3 +16,6 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+CURRENT_POLICY_VERSION = "2026-11-21"
