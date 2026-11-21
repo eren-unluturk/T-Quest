@@ -15,6 +15,7 @@ EXPECTED = {
     "/recommendations": ["get"],
     "/analytics/me": ["get"],
     "/analytics/boston": ["get"],
+    "/place-visits": ["post", "delete"],
     "/consent": ["get", "post"],
     "/consent/{scope}": ["delete"],
 }
@@ -55,8 +56,9 @@ def test_query_params_present():
 
 def test_version_and_changelog():
     info = load()["info"]
-    assert info["version"] == "0.2.0"
+    assert info["version"] == "0.3.0"
     log = info["x-changelog"]
+    assert any(e.startswith("0.3.0:") and "/place-visits" in e for e in log)
     assert any(e.startswith("0.2.0:") and "/analytics/boston" in e for e in log)
     assert any(e.startswith("0.1.1:") and "409" in e and "ConsentRequired" in e for e in log)
 

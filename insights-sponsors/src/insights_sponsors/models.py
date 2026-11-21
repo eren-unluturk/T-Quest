@@ -7,7 +7,7 @@ or non-API shapes.
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 Category = Literal["food", "clothing", "sports", "other"]
 ConsentScope = Literal["location", "place_visits"]
@@ -224,3 +224,20 @@ class BostonAnalytics(BaseModel):
     busiest_stops: list[BusiestStop]
     trending_neighborhoods: list[TrendingNeighborhood]
     lines: list[LineActivity]
+
+
+class PlaceVisitIn(BaseModel):
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    visited_at: datetime
+    place_category: Category
+    store_id: str | None = None
+
+
+class PlaceVisitAck(BaseModel):
+    accepted: bool
+    retained_days: int
+
+
+class PlaceVisitsDeleted(BaseModel):
+    deleted: int

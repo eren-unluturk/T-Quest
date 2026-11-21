@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from .config import settings
-from .routes import catalog, consent, content, insights
+from .routes import catalog, consent, content, insights, place_visits
 
 
 def create_app() -> FastAPI:
@@ -10,6 +10,7 @@ def create_app() -> FastAPI:
     app.include_router(catalog.router)
     app.include_router(consent.router)
     app.include_router(insights.router)
+    app.include_router(place_visits.router)
 
     @app.get("/health")
     def health() -> dict:

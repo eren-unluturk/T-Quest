@@ -75,3 +75,11 @@ class Repository(Protocol):
     ) -> list[PlaceVisit]:
         """Consent-gated: callers must pass has_consent(user, "place_visits") first."""
         ...
+
+    def add_place_visit(self, user_id: str, visit: PlaceVisit) -> None:
+        """Consent-gated: only POST /place-visits (behind require_consent) may call this."""
+        ...
+
+    def delete_place_visits(self, user_id: str) -> int:
+        """Erase every stored visit for the user and return how many were deleted."""
+        ...

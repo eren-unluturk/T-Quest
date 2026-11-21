@@ -49,6 +49,9 @@ def revoke_consent(
     user_id: Annotated[str, Depends(current_user_id)],
     repo: Annotated[Repository, Depends(get_repository)],
 ):
+    if scope == "place_visits":
+        # revoking deletes the data, even when the call is a repeat
+        repo.delete_place_visits(user_id)
     existing = next((c for c in repo.get_consents(user_id) if c.scope == scope), None)
     if existing is None:
         return _default(scope)

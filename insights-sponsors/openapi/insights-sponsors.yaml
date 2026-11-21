@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
   title: T-Quest insights-sponsors API
-  version: 0.2.0
+  version: 0.3.0
   x-changelog:
+    - '0.3.0: add POST and DELETE /place-visits (consent-gated ingest); revoking place_visits deletes stored visits'
     - '0.2.0: add GET /analytics/boston (anonymous city analytics, k=3)'
     - '0.1.1: document 409 on POST /consent and ConsentRequired'
     - '0.1.0: first draft'
@@ -188,8 +189,8 @@ paths:
       summary: The caller's consent records
       description: |
         Consent state per scope. Routes that gate on a consent return the reusable
-        ConsentRequired response (403, detail "consent required: <scope>"). No route
-        does that yet; the response is kept in components for future routes.
+        ConsentRequired response (403, detail "consent required: <scope>").
+        POST /place-visits is the first route that does.
       responses:
         '200':
           description: One record per scope
@@ -219,12 +220,44 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/PolicyMismatch'}
         '422': {description: Unknown scope or malformed body}
+  /place-visits:
+    post:
+      summary: Record a visit to a place (requires place_visits consent)
+      description: |
+        Only accepted while the caller has granted the place_visits consent; otherwise
+        403 ConsentRequired. Privacy rules: coordinates are rounded to 3 decimals
+        (about 100 m) before storage; visited_at more than 7 days in the past or more
+        than 5 minutes in the future is rejected with 422; data is kept for 90 days.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PlaceVisitIn'}
+      responses:
+        '201':
+          description: Visit stored
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PlaceVisitAck'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/ConsentRequired'}
+        '422': {description: 'Coordinates out of range, unknown category, or visited_at outside the accepted window'}
+    delete:
+      summary: Erase all of the caller's stored place visits
+      description: Works without consent, so a user can always erase their data.
+      responses:
+        '200':
+          description: Number of visits deleted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PlaceVisitsDeleted'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
   /consent/{scope}:
     delete:
       summary: Revoke consent for a scope
       description: |
-        Revoking place_visits stops future use and makes stored place-visit data
-        ineligible for recommendations.
+        Revoking place_visits stops future use and deletes the user's stored place
+        visits. Revoking is idempotent.
       parameters:
         - name: scope
           in: path
@@ -462,6 +495,26 @@ components:
         lines:
           type: array
           items: {$ref: '#/components/schemas/LineActivity'}
+    PlaceVisitIn:
+      type: object
+      required: [lat, lon, visited_at, place_category]
+      properties:
+        lat: {type: number, minimum: -90, maximum: 90}
+        lon: {type: number, minimum: -180, maximum: 180}
+        visited_at: {type: string, format: date-time}
+        place_category: {type: string, enum: [food, clothing, sports, other]}
+        store_id: {type: string, nullable: true}
+    PlaceVisitAck:
+      type: object
+      required: [accepted, retained_days]
+      properties:
+        accepted: {type: boolean}
+        retained_days: {type: integer}
+    PlaceVisitsDeleted:
+      type: object
+      required: [deleted]
+      properties:
+        deleted: {type: integer}
     ConsentScope:
       type: string
       enum: [location, place_visits]

@@ -23,6 +23,7 @@ from ..models import (
 
 DEFAULT_SEED_DIR = Path(__file__).resolve().parents[3] / "data" / "seed"
 EARTH_RADIUS_M = 6371000.0
+PLACE_VISIT_RETENTION_DAYS = 90
 
 
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -184,11 +185,23 @@ class MemoryRepository:
     def place_visits(
         self, user_id: str, since: datetime | None = None
     ) -> list[PlaceVisit]:
+        # 90-day retention is enforced on read: older visits are never returned.
+        cutoff = datetime.now(timezone.utc) - timedelta(days=PLACE_VISIT_RETENTION_DAYS)
+        floor = cutoff if since is None else max(since, cutoff)
         return [
-            v
-            for v in self._place_visits
-            if v.user_id == user_id and (since is None or v.time >= since)
+            v for v in self._place_visits if v.user_id == user_id and v.time >= floor
         ]
+
+    def add_place_visit(self, user_id: str, visit: PlaceVisit) -> None:
+        """Callers must have checked has_consent(user, "place_visits") first."""
+        self._place_visits.append(visit.model_copy(update={"user_id": user_id}))
+        self._place_visits.sort(key=lambda v: v.time)
+
+    def delete_place_visits(self, user_id: str) -> int:
+        kept = [v for v in self._place_visits if v.user_id != user_id]
+        deleted = len(self._place_visits) - len(kept)
+        self._place_visits = kept
+        return deleted
 
     # consent
     def get_consents(self, user_id: str) -> list[Consent]:

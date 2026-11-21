@@ -1,7 +1,7 @@
 ---
 id: 013
 title: Consented place-visit ingest (POST /place-visits) and deletion on revoke
-status: ready
+status: done
 issue:
 depends_on: [012]
 ---
