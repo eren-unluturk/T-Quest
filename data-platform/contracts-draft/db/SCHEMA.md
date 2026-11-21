@@ -146,3 +146,7 @@ Written by insights-sponsors only after `place_visits` consent. `id uuid`, `time
 - `user_stop_hourly` (CAGG, 1 hour): `bucket, stop_id, user_id, checkins` (check-in events only). Same policy.
 - `stop_popularity_hourly` (view over `user_stop_hourly`): `bucket, stop_id, checkins, unique_users`.
 - `home_line` column `rides_28d` was renamed `checkins_30d` and moved to a true 30-day window (0007); `users_affected_by_alert` was recreated on top of it.
+
+## Compression (0008)
+- `rider_events` compression: segmentby `user_id`, orderby `time DESC, id` (the primary key columns must be in the set); policy compresses chunks older than 7 days. Measured about 9.5x total size reduction (see docs/TIGER_DATA_RESULTS.md).
+- Verified against a live TimescaleDB 2.32.1 on PostgreSQL 18: migrations 0000-0008 apply cleanly and idempotently. `schema.sql` is still the concatenation of the migrations, not a pg_dump.

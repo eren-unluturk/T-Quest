@@ -1,5 +1,5 @@
 -- GENERATED FILE. Migrations in data-platform/migrations/ are the source of truth.
--- NOTE: this is a concatenation of migrations 0000 to 0007, NOT a pg_dump. It was built
+-- NOTE: this is a concatenation of migrations 0000 to 0008, NOT a pg_dump. It was built
 -- without a database. To replace it with a real dump, run from data-platform/:
 --   docker compose up -d; python -m data_platform.migrate
 --   docker compose exec db pg_dump -U postgres -d tquest --schema-only --no-owner > contracts-draft/db/schema.sql
@@ -827,4 +827,16 @@ BEGIN
     END IF;
 END
 $do$;
+
+-- ===== migrations/0008_rider_events_compression.sql =====
+-- Columnar compression for rider_events (Tiger Data demo).
+-- The primary key is (id, time), so both must be in the segmentby/orderby set.
+-- Idempotent.
+ALTER TABLE rider_events SET (
+    timescaledb.compress,
+    timescaledb.compress_segmentby = 'user_id',
+    timescaledb.compress_orderby = 'time DESC, id'
+);
+
+SELECT add_compression_policy('rider_events', INTERVAL '7 days', if_not_exists => TRUE);
 
