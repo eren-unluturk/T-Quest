@@ -1,0 +1,11 @@
+{
+  "source": "Isabella, 2026-11-21 (palette swatch in design/sketches/2026-11-21-ui-workflow.png)",
+  "note": "Roles (background, text, primary, accent) not assigned yet; see issue #45.",
+  "color": {
+    "red": "#E63946",
+    "honeydew": "#F1FAEE",
+    "light-blue": "#A8DADC",
+    "steel-blue": "#457B9D",
+    "navy": "#1D3557"
+  }
+}

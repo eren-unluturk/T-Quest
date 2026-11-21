@@ -7,3 +7,8 @@ Default split (see DECISIONS.md; changeable by issue to:client-bryan / to:client
 3. Log each screen in design/INTAKE.md
 4. Coordinate the split and component interfaces with client-bryan via issues
 5. Then: components and screen build-out exactly as designed
+
+## Status (2026-11-21)
+- Done: UI workflow sketch in design/sketches/, palette in design/tokens/colors.json, screens logged in design/INTAKE.md.
+- Open: #42 (game-engine ranks), #43 (data-platform travel + facts), #44 (insights-sponsors stores), #45 (humans questions), #10 (split confirmed).
+- Next: framework choice with client-bryan, then components from the sketch.
