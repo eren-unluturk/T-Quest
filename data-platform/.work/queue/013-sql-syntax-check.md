@@ -1,7 +1,7 @@
 ---
 id: 013
 title: DB-free SQL syntax check for every migration
-status: ready
+status: done
 depends_on: [012]
 ---
 ## Goal

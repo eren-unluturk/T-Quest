@@ -717,7 +717,7 @@ DROP VIEW IF EXISTS home_line;
 
 -- Most-ridden route over the last 4 weekly buckets, at least 5 check-ins.
 -- users.home_line_override wins when set.
-CREATE VIEW home_line AS
+CREATE OR REPLACE VIEW home_line AS
     WITH recent AS (
         SELECT w.user_id, w.route_id, sum(w.rides)::bigint AS checkins_28d
         FROM home_line_weekly w
