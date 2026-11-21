@@ -8,6 +8,12 @@
       "problemMatcher": []
     },
     {
+      "label": "Sync docs",
+      "type": "shell",
+      "command": "node scripts/sync-docs.mjs",
+      "problemMatcher": []
+    },
+    {
       "label": "Watch inbox",
       "type": "shell",
       "command": "node scripts/watch-inbox.mjs",

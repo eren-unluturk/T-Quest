@@ -32,3 +32,8 @@ Nobody invents UI. Sketches and Figma (`design/`) are the only source of truth. 
 
 ## Stack defaults (see DECISIONS.md)
 Python 3.11+ FastAPI per backend agent, contract-first OpenAPI in `contracts/api/`, one shared Tiger Data (Postgres + TimescaleDB) database whose schema is owned by data-platform.
+
+## Living docs
+- README.md, PLAN.md and PITCH.md at the repo root are living documents. After completing or verifying a roadmap item, run `node scripts/sync-docs.mjs` (slash command `/docs-refresh`, VS Code task "Sync docs"). It regenerates only the `AUTO` blocks.
+- Only Eren's agents edit the hand-written text of README/PLAN/PITCH (root ownership guard). Any other agent who needs a doc change opens a `to:data-platform` message issue with the exact wording.
+- Docs may state only numbers that appear in `docs/TIGER_DATA_RESULTS.md`; otherwise write "TODO: measure". Never describe UI that is not in `design/`.

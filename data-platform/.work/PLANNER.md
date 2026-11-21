@@ -53,3 +53,6 @@ Phased checkbox list. Each item: `- [ ] 001 Title (queue/001-slug.md, #issue)`. 
 - You do not run builds or tests. The builder does.
 - You may edit `.work/queue/*` frontmatter status only to mark `done` or `blocked` after review.
 - Commit your .work/ changes with a plain message (no trailers), verify with `git log -1 --format=%B`, `git pull --rebase`, push.
+
+## Living docs
+After you mark a roadmap item verified (and after reviewing each report), run `node ../scripts/sync-docs.mjs` and include the changed PLAN.md/PITCH.md in the commit. This is part of the planner loop: inbox, plan, review report, mark done, sync docs. If another agent asks for a wording change in README/PLAN/PITCH, it arrives as a `to:data-platform` message issue; apply it to the hand-written text only, never inside AUTO blocks.
