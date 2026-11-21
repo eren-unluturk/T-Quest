@@ -145,6 +145,7 @@ class PgTests(unittest.TestCase):
             "where s.active and s.removed_at is null order by 1").fetchall()]
         if len(stations) < 3:
             self.skipTest("fewer than 3 stations have spots")
+        self.conn.execute("delete from quests")   # inside the rolled-back transaction: start from no quests
         self.conn.execute("insert into badges (id, name, kind) values ('local-explorer', 'Local Explorer', 'event') "
                           "on conflict (id) do nothing")
         self.conn.execute("insert into quests (title, goal, criteria, reward_points, reward_badge_id) values "
@@ -171,6 +172,24 @@ class PgTests(unittest.TestCase):
             self.assertEqual(r.json()["points_awarded"], 20)   # only the normal first-visit points, no second 40
         goal = [q["goal"] for q in self.c.get("/quests", headers=H(u)).json() if q["title"] == "pytest local explorer"]
         self.assertEqual(goal, ["Visit 3 different stations"])
+
+    def test_complete_freedom_trail_unlocks_badge(self):
+        stations = sorted(self.store.catalog().trail)
+        if len(stations) < 2:
+            self.skipTest("Freedom Trail stations are not loaded")
+        u = "pytest-trail"
+        last = None
+        for i, sid in enumerate(stations):
+            lat, lon = self.conn.execute("select lat, lon from stops where id=%s", (sid,)).fetchone()
+            body = {"stop_id": sid, "lat": lat, "lon": lon, "client_time": "2026-11-21T12:00:00"}
+            r = self.c.post("/checkins", json=body, headers=H(u))
+            self.assertEqual(r.status_code, 201, r.text)
+            if i < len(stations) - 1:
+                self.assertNotIn("freedom-trail", r.json()["badges_unlocked"])
+            last = r.json()
+        self.assertIn("freedom-trail", last["badges_unlocked"])
+        rewards = self.c.get("/me/collection", headers=H(u)).json()["physical_rewards"]
+        self.assertIn("Freedom Trail sticker", rewards)
 
     def test_unknown_stop_and_far(self):
         self.assertEqual(self.c.post("/checkins", json=dict(self.stop, stop_id="nope-nope"),
