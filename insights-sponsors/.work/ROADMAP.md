@@ -25,15 +25,18 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 
 ## Phase 3: analytics and recommendations
 - [x] 006 Analytics and recs: SQL drafts plus in-memory (queue/006-analytics-recs-sql-draft.md, #3) verified, #3 closed
-- [ ] 007 Postgres (Tiger Data) backend (queue/007-postgres-backend.md, #1) [blocked on schema]
+- [-] 007 superseded by 014
+- [ ] 014 Postgres backend: catalog, content, consent, place visits (queue/014-postgres-catalog-content-consent.md, #1)
+- [ ] 015 Bus parity in seed, analytics, recs (queue/015-bus-parity-seed.md)
+- [ ] 016 (to write) Analytics and recs on Postgres, after data-platform prompt 012 adds user_stop_daily / stop_popularity_hourly / home_line checkins_30d
 
 ## Phase 4: hardening and AI
 - [x] 008 Hardening and contract conformance test (queue/008-hardening-contract-conformance.md, #8) verified
 - [-] 009 CANCELLED: AI reasons (AGENTS.md Billing: no API keys)
-- [ ] 011 Document consent error responses in OpenAPI (queue/011-openapi-error-responses.md, #8)
+- [x] 011 Document consent error responses in OpenAPI (queue/011-openapi-error-responses.md, #8) verified
 - [ ] 012 Boston analytics GET /analytics/boston, k-anonymous (queue/012-boston-analytics.md, #3)
 - [ ] 013 Consented place-visit ingest and delete-on-revoke (queue/013-place-visit-ingest.md)
-- [ ] 010 Seed coverage (neighborhoods, bus) and MBTA API verification (queue/010-seed-coverage-and-verification.md)
+- [x] 010 Seed coverage (neighborhoods, bus) and MBTA API verification (queue/010-seed-coverage-and-verification.md) verified
 
 ## Out of scope: do later (needs pay-per-usage, not this hackathon)
 - 009 AI-written recommendation reasons (LLM API, per-token). Prompt kept as a cancelled reference.
@@ -52,3 +55,6 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 - 005 verified: 52 tests pass; single gate has_consent, require_consent 401/403/200, policy 409, idempotent revoke. Undocumented 409/403 led to 011 (draft not promoted yet, so it can still change). #26 updated.
 - 006 verified: 76 tests pass, hand-checked user-1 numbers, consent gate proven by spy and source scan, sponsorship order-neutral, 4 parameterized SQL files. 009 cancelled by the billing rule. Added 012 (Boston analytics) and 013 (place-visit ingest).
 - 008 verified: 100 passed, 1 intentional skip; every YAML operation validated against the live app; no extra routes; .env resolved from the package path. Later spec changes (011-013) are covered automatically.
+- 010 verified: 29 stops all match the MBTA API (verify_stops exit 0), 19 neighborhoods, 5 bus-mode stops, 103 passed. Bus stops have no events, so 015 follows up.
+- 011 verified: 108 passed, spec 0.1.1 with PolicyMismatch 409 and ConsentRequired. #8 updated.
+- 0005 landed (data-platform): ids are uuid for sponsors, stores, offers and physical_rewards, so 014 maps slugs with uuid5. Badge slugs follow `line-red-complete` (posted on #5). Our aggregates come in data-platform 012 (home_line becomes checkins_30d), so 016 comes later.
