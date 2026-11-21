@@ -23,3 +23,13 @@ Tests: `node --test tests/`.
 After setup, start your pair: VS Code Terminal > Run Task > **Duo up: <you>** (or `node scripts/duo.mjs <agent> planner` and `... builder`). Say **start** in each planner terminal and **go** in each builder terminal. The planner writes prompts and handles GitHub; the builder implements them and writes reports in `.work/reports/`. Four sessions at once use plan limits fast: use Sonnet everywhere if limits are hit. Details: docs/DUO.md.
 
 Hooks and checks: `setup-me.mjs` sets the hooks path and syncs the Claude config; `doctor.mjs` verifies hooks, identity, gh, Node and the attribution audit (`scripts/check-attribution.mjs`).
+
+## Billing safety (read this)
+Everyone uses their OWN Claude plan. There is never per-token API billing for this project. If `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN` is set anywhere, Claude Code silently bills the API instead of your plan.
+
+1. Unset the variables (PowerShell). Current terminal: `Remove-Item Env:ANTHROPIC_API_KEY, Env:ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue`. Permanently: `[Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', $null, 'User')` and the same for `ANTHROPIC_AUTH_TOKEN` (use `'Machine'` from an Administrator PowerShell if it is set there). Then close all terminals and VS Code and reopen.
+2. Run `/status` in `claude` and confirm it shows your subscription plan, not API usage billing.
+3. In claude.ai go to Settings > Usage and disable usage credits / extra usage, so nothing can bill past your plan limit.
+4. Never add an Anthropic key or token to `.env`, `.env.example`, code, issues or docs.
+
+`node scripts/doctor.mjs` FAILS if either variable is set in the process, Windows User or Windows Machine environment (it prints the exact fix, never the value). `scripts/duo.mjs` strips both variables from the child environment and refuses to launch if they are set at the User or Machine level. Its `--allow-api-key` override exists for emergencies only and is not used by any VS Code task. Do not use it.

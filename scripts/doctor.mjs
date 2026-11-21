@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { repoRoot, readTeam, readMe, agentFromCwd } from './lib.mjs';
+import { checkBilling, describe, fixText } from './billing.mjs';
 
 const root = repoRoot();
 const checks = [];
@@ -26,6 +27,8 @@ const mine = me && team[me] ? team[me].agents : [];
 add(`current folder resolves to one of my agents (${here ?? 'repo root / not an agent folder'})`, !!here && mine.includes(here), 'cd into your agent folder, e.g. cd ' + (mine[0] ?? '<agent>'), false);
 const attr = run(process.execPath, [path.join(root, 'scripts', 'check-attribution.mjs')]);
 add('attribution check (history, files, issues/PRs)', attr.status === 0, 'node scripts/check-attribution.mjs  (prints hits and the cleanup command)');
+const bill = checkBilling();
+add(`billing safety: no ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN (${bill.ok ? 'none set' : describe(bill)})`, bill.ok, '\n' + fixText(bill).split('\n').map((l) => '        ' + l).join('\n'));
 add('gh authenticated', run('gh', ['auth', 'status']).status === 0, 'gh auth login');
 const major = Number(process.versions.node.split('.')[0]);
 add(`node >= 20 (got ${process.versions.node})`, major >= 20, 'install Node LTS');
