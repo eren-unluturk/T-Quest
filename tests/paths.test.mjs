@@ -50,3 +50,20 @@ test('bryan/isabella: no scripts or root files, design/ ok', () => {
   assert.equal(guard('isabella', ['AGENTS.md']), 1);
   assert.equal(guard('isabella', ['design/INTAKE.md', 'client-isabella/a.md']), 0);
 });
+
+test('eren: infrastructure dirs; others are refused', () => {
+  assert.equal(guard('eren', ['.githooks/x.cjs', '.claude-template/a.md', '.vscode/tasks.json', 'tests/a.mjs']), 0);
+  for (const who of ['tobi', 'bryan', 'isabella']) {
+    assert.equal(guard(who, ['.githooks/pre-push']), 1);
+    assert.equal(guard(who, ['.vscode/tasks.json']), 1);
+  }
+});
+
+test('agent .work/ files are allowed for the owner only', () => {
+  assert.equal(guard('eren', ['data-platform/.work/ROADMAP.md', 'insights-sponsors/.work/queue/001-a.md', 'data-platform/.work/reports/001.md']), 0);
+  assert.equal(guard('tobi', ['game-engine/.work/queue/001-a.md']), 0);
+  assert.equal(guard('bryan', ['client-bryan/.work/PLANNER.md']), 0);
+  assert.equal(guard('isabella', ['client-isabella/.work/BUILDER.md']), 0);
+  assert.equal(guard('tobi', ['data-platform/.work/ROADMAP.md']), 1);
+  assert.equal(guard('bryan', ['client-isabella/.work/ROADMAP.md']), 1);
+});

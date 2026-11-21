@@ -11,6 +11,10 @@
 /contracts/api/game-engine.yaml         @TODO-tobi
 /contracts/events/                      @TODO-eren @TODO-tobi @TODO-bryan @TODO-isabella
 /scripts/                               @TODO-eren
+/.githooks/                              @TODO-eren
+/.claude-template/                       @TODO-eren
+/.vscode/                                @TODO-eren
+/tests/                                  @TODO-eren
 /.github/                               @TODO-eren
 /team.json                              @TODO-eren
 /TEAM.md                                @TODO-eren

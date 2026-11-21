@@ -60,3 +60,10 @@ Format: decision, alternatives, why. Append new entries; do not rewrite others'.
 - Docs: https://www.tigerdata.com/docs/get-started/quickstart/tiger-cli , https://www.tigerdata.com/docs/ai/latest/mcp-server/
 - Local fallback: a timescaledb docker image via docker-compose (data-platform to add).
 - Demo numbers to capture: compression ratio on realtime tables, continuous-aggregate query latency vs raw.
+
+## D15. Attribution enforcement is mechanical
+- `.githooks/attribution.cjs` holds the banned-line patterns (any Co-Authored-By trailer with any name, Claude-Session, "Generated with", noreply@anthropic.com, robot-emoji lines with Claude/Generated). `commit-msg` strips them and aborts on an empty message; `pre-push` scans every commit in the pushed range (new remote refs: commits not on any remote) and refuses with a non-interactive `git filter-branch --msg-filter` fix, which catches `--no-verify` commits. `scripts/check-attribution.mjs` audits full history, tracked files (rule-carrying files excluded: AGENTS.md, CLAUDE.md, AGENT.md, .work/PLANNER.md and BUILDER.md, docs/ONBOARDING.md, docs/DUO.md, .githooks/, .claude-template/, .claude/, tests/) and issues/PRs via gh. `doctor.mjs` runs it.
+- Why: the rule must hold even when a tool default or --no-verify tries to add trailers. Existing history was audited: clean, nothing rewritten.
+
+## D16. Script verification against the live repo
+- send, ack, done and watch-inbox were exercised with throwaway issues (closed afterward). The route-issues workflow applied to:/from:/type: labels to a fresh issue. No fixes were needed.

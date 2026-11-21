@@ -1,16 +1,15 @@
 #!/usr/bin/env node
-// Strips AI attribution lines from commit messages. Mechanical enforcement of the no-attribution rule.
+// Strips attribution lines (any Co-Authored-By, Claude-Session, "Generated with", noreply@anthropic.com,
+// robot-emoji lines) from the commit message. Aborts if nothing is left.
 const { readFileSync, writeFileSync } = require('node:fs');
+const { stripBanned } = require('./attribution.cjs');
 
 const file = process.argv[2];
 if (!file) process.exit(0);
 const original = readFileSync(file, 'utf8');
-const banned = [/^(Co-Authored-By|Claude-Session).*$/i, /Generated with/i];
-let lines = original.split(/\r?\n/).filter((l) => !banned.some((re) => re.test(l.trim())));
-while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
-const cleaned = lines.join('\n') + '\n';
+const cleaned = stripBanned(original);
 if (cleaned !== original) writeFileSync(file, cleaned);
 if (!cleaned.replace(/^#.*$/gm, '').trim()) {
-  console.error('commit-msg: message is empty after cleanup');
+  console.error('commit-msg: message is empty after removing attribution lines. Write a plain message and retry.');
   process.exit(1);
 }

@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+// Refuses a push if any commit being pushed carries an attribution line (catches --no-verify commits).
+const { spawnSync } = require('node:child_process');
+const { readFileSync } = require('node:fs');
+const path = require('node:path');
+const { hasBanned } = require('./attribution.cjs');
+
+const git = (args) => spawnSync('git', args, { encoding: 'utf8' });
+const remoteName = process.argv[2] || '';
+const zero = /^0+$/;
+let input = '';
+try { input = readFileSync(0, 'utf8'); } catch { /* no stdin */ }
+
+const bad = new Set();
+let firstRange = null;
+for (const line of input.split(/\r?\n/).filter(Boolean)) {
+  const [, localSha, , remoteSha] = line.split(/\s+/);
+  if (!localSha || zero.test(localSha)) continue; // deleting a ref
+  let range = [localSha, '--not', remoteName ? `--remotes=${remoteName}` : '--remotes'];
+  if (remoteSha && !zero.test(remoteSha) && git(['cat-file', '-e', `${remoteSha}^{commit}`]).status === 0) {
+    range = [`${remoteSha}..${localSha}`];
+  }
+  firstRange = firstRange || range.join(' ');
+  for (const h of git(['rev-list', ...range]).stdout.split(/\s+/).filter(Boolean)) {
+    if (hasBanned(git(['log', '-1', '--format=%B', h]).stdout)) bad.add(h);
+  }
+}
+if (!bad.size) process.exit(0);
+
+const root = git(['rev-parse', '--show-toplevel']).stdout.trim();
+const filter = path.join(root, '.githooks', 'strip-msg.cjs').split(path.sep).join('/');
+console.error('pre-push: REFUSED. These commits carry an attribution line (Co-Authored-By, Claude-Session, "Generated with", noreply@anthropic.com):');
+for (const h of bad) console.error(`  ${h.slice(0, 10)}  ${git(['log', '-1', '--format=%s', h]).stdout.trim()}`);
+console.error('\nRewrite only the unpushed commits (non-interactive), then push again:');
+console.error(`  git filter-branch -f --msg-filter "node ${filter}" -- ${remoteName ? `--not --remotes=${remoteName} HEAD` : 'HEAD'}`);
+console.error('Only the latest commit? Run: git commit --amend   and delete the offending line by hand.');
+process.exit(1);
