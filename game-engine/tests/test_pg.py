@@ -129,6 +129,49 @@ class PgTests(unittest.TestCase):
         if not near and not far:
             self.skipTest("no live vehicle data")
 
+    def test_physical_rewards_come_from_the_table(self):
+        ids = ["line-red-complete", "freedom-trail", "rank-3", "no-such-badge"]
+        expected = sorted({r[0] for r in self.conn.execute(
+            "select name from physical_rewards where active and badge_id = any(%s)", (ids,)).fetchall()})
+        got = self.store.physical_rewards_for(ids)
+        self.assertEqual(got, expected)
+        self.assertEqual(len(got), len(set(got)))   # no duplicates
+        self.assertEqual(self.store.physical_rewards_for([]), [])
+
+    def test_spots_near_stops_quest(self):
+        """Community quest: any 3 stations that have a nearby spot (rolled back)."""
+        stations = [r[0] for r in self.conn.execute(
+            "select distinct l.stop_id from spot_stop_links l join nearby_spots s on s.id = l.spot_id "
+            "where s.active and s.removed_at is null order by 1").fetchall()]
+        if len(stations) < 3:
+            self.skipTest("fewer than 3 stations have spots")
+        self.conn.execute("insert into badges (id, name, kind) values ('local-explorer', 'Local Explorer', 'event') "
+                          "on conflict (id) do nothing")
+        self.conn.execute("insert into quests (title, goal, criteria, reward_points, reward_badge_id) values "
+                          "('pytest local explorer', 'Visit 3 stations with spots', "
+                          "'{\"type\": \"spots_near_stops\", \"min_stops\": 3}'::jsonb, 40, 'local-explorer')")
+        u = "pytest-explorer"
+        results = []
+        for sid in stations[:3]:
+            lat, lon = self.conn.execute("select lat, lon from stops where id=%s", (sid,)).fetchone()
+            body = {"stop_id": sid, "lat": lat, "lon": lon, "client_time": "2026-11-21T12:00:00"}
+            r = self.c.post("/checkins", json=body, headers=H(u))
+            self.assertEqual(r.status_code, 201, r.text)
+            results.append(r.json())
+        self.assertNotIn("local-explorer", results[0]["badges_unlocked"])
+        self.assertNotIn("local-explorer", results[1]["badges_unlocked"])
+        self.assertIn("local-explorer", results[2]["badges_unlocked"])
+        self.assertEqual(results[2]["points_awarded"], 20 + 40)
+        # a fourth visit does not pay the quest twice
+        if len(stations) > 3:
+            sid = stations[3]
+            lat, lon = self.conn.execute("select lat, lon from stops where id=%s", (sid,)).fetchone()
+            r = self.c.post("/checkins", json={"stop_id": sid, "lat": lat, "lon": lon,
+                                              "client_time": "2026-11-21T12:00:00"}, headers=H(u))
+            self.assertEqual(r.json()["points_awarded"], 20)   # only the normal first-visit points, no second 40
+        goal = [q["goal"] for q in self.c.get("/quests", headers=H(u)).json() if q["title"] == "pytest local explorer"]
+        self.assertEqual(goal, ["Visit 3 different stations"])
+
     def test_unknown_stop_and_far(self):
         self.assertEqual(self.c.post("/checkins", json=dict(self.stop, stop_id="nope-nope"),
                                      headers=H("pytest-bob")).status_code, 404)

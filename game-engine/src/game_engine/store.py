@@ -57,6 +57,9 @@ class MemoryStore:
     def quests(self):
         return list(DEMO_QUESTS)
 
+    def physical_rewards_for(self, badge_ids):
+        return sorted(badges.physical_rewards_for(badge_ids))
+
     def catalog(self):
         return badges.DEFAULT_CATALOG
 

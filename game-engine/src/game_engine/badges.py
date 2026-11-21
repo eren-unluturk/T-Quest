@@ -78,11 +78,14 @@ class Quest:
     reward_points: int
     reward_badge_id: Optional[str] = None
     sponsor_id: Optional[str] = None
+    min_stops: Optional[int] = None  # None: every goal stop; N: any N distinct goal stops
 
 
 def quest_progress(quest, visited_stops):
     """Return (done, total) for a visit-these-stops quest."""
     done = len(quest.goal_stops & set(visited_stops))
+    if quest.min_stops:
+        return min(done, quest.min_stops), quest.min_stops
     return done, len(quest.goal_stops)
 
 
