@@ -82,3 +82,5 @@ Next 3 queue prompts: **014, 015, 016** (017 depends on 016). 007 is superseded 
 
 ## Update (merge and cleanup pass)
 - Rank mismatch: game-engine now has 8 named ranks in the shared `ranks` table; our `/rank-tiers` still lists 5 placeholder tiers and offers use `min_rank` 1-5 (OpenAPI caps min_rank at 5). Align before the demo.
+
+- Rank migration done (v0.6.0): `/rank-tiers` reads game-engine's 8 named ranks from the shared `ranks` table (memory mode copy in `ranks.py`), `min_rank` max is 8, demo offer percentages follow the tier table (placeholders), the free-item demo offer is at rank 8. This supersedes the "Rank mismatch" note above.

@@ -44,11 +44,11 @@ Roadmap checkbox progress (counted from each agent's `.work/ROADMAP.md`; checkbo
 | `to:client-bryan` | 3 |
 | `to:client-isabella` | 4 |
 | `to:data-platform` | 3 |
-| `to:game-engine` | 7 |
+| `to:game-engine` | 2 |
 | `to:humans` | 3 |
 | `to:insights-sponsors` | 5 |
 
-Total open issues: 27.
+Total open issues: 22.
 <!-- AUTO:status:end -->
 
 ## Per-agent roadmap (hand-written, as of 2026-11-21)

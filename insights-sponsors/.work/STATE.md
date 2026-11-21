@@ -11,3 +11,5 @@
 
 # STATE (merge and cleanup pass, 2026-11-21)
 - All work is on main and pushed; 195 tests pass. Open item: `/rank-tiers` and the demo offers use the old 5-rank placeholder percentages (3/5/7/10/12) while game-engine now has 8 ranks; update from the ranks table or mark as placeholders.
+
+- Rank migration done (v0.6.0): `/rank-tiers` reads game-engine's 8 named ranks from the shared `ranks` table (memory mode copy in `ranks.py`), `min_rank` max is 8, demo offer percentages follow the tier table (placeholders), the free-item demo offer is at rank 8. This supersedes the "Rank mismatch" note above.
