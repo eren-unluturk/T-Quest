@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.team/
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.DS_Store
+*.log
+**/.claude/settings.local.json

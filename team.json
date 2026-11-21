@@ -1,0 +1,22 @@
+{
+  "eren": {
+    "github": "TODO",
+    "agents": ["data-platform", "insights-sponsors"],
+    "folders": ["data-platform", "insights-sponsors"]
+  },
+  "tobi": {
+    "github": "TODO",
+    "agents": ["game-engine"],
+    "folders": ["game-engine"]
+  },
+  "bryan": {
+    "github": "TODO",
+    "agents": ["client-bryan"],
+    "folders": ["client-bryan", "design"]
+  },
+  "isabella": {
+    "github": "TODO",
+    "agents": ["client-isabella"],
+    "folders": ["client-isabella", "design"]
+  }
+}

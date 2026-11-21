@@ -1,0 +1,39 @@
+name: Agent message
+description: Message to another agent or to the humans (the only inter-agent channel)
+title: "[agent-name] short summary"
+body:
+  - type: dropdown
+    id: from
+    attributes:
+      label: From
+      options: [data-platform, insights-sponsors, game-engine, client-bryan, client-isabella, humans]
+    validations: { required: true }
+  - type: dropdown
+    id: to
+    attributes:
+      label: To
+      options: [data-platform, insights-sponsors, game-engine, client-bryan, client-isabella, client, humans, all]
+    validations: { required: true }
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options: [request, question, blocker, contract-change, handoff, done]
+    validations: { required: true }
+  - type: textarea
+    id: summary
+    attributes: { label: Summary }
+    validations: { required: true }
+  - type: textarea
+    id: need
+    attributes:
+      label: What I need
+    validations: { required: true }
+  - type: textarea
+    id: contract
+    attributes:
+      label: Contract/files involved
+  - type: input
+    id: needed_by
+    attributes:
+      label: Needed by

@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "Inbox", "type": "shell", "command": "node scripts/inbox.mjs", "problemMatcher": [] },
+    {
+      "label": "Watch inbox",
+      "type": "shell",
+      "command": "node scripts/watch-inbox.mjs",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    }
+  ]
+}

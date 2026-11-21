@@ -1,0 +1,15 @@
+{
+  "folders": [
+    { "name": "data-platform (Eren)", "path": "data-platform" },
+    { "name": "insights-sponsors (Eren)", "path": "insights-sponsors" },
+    { "name": "game-engine (Tobi)", "path": "game-engine" },
+    { "name": "client-bryan", "path": "client-bryan" },
+    { "name": "client-isabella", "path": "client-isabella" },
+    { "name": "design (shared)", "path": "design" },
+    { "name": "repo root", "path": "." }
+  ],
+  "settings": {
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "files.eol": "\n"
+  }
+}

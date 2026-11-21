@@ -1,0 +1,36 @@
+#!/usr/bin/env node
+// Ownership guard: refuse commits that stage files outside the committer's folders.
+// Allowlist: DECISIONS.md, docs/. Override: ALLOW_SHARED=1.
+const { spawnSync } = require('node:child_process');
+const { readFileSync, existsSync } = require('node:fs');
+const path = require('node:path');
+
+if (process.env.ALLOW_SHARED === '1') process.exit(0);
+
+const git = (args) => spawnSync('git', args, { encoding: 'utf8' });
+const root = git(['rev-parse', '--show-toplevel']).stdout.trim();
+const meFile = path.join(root, '.team', 'me');
+const teamFile = path.join(root, 'team.json');
+if (!existsSync(teamFile)) process.exit(0);
+
+if (!existsSync(meFile)) {
+  console.error('pre-commit: .team/me missing. Run: node scripts/setup-me.mjs <person>  (or ALLOW_SHARED=1 to override)');
+  process.exit(1);
+}
+const me = readFileSync(meFile, 'utf8').trim().toLowerCase();
+const team = JSON.parse(readFileSync(teamFile, 'utf8'));
+if (!team[me]) {
+  console.error(`pre-commit: "${me}" not in team.json`);
+  process.exit(1);
+}
+
+const staged = git(['diff', '--cached', '--name-only', '--diff-filter=ACMRD']).stdout.split('\n').map((s) => s.trim()).filter(Boolean);
+const allowedPrefixes = [...team[me].folders.map((f) => f + '/'), 'docs/'];
+const allowedFiles = ['DECISIONS.md'];
+const bad = staged.filter((f) => !allowedFiles.includes(f) && !allowedPrefixes.some((p) => f.startsWith(p)));
+if (bad.length) {
+  console.error(`pre-commit: ${me} may only commit inside: ${team[me].folders.join(', ')}, docs/, DECISIONS.md`);
+  for (const f of bad) console.error(`  not allowed: ${f}`);
+  console.error('Open an issue to the owner (node scripts/send.mjs ...) or set ALLOW_SHARED=1 for intentional shared edits.');
+  process.exit(1);
+}
