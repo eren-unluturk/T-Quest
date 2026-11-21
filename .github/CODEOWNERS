@@ -1,15 +1,15 @@
 # Handles are placeholders until team.json is filled in. Mirrors team.json "paths".
 /data-platform/                         @TODO-eren
 /insights-sponsors/                     @TODO-eren
-/game-engine/                           @TODO-tobi
+/game-engine/                           @tobiolawale
 /client-bryan/                          @TODO-bryan
 /client-isabella/                       @TODO-isabella
 /design/                                @TODO-bryan @TODO-isabella
 /contracts/db/                          @TODO-eren
 /contracts/api/data-platform.yaml       @TODO-eren
 /contracts/api/insights-sponsors.yaml   @TODO-eren
-/contracts/api/game-engine.yaml         @TODO-tobi
-/contracts/events/                      @TODO-eren @TODO-tobi @TODO-bryan @TODO-isabella
+/contracts/api/game-engine.yaml         @tobiolawale
+/contracts/events/                      @TODO-eren @tobiolawale @TODO-bryan @TODO-isabella
 /scripts/                               @TODO-eren
 /.githooks/                              @TODO-eren
 /.claude-template/                       @TODO-eren

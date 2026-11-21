@@ -5,7 +5,7 @@ Source of truth for scripts: `team.json`. Keep this table in sync. GitHub handle
 | Person | GitHub | Agents | Owned folders |
 |---|---|---|---|
 | Eren | TODO | data-platform, insights-sponsors | data-platform/, insights-sponsors/ |
-| Tobi | TODO | game-engine | game-engine/ |
+| Tobi | tobiolawale | game-engine | game-engine/ |
 | Bryan | TODO | client-bryan | client-bryan/, design/ (shared) |
 | Isabella | TODO | client-isabella | client-isabella/, design/ (shared) |
 
