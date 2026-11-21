@@ -17,7 +17,7 @@
 
 ## Phase 2: catalog, content, consent (in-memory)
 - [x] 003 Models, repository, seed content (queue/003-models-memory-repo-seed.md) verified
-- [ ] 004 Content and catalog endpoints (queue/004-content-catalog-endpoints.md, #5)
+- [x] 004 Content and catalog endpoints (queue/004-content-catalog-endpoints.md, #5) verified
 - [ ] 005 Consent endpoints and guard (queue/005-consent-endpoints-and-guard.md)
 
 ## Phase 3: analytics and recommendations
@@ -36,3 +36,4 @@
 - 001 verified: 6 tests pass, /health on :8002. Nit for a later hardening prompt: `config.py` reads `../.env` relative to cwd; resolve it from the package path instead.
 - 002 verified: 10 tests pass, the spec validates, and every path and field matches the prompt. Accepted deviations: shared components, a recs limit max of 50, extra 404/422 responses. Draft announced on #8 and #5.
 - 003 verified: 22 tests pass, a model/OpenAPI field-parity test, referential integrity, no real brands. Sampled fun facts read as accurate. Gaps: coordinates approximate, URLs unchecked, 5 of 13 stops Downtown, no bus stops, so follow-up 010. The consent default-rows question is already answered by 005 step 1. Badge ids posted on #5.
+- 004 verified: 41 tests pass; facts, trail, fun-facts (no auth), local picks, offers filters and eligibility, catalog, shape checks against OpenAPI. 008 now reuses tests/openapi_shape.py instead of jsonschema. Eligibility rule posted on #5.
