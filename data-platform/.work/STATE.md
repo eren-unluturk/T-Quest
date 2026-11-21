@@ -39,3 +39,6 @@ STOPPED SAFELY at 2026-11-21 13:20 (planner). See .work/HANDOFF.md.
 # STATE (unattended run, 2026-11-21)
 - Added migrations 0010 (nearby spots, identity labels, demo_placeholder flags) and 0011 (tourist content tables), applied to the live database. contracts/db and contracts-draft schema regenerated. 130 data-platform tests pass.
 - Collector and collected MBTA data were not touched.
+
+# STATE (merge and cleanup pass, 2026-11-21)
+- main equals origin/main; no branches of mine remain. 130 data-platform tests pass. test_user_rank_with_redemption now reads the ranks table (game-engine changed it to 8 named ranks in the shared database).

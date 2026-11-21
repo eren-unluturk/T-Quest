@@ -23,3 +23,6 @@
 ## Update 2026-11-21 (migrations 0010, 0011)
 - 0010: spot_categories, label_types, nearby_spots, spot_stop_links, spot_labels, view spot_labels_public, sponsors/stores.demo_placeholder. 0011: content_sources, content_items, stop_content, loading_facts. Both applied and verified on the live database; used by insights-sponsors. See DECISIONS D17 and docs/DATA_SOURCES.md.
 - Pending: Dockerfile and compose (015). Roadmap checkboxes for 002-012 and 016 still read "DB-unverified" although the live run passed; tick them when convenient.
+
+## Update (merge and cleanup pass)
+- The shared `ranks` table now has 8 named ranks (game-engine). Anything that hard-codes the old 5-rank table is stale; the data-platform test no longer does.

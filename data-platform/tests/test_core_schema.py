@@ -54,7 +54,11 @@ def test_user_rank_with_redemption(conn, user):
     row = conn.execute(
         "SELECT rank, discount_pct, lifetime, balance FROM user_rank WHERE user_id = %s", (user,)
     ).fetchone()
-    assert row == (2, 5, 1500, 1300)
+    # the ranks table is owned by game-engine's rank design; derive the expectation from it
+    exp = conn.execute(
+        "SELECT rank, discount_pct FROM ranks WHERE min_lifetime_points <= 1500 ORDER BY rank DESC LIMIT 1"
+    ).fetchone()
+    assert row == (exp[0], exp[1], 1500, 1300)
 
 
 def test_consent_unique_and_active_view(conn, user):

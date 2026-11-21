@@ -79,3 +79,6 @@ Next 3 queue prompts: **014, 015, 016** (017 depends on 016). 007 is superseded 
 3. Say `start` to the planner and `go` to the builder.
 4. First thing for the builder: `git merge wip/insights-sponsors-014` (commit ed294ec) on main, run `python -m pytest -q` (expect 149 passed), then continue 014 at Step 1 (`repo/ids.py`) using its "Resume notes".
 5. First thing for the planner: check #26, #23 and #5 (rank-4), and confirm the home_line column name with data-platform.
+
+## Update (merge and cleanup pass)
+- Rank mismatch: game-engine now has 8 named ranks in the shared `ranks` table; our `/rank-tiers` still lists 5 placeholder tiers and offers use `min_rank` 1-5 (OpenAPI caps min_rank at 5). Align before the demo.
