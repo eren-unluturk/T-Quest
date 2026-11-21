@@ -20,7 +20,8 @@
 ## Phase 2: Tiger Data features
 - [ ] 005 MBTA realtime tables with compression and retention (queue/005-realtime-tables.md) -- reviewed: compression orderby conflicts with unique indexes, fix in 011; DB unverified
 - [ ] 011 Fix compression settings vs unique indexes (queue/011-fix-compression-unique.md)
-- [ ] 006 Continuous aggregates: leaderboard, home line, personal stats (queue/006-continuous-aggregates.md, #4)
+- [ ] 012 Insights aggregates + home_line checkins_28d rename (queue/012-insights-aggregates.md, #22)
+- [ ] 006 Continuous aggregates: leaderboard, home line, personal stats (queue/006-continuous-aggregates.md, #4) -- reviewed: OK (runner no-transaction fix good), DB unverified; missed the #22 amendment -> 012
 - [ ] 007 MBTA static loader and realtime ingestion worker (queue/007-mbta-ingestion.md)
 - [ ] 008 Read API implementation (queue/008-read-api.md, #8)
 - [ ] 009 Demo benchmark: compression ratio and aggregate latency (queue/009-benchmarks.md)
