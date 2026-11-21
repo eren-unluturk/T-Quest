@@ -10,7 +10,8 @@
 - Attribution check fails on history commit 6732e8d (a teammate's Co-authored-by trailer, merged via PR #19). Fix requires a history rewrite + force-push, which agents may not do. Raised to humans.
 - **No database on this machine (#25, to:humans).** Docker and Postgres are absent; all DB acceptance checks are deferred until a Tiger Cloud DATABASE_URL or Docker is available. Items are ticked only after a DB run.
 - MBTA_API_KEY needed for live ingestion (007); requested on #25. Without a key the API allows ~20 req/min.
-- Once a DB exists: queue a verification prompt that runs migrate, load_static, ingest --once and the full pytest suite, then tick 001-003, 005-007.
+- Once a DB exists: Eren runs `python -m data_platform.verify` (014); planner reviews verify/VERIFY.md and ticks 001-003, 005-012.
+- game-engine (PRs #28-#30) still uses in-memory fake data; it switches to our tables after publication (#27). Home line rule owned by game-engine delay.py; our view mirrors it (012).
 
 ## Phase 1: schema v0 and contracts (unblocks game-engine, insights-sponsors, clients)
 - [ ] 001 Scaffold service, docker-compose, env, migration runner (queue/001-scaffold-compose-migrations.md, #1) -- reviewed: code OK, DB criteria unverified (no DB, #25)
@@ -22,11 +23,13 @@
 ## Phase 2: Tiger Data features
 - [ ] 005 MBTA realtime tables with compression and retention (queue/005-realtime-tables.md) -- reviewed: compression orderby conflicts with unique indexes, fix in 011; DB unverified
 - [ ] 011 Fix compression settings vs unique indexes (queue/011-fix-compression-unique.md)
-- [ ] 012 Insights aggregates + home_line checkins_28d rename (queue/012-insights-aggregates.md, #22)
+- [ ] 012 Insights aggregates + home_line aligned with game-engine delay.py, checkins_30d (queue/012-insights-aggregates.md, #22, #4)
+- [ ] 013 DB-free SQL syntax check with the real Postgres parser (queue/013-sql-syntax-check.md)
+- [ ] 014 One-command verification run for when a DB exists (queue/014-verify-command.md, #25)
 - [ ] 006 Continuous aggregates: leaderboard, home line, personal stats (queue/006-continuous-aggregates.md, #4) -- reviewed: OK (runner no-transaction fix good), DB unverified; missed the #22 amendment -> 012
 - [ ] 007 MBTA static loader and realtime ingestion worker (queue/007-mbta-ingestion.md) -- reviewed: OK (parse/mock tests pass); live load needs MBTA_API_KEY + DB (#25)
 - [ ] 008 Read API implementation (queue/008-read-api.md, #8) -- reviewed: OK (paths/params match spec; SQL DB-unverified). OpenAPI draft tweaked (limit/since_s defaults), so publish the current draft (#27)
-- [ ] 009 Demo benchmark: compression ratio and aggregate latency (queue/009-benchmarks.md)
+- [ ] 009 Demo benchmark: compression ratio and aggregate latency (queue/009-benchmarks.md) -- reviewed: code OK; no numbers until a DB run (#25)
 - [ ] 010 Schema v0.1: insights-sponsors additions + user_rank for all users (queue/010-schema-v01-insights.md, #22)
 - [ ] HUMAN: Eren publishes v0.1 contracts-draft/ (then planner closes #22)
 

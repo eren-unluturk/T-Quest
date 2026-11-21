@@ -18,4 +18,5 @@
 - Cycle 5: reviewed 007 (OK; live run needs key + DB, asked on #25).
 - Billing rule received: no per-token API billing; audited data-platform (clean), recorded in ROADMAP. Never queue LLM/API-key work.
 - Cycle 6: reviewed 008 (OK, DB-unverified).
-- Next: review 009-012; then, if a DB exists, queue the verification prompt.
+- Cycle 7: reviewed 009 (code OK, no numbers without DB). Amended 012 to mirror game-engine delay.py home line (30d, tie to most recent, checkins_30d); told #22 and #4. Queued 013 (pglast syntax check) and 014 (verify command).
+- Next: review 010-014.
