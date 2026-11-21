@@ -1,0 +1,104 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-21T21:05:00Z"
+ },
+ "title": "T-Quest UI",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Loading.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Loading",
+   "is_interactive": true
+  },
+  "Main.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Home",
+   "is_interactive": true
+  },
+  "Traveled.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Traveled",
+   "is_interactive": true
+  },
+  "Explore.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Explore",
+   "is_interactive": true
+  },
+  "Profile.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "User page",
+   "is_interactive": true
+  },
+  "Faves.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Faved fun facts",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Loading.dc.html",
+  "Main.dc.html",
+  "Traveled.dc.html",
+  "Explore.dc.html",
+  "Faves.dc.html",
+  "Profile.dc.html"
+ ],
+ "notes": {
+  "title": {
+   "x": 0,
+   "y": -300,
+   "text": "T-Quest: screens from Isabella's sketch",
+   "kind": "title1",
+   "maxW": 2740
+  },
+  "ranks": {
+   "x": 0,
+   "y": 964,
+   "w": 300,
+   "size": "m",
+   "fill": "teal",
+   "text": "RANKS (highest first, to confirm in #45)\n1. Patriot\n2. Boston Lobstah\n3. Children of Liberty\n4. Tea Party Raider\n5. Midnight Rider\n6. Lamplighter\n7. Town Crier\n8. Harbor Seal\nThe rank changes the profile picture."
+  },
+  "palette": {
+   "x": 380,
+   "y": 964,
+   "w": 300,
+   "size": "m",
+   "fill": "blue",
+   "text": "PALETTE\n#1D3557 navy (outlines, text)\n#FFF8EC cream (background)\n#E63946 red\n#FFC93C yellow\n#F4A6C6 pink\n#A8DADC light blue\n#F4A261 orange\n#457B9D steel blue\nT lines: #00843D green, #DA291C red, #003DA5 blue, #ED8B00 orange"
+  },
+  "open": {
+   "x": 760,
+   "y": 964,
+   "w": 340,
+   "size": "m",
+   "fill": "orange",
+   "text": "OPEN QUESTIONS (#45)\n- Ownership dot colors: red Latinx, pink women, blue Black-owned (placeholder)\n- What the ethnic Boston switch does\n- Where Learn more goes\nPartner stores and offers are FICTIONAL demo businesses. Facts about real places are real; names and numbers are placeholders."
+  }
+ },
+ "designSystems": []
+}

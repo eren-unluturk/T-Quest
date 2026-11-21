@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>T-Quest faved fun facts</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Inter:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D3557}a:hover{color:#457B9D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFF8EC; font-family: Inter, system-ui, sans-serif; color: #1D3557; display: flex; flex-direction: column; gap: 14px; padding: 20px 18px; overflow: hidden">
+  <div style="display: flex; align-items: center; gap: 12px">
+    <a href="Main.dc.html" aria-label="Back" style="width: 44px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #FFFFFF; border: 3px solid #1D3557; box-shadow: 2px 2px 0 #1D3557; color: #1D3557">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+    </a>
+    <div style="display: flex; flex-direction: column">
+      <span style="font-family: Caveat, cursive; font-size: 21px; font-weight: 700; color: #E63946; line-height: 1">the good stuff</span>
+      <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; line-height: 1.1">Faved fun facts</h1>
+    </div>
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="#FFC93C" stroke="#1D3557" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="margin-left: auto; transform: rotate(10deg)"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+  </div>
+  <span style="font-size: 13px; font-weight: 600; color: #457B9D">{{count}} facts saved · tap a star to unfave</span>
+
+  <div style="display: flex; flex-direction: column; gap: 14px">
+    <sc-for list="{{items}}" as="f" hint-placeholder-count="5">
+      <div style="{{f.card}}">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+          <span style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px">
+            <span style="{{f.lineDot}}"></span>{{f.place}}
+          </span>
+          <button type="button" onClick="{{f.unfave}}" aria-label="Unfave this fact" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: #FFFFFF; border: 2.5px solid #1D3557; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFC93C" stroke="#1D3557" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+          </button>
+        </div>
+        <p style="margin: 0; font-size: 14px; line-height: 1.4; font-weight: 500">{{f.fact}}</p>
+      </div>
+    </sc-for>
+    <sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+      <div style="border: 3px dashed #1D3557; border-radius: 18px; padding: 20px; text-align: center; font-family: Caveat, cursive; font-size: 22px; font-weight: 700">no faves yet... go find some!</div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { gone: {} }; }
+  renderVals() {
+    var all = [
+      { id: 'a', place: 'Park Street station', line: '#00843D', bg: '#FFC93C', rot: -1, fact: 'You are in the oldest subway station in America. Park Street opened in 1897.' },
+      { id: 'b', place: 'Old State House', line: '#003DA5', bg: '#F4A6C6', rot: 1, fact: 'The Boston Massacre happened right outside in 1770.' },
+      { id: 'c', place: 'Fenway Park', line: '#00843D', bg: '#A8DADC', rot: -0.8, fact: 'It opened in 1912 and is the oldest ballpark in the major leagues.' },
+      { id: 'd', place: 'Longfellow Bridge', line: '#DA291C', bg: '#B8E0A8', rot: 0.8, fact: 'Locals call its towers the "salt and pepper shakers."' },
+      { id: 'e', place: 'Harvard', line: '#DA291C', bg: '#FFE3A3', rot: -0.6, fact: 'Founded in 1636, it is the oldest university in the US.' }
+    ];
+    var self = this;
+    var items = all.filter(function (f) { return !self.state.gone[f.id]; }).map(function (f) {
+      return {
+        place: f.place,
+        fact: f.fact,
+        lineDot: 'display:inline-block;width:14px;height:14px;border-radius:50%;border:2.5px solid #1D3557;background:' + f.line,
+        card: 'background:' + f.bg + ';border:3px solid #1D3557;border-radius:18px;box-shadow:4px 4px 0 #1D3557;padding:12px 14px;display:flex;flex-direction:column;gap:6px;transform:rotate(' + f.rot + 'deg)',
+        unfave: function () { var g = Object.assign({}, self.state.gone); g[f.id] = true; self.setState({ gone: g }); }
+      };
+    });
+    return { items: items, count: items.length, empty: items.length === 0 };
+  }
+}
+</script>
+</body>
+</html>

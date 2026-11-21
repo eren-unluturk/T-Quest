@@ -1,11 +1,33 @@
 {
-  "source": "Isabella, 2026-11-21 (palette swatch in design/sketches/2026-11-21-ui-workflow.png)",
-  "note": "Roles (background, text, primary, accent) not assigned yet; see issue #45.",
+  "source": "Isabella, 2026-11-21. Approved demo: design/canvas/",
   "color": {
+    "navy": "#1D3557",
+    "cream": "#FFF8EC",
     "red": "#E63946",
-    "honeydew": "#F1FAEE",
+    "red-dark": "#C1272D",
+    "yellow": "#FFC93C",
+    "pink": "#F4A6C6",
     "light-blue": "#A8DADC",
+    "orange": "#F4A261",
     "steel-blue": "#457B9D",
-    "navy": "#1D3557"
-  }
+    "honeydew": "#F1FAEE",
+    "light-green": "#B8E0A8",
+    "map-land": "#F3EBDD"
+  },
+  "roles": {
+    "background": "cream",
+    "text": "navy",
+    "outline": "navy (3px borders, solid 3-5px offset shadow)",
+    "loading-screen-background": "navy",
+    "promo-badge": "red-dark with white text",
+    "accents": "yellow, pink, light-blue, light-green, orange"
+  },
+  "t-lines": { "green": "#00843D", "red": "#DA291C", "blue": "#003DA5", "orange": "#ED8B00" },
+  "ownership-dots": { "latinx-owned": "#E63946", "women-owned": "#F4A6C6", "black-owned": "#457B9D (placeholder)" },
+  "fonts": {
+    "headings": "Space Grotesk 700",
+    "body": "Inter 400-800",
+    "handwritten-notes": "Caveat 700"
+  },
+  "style": "Playful, hand-drawn (BostonHacks 2026 'Boston Bound' feel): thick navy outlines, offset shadows, slight card tilts, sparkles, squiggles, clouds, dashed lines, pill buttons"
 }

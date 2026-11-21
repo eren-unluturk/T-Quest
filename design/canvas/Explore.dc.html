@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>T-Quest explore</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Inter:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D3557}a:hover{color:#457B9D}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; background: #FFF8EC; font-family: Inter, system-ui, sans-serif; color: #1D3557; display: flex; flex-direction: column; overflow: hidden">
+  <div style="display: flex; align-items: center; gap: 12px; padding: 18px 18px 8px">
+    <div style="display: flex; flex-direction: column; flex-grow: 1">
+      <span style="font-family: Caveat, cursive; font-size: 21px; font-weight: 700; color: #457B9D; line-height: 1">where to next?</span>
+      <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; line-height: 1.1">Explore</h1>
+    </div>
+    <a href="Faves.dc.html" aria-label="Your faved fun facts" style="width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; background: #FFFFFF; border: 3px solid #1D3557; box-shadow: 3px 3px 0 #1D3557; display: flex; align-items: center; justify-content: center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFC93C" stroke="#1D3557" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+    </a>
+  </div>
+
+  <div style="display: flex; gap: 8px; overflow-x: auto; padding: 6px 18px 12px; flex-shrink: 0">
+    <button type="button" onClick="{{openSheet}}" aria-label="Filters" style="flex-shrink: 0; min-height: 42px; padding: 6px 14px; border-radius: 999px; border: 2.5px solid #1D3557; background: #1D3557; color: #FFF8EC; font: 700 13px Inter, sans-serif; display: flex; align-items: center; gap: 6px; cursor: pointer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>
+      Filter
+      <sc-if value="{{hasActive}}" hint-placeholder-val="{{ false }}"><span style="background: #FFC93C; color: #1D3557; border-radius: 999px; min-width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center">{{activeCount}}</span></sc-if>
+    </button>
+    <sc-for list="{{cats}}" as="c" hint-placeholder-count="6">
+      <button type="button" onClick="{{c.pick}}" aria-pressed="{{c.on}}" style="{{c.style}}">{{c.label}}</button>
+    </sc-for>
+  </div>
+
+  <div style="flex-grow: 1; overflow-y: auto; padding: 0 0 12px; display: flex; flex-direction: column; gap: 18px">
+    <sc-for list="{{sections}}" as="sec" hint-placeholder-count="2">
+      <section style="display: flex; flex-direction: column; gap: 8px">
+        <div style="padding: 0 18px">
+          <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700">{{sec.title}}</h2>
+          <span style="font-family: Caveat, cursive; font-size: 18px; font-weight: 700; color: {{sec.subColor}}">{{sec.sub}}</span>
+        </div>
+        <div style="display: flex; gap: 14px; overflow-x: auto; padding: 4px 18px 10px">
+          <sc-for list="{{sec.cards}}" as="p" hint-placeholder-count="3">
+            <a href="#" style="flex-shrink: 0; width: 218px; text-decoration: none; color: #1D3557; background: #FFFFFF; border: 3px solid #1D3557; border-radius: 20px; box-shadow: 4px 4px 0 #1D3557; overflow: hidden; display: flex; flex-direction: column">
+              <div style="{{p.top}}">
+                <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1D3557" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{p.icon}}"></path></svg>
+                <span style="position: absolute; left: 8px; top: 8px; background: #FFFFFF; border: 2px solid #1D3557; border-radius: 999px; padding: 1px 8px; font-size: 10px; font-weight: 800">{{p.badge}}</span>
+                <span style="position: absolute; right: 8px; top: 8px; display: flex">
+                  <sc-for list="{{p.owners}}" as="o" hint-placeholder-count="1"><span style="{{o.style}}"></span></sc-for>
+                </span>
+              </div>
+              <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 4px">
+                <span style="font-weight: 800; font-size: 15px">{{p.name}}</span>
+                <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #457B9D"><span style="{{p.lineDot}}"></span>{{p.cat}} · {{p.stop}}</span>
+                <span style="font-size: 12px; font-weight: 600">{{p.why}}</span>
+                <span style="margin-top: 4px; background: #C1272D; color: #FFFFFF; border: 2px solid #1D3557; border-radius: 10px; padding: 5px 8px; font-size: 12px; font-weight: 800">{{p.promo}}</span>
+              </div>
+            </a>
+          </sc-for>
+          <sc-if value="{{sec.empty}}" hint-placeholder-val="{{ false }}">
+            <div style="flex-shrink: 0; width: 300px; border: 3px dashed #1D3557; border-radius: 20px; padding: 18px; font-family: Caveat, cursive; font-size: 20px; font-weight: 700">nothing here with these filters yet</div>
+          </sc-if>
+        </div>
+      </section>
+    </sc-for>
+  </div>
+
+  <nav style="margin: 0 18px 18px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 18px; background: #FFFFFF; border: 3px solid #1D3557; text-decoration: none; color: #1D3557; font-size: 12px; font-weight: 700">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E63946" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"></path><circle cx="12" cy="9" r="2.5"></circle></svg>
+      This page
+    </a>
+    <a href="Explore.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 18px; background: #FFC93C; border: 3px solid #1D3557; box-shadow: 3px 3px 0 #1D3557; text-decoration: none; color: #1D3557; font-size: 12px; font-weight: 800">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+      Explore
+    </a>
+    <a href="Traveled.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 18px; background: #FFFFFF; border: 3px solid #1D3557; text-decoration: none; color: #1D3557; font-size: 12px; font-weight: 700">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00843D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"></path><path d="M9 4v14M15 6v14"></path></svg>
+      Traveled
+    </a>
+  </nav>
+
+  <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; background: rgba(29,53,87,0.45); display: flex; flex-direction: column; justify-content: flex-end; z-index: 5">
+      <div style="background: #FFF8EC; border-top: 3px solid #1D3557; border-radius: 26px 26px 0 0; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <span style="font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700">Filter</span>
+          <button type="button" onClick="{{closeSheet}}" aria-label="Close filters" style="width: 40px; height: 40px; border-radius: 50%; border: 2.5px solid #1D3557; background: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D3557" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 13px; font-weight: 800">Along a line</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <sc-for list="{{lineOpts}}" as="o" hint-placeholder-count="4">
+              <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}"><span style="{{o.dot}}"></span>{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 13px; font-weight: 800">Owned by</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <sc-for list="{{ownerOpts}}" as="o" hint-placeholder-count="4">
+              <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}"><span style="{{o.dot}}"></span>{{o.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; border: 2.5px solid #1D3557; border-radius: 16px; padding: 10px 12px">
+          <span style="display: flex; flex-direction: column">
+            <span style="font-weight: 800; font-size: 14px">Ethnic Boston</span>
+            <span style="font-size: 12px; color: #457B9D; font-weight: 600">adds a section of culture-rich spots</span>
+          </span>
+          <button type="button" onClick="{{toggleEthnic}}" aria-pressed="{{ethnic}}" aria-label="Ethnic Boston" style="width: 60px; height: 34px; border-radius: 17px; border: 3px solid #1D3557; background: {{ethnicBg}}; padding: 0 3px; display: flex; align-items: center; justify-content: {{ethnicSide}}; cursor: pointer">
+            <span style="width: 22px; height: 22px; border-radius: 50%; background: #1D3557"></span>
+          </button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+          <button type="button" onClick="{{clearAll}}" style="min-height: 48px; border-radius: 16px; border: 3px solid #1D3557; background: #FFFFFF; font: 800 14px Inter, sans-serif; color: #1D3557; cursor: pointer">Clear all</button>
+          <button type="button" onClick="{{closeSheet}}" style="min-height: 48px; border-radius: 16px; border: 3px solid #1D3557; background: #FFC93C; box-shadow: 3px 3px 0 #1D3557; font: 800 14px Inter, sans-serif; color: #1D3557; cursor: pointer">Show {{resultCount}} spots</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { cat: 'All', sheet: false, lines: {}, owners: {}, ethnic: false };
+  }
+  renderVals() {
+    var self = this;
+    var st = this.state;
+    var ICON = {
+      Restaurants: 'M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 2-2 6 0 8v10',
+      Drinks: 'M7 8h10l-1 13H8zM12 8l2-5h3',
+      Sightseeing: 'M3 21h18M5 18h14M6 10v8M10 10v8M14 10v8M18 10v8M3 10l9-6 9 6z',
+      Shopping: 'M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2',
+      'Cafés': 'M4 9h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 11h2a2 2 0 0 1 0 4h-2M8 3v3M12 3v3'
+    };
+    var LINE = { green: '#00843D', red: '#DA291C', orange: '#ED8B00', blue: '#003DA5' };
+    var OWN = { latinx: '#E63946', women: '#F4A6C6', black: '#457B9D' };
+    var places = [
+      { id: 'abuela', name: 'Abuela’s Kitchen', cat: 'Restaurants', stop: 'Park Street', lines: ['green', 'red'], owners: ['latinx', 'women'], color: '#F4A6C6', promo: '15% off for Boston Lobstahs', reco: 'Your most-visited stop', along: 2, alongWhy: '2 stops ahead' },
+      { id: 'steep', name: 'Steep & Swirl Tea Bar', cat: 'Drinks', stop: 'Boylston', lines: ['green'], owners: ['women'], color: '#B8E0A8', promo: 'Buy 1 bubble tea, get 1 free', along: 1, alongWhy: 'next stop!' },
+      { id: 'oldbrick', name: 'Old Brick Walking Tours', cat: 'Sightseeing', stop: 'Government Center', lines: ['green', 'blue'], owners: [], color: '#A8DADC', promo: '$5 off any tour', reco: 'You fave history facts', along: 3, alongWhy: '3 stops ahead' },
+      { id: 'harborlight', name: 'Harborlight Books', cat: 'Shopping', stop: 'Charles/MGH', lines: ['red'], owners: [], color: '#FFC93C', promo: '10% off + a free T-Quest sticker', reco: 'On your usual Red Line ride' },
+      { id: 'roxbury', name: 'Roxbury Roots Café', cat: 'Cafés', stop: 'Ruggles', lines: ['orange'], owners: ['black'], color: '#F4A261', promo: 'Free pastry with any coffee', reco: 'A new line to unlock', ethnic: true },
+      { id: 'copley', name: 'Copley Corner Bakery', cat: 'Cafés', stop: 'Copley', lines: ['green'], owners: ['women'], color: '#FFE3A3', promo: '20% off for Patriots', along: 9, alongWhy: 'behind you' },
+      { id: 'pho', name: 'Pho Lantern', cat: 'Restaurants', stop: 'Chinatown', lines: ['orange'], owners: [], color: '#FFD6C9', promo: 'Free spring rolls on $20+', reco: 'Near your next transfer', ethnic: true },
+      { id: 'sabor', name: 'Sabor del Barrio', cat: 'Restaurants', stop: 'Jackson Square', lines: ['orange'], owners: ['latinx'], color: '#FFC9C9', promo: 'Free agua fresca for T-Quest riders', ethnic: true }
+    ];
+    var lineKeys = Object.keys(st.lines).filter(function (k) { return st.lines[k]; });
+    var ownKeys = Object.keys(st.owners).filter(function (k) { return st.owners[k]; });
+    function pass(p) {
+      if (st.cat !== 'All' && p.cat !== st.cat) return false;
+      if (lineKeys.length && !lineKeys.some(function (l) { return p.lines.indexOf(l) >= 0; })) return false;
+      if (ownKeys.length && !ownKeys.some(function (o) { return o === 'local' || p.owners.indexOf(o) >= 0; })) return false;
+      return true;
+    }
+    function card(p, why) {
+      return {
+        name: p.name, cat: p.cat, stop: p.stop, promo: p.promo, why: why,
+        badge: 'LOCALLY OWNED',
+        icon: ICON[p.cat],
+        top: 'position:relative;height:96px;background:' + p.color + ';border-bottom:3px solid #1D3557;display:flex;align-items:center;justify-content:center',
+        lineDot: 'display:inline-block;width:10px;height:10px;border-radius:50%;border:2px solid #1D3557;background:' + LINE[p.lines[0]],
+        owners: p.owners.map(function (o, k) { return { style: 'display:block;width:18px;height:18px;border-radius:50%;border:2.5px solid #1D3557;background:' + OWN[o] + (k ? ';margin-left:-6px' : '') }; })
+      };
+    }
+    function section(title, sub, subColor, list) {
+      return { title: title, sub: sub, subColor: subColor, cards: list, empty: list.length === 0 };
+    }
+    var reco = places.filter(function (p) { return p.reco && pass(p); }).map(function (p) { return card(p, p.reco); });
+    var along = places.filter(function (p) { return p.along && pass(p); }).sort(function (a, b) { return a.along - b.along; }).map(function (p) { return card(p, p.alongWhy); });
+    var sections = [
+      section('Recommended for you', 'picked from where you ride + what you fave', '#E63946', reco),
+      section('Popular along the Green Line', 'heading inbound → closest first', '#00843D', along)
+    ];
+    if (st.ethnic) {
+      var eth = places.filter(function (p) { return p.ethnic && pass(p); }).map(function (p) { return card(p, 'Ethnic Boston pick'); });
+      sections.push(section('Ethnic Boston', 'flavors from all over, right here', '#457B9D', eth));
+    }
+    var total = places.filter(pass).length;
+    var CATS = ['All', 'Sightseeing', 'Restaurants', 'Drinks', 'Cafés', 'Shopping'];
+    var CATC = { All: '#FFC93C', Sightseeing: '#A8DADC', Restaurants: '#F4A6C6', Drinks: '#B8E0A8', 'Cafés': '#F4A261', Shopping: '#FFE3A3' };
+    function optStyle(on) { return 'min-height:40px;padding:6px 12px;border-radius:999px;border:2.5px solid #1D3557;font:700 13px Inter,sans-serif;color:#1D3557;cursor:pointer;display:flex;align-items:center;gap:6px;' + (on ? 'background:#FFC93C;box-shadow:2px 2px 0 #1D3557' : 'background:#FFFFFF'); }
+    function toggleIn(key, k) { var o = Object.assign({}, st[key]); o[k] = !o[k]; var s = {}; s[key] = o; self.setState(s); }
+    var active = lineKeys.length + ownKeys.length + (st.ethnic ? 1 : 0);
+    return {
+      cats: CATS.map(function (c) {
+        var on = st.cat === c;
+        return { label: c, on: on, pick: function () { self.setState({ cat: c }); }, style: 'flex-shrink:0;min-height:42px;padding:6px 14px;border-radius:999px;border:2.5px solid #1D3557;font:700 13px Inter,sans-serif;color:#1D3557;cursor:pointer;' + (on ? 'background:' + CATC[c] + ';box-shadow:3px 3px 0 #1D3557' : 'background:#FFFFFF') };
+      }),
+      sections: sections,
+      sheetOpen: st.sheet,
+      openSheet: function () { self.setState({ sheet: true }); },
+      closeSheet: function () { self.setState({ sheet: false }); },
+      clearAll: function () { self.setState({ lines: {}, owners: {}, ethnic: false }); },
+      hasActive: active > 0,
+      activeCount: active,
+      resultCount: total,
+      ethnic: st.ethnic,
+      ethnicBg: st.ethnic ? '#B8E0A8' : '#FFFFFF',
+      ethnicSide: st.ethnic ? 'flex-end' : 'flex-start',
+      toggleEthnic: function () { self.setState({ ethnic: !st.ethnic }); },
+      lineOpts: [['green', 'Green Line'], ['red', 'Red Line'], ['orange', 'Orange Line'], ['blue', 'Blue Line']].map(function (l) {
+        var on = !!st.lines[l[0]];
+        return { label: 'Along ' + l[1], on: on, style: optStyle(on), dot: 'display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid #1D3557;background:' + LINE[l[0]], pick: function () { toggleIn('lines', l[0]); } };
+      }),
+      ownerOpts: [['local', 'Locally owned', '#FFFFFF'], ['latinx', 'Latinx-owned', OWN.latinx], ['women', 'Women-owned', OWN.women], ['black', 'Black-owned', OWN.black]].map(function (o) {
+        var on = !!st.owners[o[0]];
+        return { label: o[1], on: on, style: optStyle(on), dot: 'display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid #1D3557;background:' + o[2], pick: function () { toggleIn('owners', o[0]); } };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

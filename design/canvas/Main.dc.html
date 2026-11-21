@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>T-Quest home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Inter:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D3557}a:hover{color:#457B9D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFF8EC; font-family: Inter, system-ui, sans-serif; color: #1D3557; display: flex; flex-direction: column; gap: 12px; padding: 18px 18px 18px; overflow: hidden">
+  <div style="display: flex; align-items: center; gap: 12px">
+    <a href="Profile.dc.html" aria-label="Open your user page" style="width: 52px; height: 52px; border-radius: 50%; background: #FFC93C; border: 3px solid #1D3557; box-shadow: 3px 3px 0 #1D3557; display: flex; align-items: center; justify-content: center; flex-shrink: 0; text-decoration: none; color: #1D3557; font-size: 9px; font-weight: 700; text-align: center; line-height: 1.1">[your<br>avatar]</a>
+    <div style="display: flex; flex-direction: column; flex-grow: 1">
+      <span style="font-family: Caveat, cursive; font-size: 21px; font-weight: 700; color: #E63946; line-height: 1">hey [name]!</span>
+      <span style="font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.15">Ready to ride?</span>
+    </div>
+    <a href="Faves.dc.html" aria-label="Your faved fun facts" style="width: 46px; height: 46px; border-radius: 50%; background: #FFFFFF; border: 3px solid #1D3557; box-shadow: 3px 3px 0 #1D3557; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFC93C" stroke="#1D3557" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+    </a>
+  </div>
+
+  <div style="background: #FFFFFF; border: 3px solid #1D3557; border-radius: 16px; box-shadow: 3px 3px 0 #1D3557; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px">
+    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700">
+      <span style="background: #F4A6C6; border: 2px solid #1D3557; border-radius: 999px; padding: 1px 9px">Boston Lobstah</span>
+      <span>1,240 pts · 260 to Patriot</span>
+    </div>
+    <svg width="100%" height="18" viewBox="0 0 320 18" fill="none" aria-hidden="true">
+      <path d="M8 9H312" stroke="#A8DADC" stroke-width="7" stroke-linecap="round"></path>
+      <path d="M8 9H200" stroke="#E63946" stroke-width="7" stroke-linecap="round"></path>
+      <circle cx="8" cy="9" r="6" fill="#FFFFFF" stroke="#1D3557" stroke-width="2.5"></circle>
+      <circle cx="200" cy="9" r="7" fill="#FFC93C" stroke="#1D3557" stroke-width="2.5"></circle>
+      <circle cx="312" cy="9" r="6" fill="#FFFFFF" stroke="#1D3557" stroke-width="2.5"></circle>
+    </svg>
+  </div>
+
+  <div style="position: relative; margin-top: 8px; background: #FFC93C; border: 3px solid #1D3557; border-radius: 20px; box-shadow: 5px 5px 0 #1D3557; padding: 14px 14px 10px; transform: rotate(-1deg); display: flex; flex-direction: column; gap: 6px; min-height: 178px; box-sizing: border-box">
+    <span style="position: absolute; top: -16px; left: 14px; background: {{tagBg}}; color: #FFFFFF; border: 2.5px solid #1D3557; border-radius: 999px; padding: 1px 12px; font-family: Caveat, cursive; font-size: 19px; font-weight: 700; transform: rotate(-3deg)">{{tag}}</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 6px">
+      <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; line-height: 1.15">{{place.name}}</span>
+      <button type="button" onClick="{{toggleFave}}" aria-pressed="{{faved}}" aria-label="Fave this fun fact" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: #FFFFFF; border: 2.5px solid #1D3557; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="{{starFill}}" stroke="#1D3557" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg>
+      </button>
+    </div>
+    <sc-if value="{{hasFacts}}" hint-placeholder-val="{{ true }}">
+      <p style="margin: 0; font-size: 15px; line-height: 1.4; font-weight: 500">{{fact}}</p>
+    </sc-if>
+    <sc-if value="{{noFacts}}" hint-placeholder-val="{{ false }}">
+      <p style="margin: 0; font-size: 15px; font-weight: 800">No history recorded yet.</p>
+      <p style="margin: 0; font-size: 14px; line-height: 1.4; font-weight: 500"><span style="font-family: Caveat, cursive; font-size: 19px; font-weight: 700">but nearby...</span> {{place.nearby}}</p>
+    </sc-if>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto">
+      <div style="display: flex; min-height: 28px">
+        <sc-for list="{{dots}}" as="d" hint-placeholder-count="2">
+          <button type="button" onClick="{{d.pick}}" aria-label="{{d.label}}" style="width: 28px; height: 28px; border: none; background: transparent; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center">
+            <span style="{{d.style}}"></span>
+          </button>
+        </sc-for>
+      </div>
+      <a href="#" style="background: #1D3557; color: #FFF8EC; font-weight: 700; font-size: 13px; padding: 7px 14px; border-radius: 999px; text-decoration: none">Learn more →</a>
+    </div>
+  </div>
+
+  <div style="position: relative; height: 336px; flex-shrink: 0; border: 3px solid #1D3557; border-radius: 20px; box-shadow: 4px 4px 0 #1D3557; overflow: hidden; background: #F3EBDD">
+    <svg width="348" height="330" viewBox="0 0 348 330" fill="none" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+      <path d="M0 0H140L66 42L0 62Z" fill="#A8DADC"></path>
+      <text x="14" y="24" font-family="Caveat, cursive" font-size="16" font-weight="700" fill="#457B9D">Charles River</text>
+      <g stroke="#FFFFFF" stroke-width="3">
+        <path d="M120 10H220M110 30H230M150 0V60M190 0V60M230 0V60"></path>
+        <path d="M290 160H348M290 200H348M300 230H348M280 300H348"></path>
+        <path d="M0 300H240M30 280V330M120 285V330M200 280V330"></path>
+      </g>
+      <g stroke="#FFFFFF" stroke-width="9" stroke-linecap="round">
+        <path d="M0 92L212 70L348 40"></path>
+        <path d="M246 262L262 122L285 60L300 0"></path>
+        <path d="M0 280L246 270L348 262"></path>
+        <path d="M86 0L88 330"></path>
+        <path d="M212 72L262 122"></path>
+        <path d="M348 140L300 330"></path>
+      </g>
+      <path d="M92 88L212 72L262 122L246 262L106 268Z" fill="#A8D5A2" stroke="#1D3557" stroke-width="2"></path>
+      <path d="M8 104Q8 96 16 96H74Q82 96 82 104V262Q82 270 74 270H16Q8 270 8 262Z" fill="#A8D5A2" stroke="#1D3557" stroke-width="2"></path>
+      <path d="M20 170C30 150 60 160 58 180S30 215 44 230 70 236 66 250" stroke="#7FC4CC" stroke-width="9" stroke-linecap="round"></path>
+      <ellipse cx="170" cy="150" rx="22" ry="14" fill="#7FC4CC" stroke="#1D3557" stroke-width="2"></ellipse>
+      <g fill="#6FA86A"><circle cx="120" cy="120" r="7"></circle><circle cx="140" cy="240" r="8"></circle><circle cx="215" cy="230" r="7"></circle><circle cx="200" cy="105" r="6"></circle><circle cx="30" cy="120" r="6"></circle><circle cx="60" cy="240" r="7"></circle></g>
+      <path d="M0 292L238 284L250 138L296 40L316 0" stroke="#00843D" stroke-width="7" stroke-linecap="round" opacity="0.9"></path>
+      <path d="M58 0L250 138L348 204" stroke="#DA291C" stroke-width="7" stroke-linecap="round" opacity="0.9"></path>
+      <circle cx="238" cy="284" r="6" fill="#FFFFFF" stroke="#1D3557" stroke-width="2.5"></circle>
+      <g font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#5B6B80">
+        <text x="98" y="86" transform="rotate(-6 98 86)">BEACON ST</text>
+        <text x="270" y="250" transform="rotate(-84 270 250)">TREMONT ST</text>
+        <text x="120" y="296">BOYLSTON ST</text>
+        <text x="92" y="320" transform="rotate(-90 92 320)">CHARLES ST</text>
+        <text x="190" y="300">Boylston</text>
+      </g>
+      <text x="22" y="292" font-family="Caveat, cursive" font-size="15" font-weight="700" fill="#1D3557">Public Garden</text>
+      <text x="118" y="200" font-family="Caveat, cursive" font-size="17" font-weight="700" fill="#1D3557">Boston Common</text>
+    </svg>
+    <sc-for list="{{pins}}" as="p" hint-placeholder-count="7">
+      <button type="button" onClick="{{p.pick}}" aria-label="{{p.name}}" aria-pressed="{{p.sel}}" style="{{p.style}}">
+        <span style="{{p.dot}}"></span>
+      </button>
+    </sc-for>
+    <span style="position: absolute; right: 10px; bottom: 8px; background: #FFFFFF; border: 2px solid #1D3557; border-radius: 10px; padding: 3px 8px; font-size: 11px; font-weight: 700">tap a spot to learn about it</span>
+  </div>
+
+  <nav style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: auto">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 18px; background: #E63946; border: 3px solid #1D3557; box-shadow: 3px 3px 0 #1D3557; text-decoration: none; color: #FFFFFF; font-size: 12px; font-weight: 800">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"></path><circle cx="12" cy="9" r="2.5"></circle></svg>
+      This page
+    </a>
+    <a href="Explore.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 18px; background: #FFFFFF; border: 3px solid #1D3557; text-decoration: none; color: #1D3557; font-size: 12px; font-weight: 700">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C98A00" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+      Explore
+    </a>
+    <a href="Traveled.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px; border-radius: 18px; background: #FFFFFF; border: 3px solid #1D3557; text-decoration: none; color: #1D3557; font-size: 12px; font-weight: 700">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00843D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"></path><path d="M9 4v14M15 6v14"></path></svg>
+      Traveled
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 'park', i: 0, faves: { park: true } }; }
+  renderVals() {
+    var places = [
+      { id: 'statehouse', name: 'Massachusetts State House', x: 195, y: 62, c: '#FFC93C', facts: ['Its dome was first covered in copper by Paul Revere’s company in 1802.', 'The dome was covered in gold leaf in 1874.'] },
+      { id: 'granary', name: 'Granary Burying Ground', x: 292, y: 82, c: '#F4A6C6', facts: ['Paul Revere, Samuel Adams and John Hancock are all buried here.', 'Founded in 1660, it is one of Boston’s oldest cemeteries.'] },
+      { id: 'church', name: 'Park Street Church', x: 270, y: 112, c: '#A8DADC', facts: ['The song "America" (My Country, ’Tis of Thee) was first sung here on July 4, 1831.'] },
+      { id: 'park', name: 'Park Street station', x: 250, y: 140, c: '#E63946', facts: ['You are in the oldest subway station in America. Park Street opened in 1897.', 'America’s first subway opened through here on September 1, 1897.'] },
+      { id: 'frog', name: 'Frog Pond', x: 170, y: 150, c: '#A8DADC', facts: [], nearby: 'Colonists grazed their cows on Boston Common, all around you, until 1830.' },
+      { id: 'common', name: 'Boston Common', x: 150, y: 228, c: '#B8E0A8', facts: ['Boston Common is the oldest public park in the US, set aside in 1634.'] },
+      { id: 'garden', name: 'Public Garden', x: 45, y: 205, c: '#B8E0A8', facts: ['The Public Garden was the first public botanical garden in the US (1837).', 'Its Swan Boats have paddled the lagoon since 1877.'] }
+    ];
+    var self = this;
+    var place = places.filter(function (p) { return p.id === self.state.sel; })[0];
+    var n = place.facts.length;
+    var i = Math.min(this.state.i, Math.max(n - 1, 0));
+    var faved = !!this.state.faves[place.id];
+    return {
+      place: place,
+      hasFacts: n > 0,
+      noFacts: n === 0,
+      fact: n ? place.facts[i] : '',
+      tag: n ? 'did you know?!' : 'no history yet!',
+      tagBg: n ? '#E63946' : '#457B9D',
+      faved: faved,
+      starFill: faved ? '#FFC93C' : 'none',
+      toggleFave: function () {
+        var f = Object.assign({}, self.state.faves);
+        f[place.id] = !f[place.id];
+        self.setState({ faves: f });
+      },
+      dots: n > 1 ? place.facts.map(function (t, k) {
+        return {
+          label: 'Fact ' + (k + 1) + ' of ' + n,
+          style: 'display:block;width:12px;height:12px;border-radius:50%;border:2.5px solid #1D3557;box-sizing:border-box;' + (k === i ? 'background:#1D3557' : 'background:#FFFFFF'),
+          pick: function () { self.setState({ i: k }); }
+        };
+      }) : [],
+      pins: places.map(function (p) {
+        var sel = p.id === self.state.sel;
+        var s = sel ? 48 : 30;
+        return {
+          name: p.name,
+          sel: sel,
+          pick: function () { self.setState({ sel: p.id, i: 0 }); },
+          style: 'position:absolute;left:' + (p.x - s / 2) + 'px;top:' + (p.y - s / 2) + 'px;width:' + s + 'px;height:' + s + 'px;border-radius:50%;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;border:3px solid #1D3557;background:' + (sel ? '#FFC93C' : p.c) + ';' + (sel ? 'box-shadow:3px 3px 0 #1D3557;z-index:2' : ''),
+          dot: 'display:block;border-radius:50%;background:#1D3557;width:' + (sel ? 14 : 8) + 'px;height:' + (sel ? 14 : 8) + 'px'
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

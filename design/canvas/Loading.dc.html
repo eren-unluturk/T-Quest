@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>T-Quest loading</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D3557}a:hover{color:#457B9D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #1D3557; color: #F1FAEE; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 72px 32px 48px">
+  <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 34px; letter-spacing: -0.5px">T-Quest</div>
+
+  <button type="button" onClick="{{next}}" aria-label="Show another fun fact" style="width: 100%; border: none; background: transparent; color: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 0; font: inherit">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#A8DADC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"></path><path d="M20 4v5h-5"></path></svg>
+    <svg width="220" height="60" viewBox="0 0 220 60" fill="none" stroke="#457B9D" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 14c18-10 36 10 54 0s36 10 54 0 36 10 54 0 36 10 50 0"></path><path d="M4 32c18-10 36 10 54 0s36 10 54 0 36 10 54 0 36 10 50 0"></path><path d="M4 50c18-10 36 10 54 0s36 10 54 0 36 10 54 0 36 10 50 0"></path></svg>
+    <div style="display: flex; flex-direction: column; gap: 10px; align-items: center">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: #A8DADC">FUN FACT</span>
+      <p style="margin: 0; font-size: 19px; line-height: 1.45; text-align: center; min-height: 84px">{{fact}}</p>
+    </div>
+    <span style="font-size: 13px; color: #A8DADC">Tap for another fact</span>
+  </button>
+
+  <a href="Main.dc.html" style="width: 100%; box-sizing: border-box; text-align: center; padding: 16px; border-radius: 16px; background: #A8DADC; color: #1D3557; font-weight: 700; font-size: 16px; text-decoration: none">Start exploring</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0 }; }
+  renderVals() {
+    var facts = [
+      'The Boston Tea Party was planned at Old South Meeting House, near Downtown Crossing.',
+      'Harvard was founded in 1636, making it the oldest university in the US.',
+      'Fenway Park opened in 1912. It is the oldest ballpark in the major leagues.',
+      'Locals call the towers on the Longfellow Bridge the "salt and pepper shakers."',
+      'The Boston Massacre happened right outside the Old State House in 1770.'
+    ];
+    var self = this;
+    return {
+      fact: facts[this.state.i],
+      next: function () { self.setState({ i: (self.state.i + 1) % facts.length }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

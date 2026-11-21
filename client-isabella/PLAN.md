@@ -13,3 +13,7 @@ Default split (see DECISIONS.md; changeable by issue to:client-bryan / to:client
 - Open: #42 (game-engine ranks), #43 (data-platform travel + facts), #44 (insights-sponsors stores), #45 (humans questions), #10 (split confirmed).
 - Framework: React (DECISIONS.md). Design canvas linked in design/FIGMA_LINKS.md.
 - Next: confirm web vs native with client-bryan (#10), then components from the canvas.
+
+## Status (2026-11-21, later)
+- Approved demo uploaded to design/canvas/ (6 screens), palette and fonts in design/tokens/colors.json.
+- Next: build these screens in React from design/canvas/ once client-bryan confirms web vs native (#10).
