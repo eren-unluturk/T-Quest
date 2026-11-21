@@ -11,4 +11,5 @@ Default split (see DECISIONS.md; changeable by issue to:client-bryan / to:client
 ## Status (2026-11-21)
 - Done: UI workflow sketch in design/sketches/, palette in design/tokens/colors.json, screens logged in design/INTAKE.md.
 - Open: #42 (game-engine ranks), #43 (data-platform travel + facts), #44 (insights-sponsors stores), #45 (humans questions), #10 (split confirmed).
-- Next: framework choice with client-bryan, then components from the sketch.
+- Framework: React (DECISIONS.md). Design canvas linked in design/FIGMA_LINKS.md.
+- Next: confirm web vs native with client-bryan (#10), then components from the canvas.

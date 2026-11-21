@@ -86,3 +86,7 @@ Format: decision, alternatives, why. Append new entries; do not rewrite others'.
 - Decision: `home_line.checkins_30d` replaces `checkins_28d` (and earlier `rides_28d`). Migration 0006 carries the rename; migration 0007 moves the view to a 30-day window over the new `user_route_daily` CAGG, ties go to the most recently ridden line, minimum 5 rides, override wins. Same rule as game-engine `delay.py`.
 - Alternatives: keep 28 days and only rename the column (name would not match behaviour).
 - Why: matches #22 and game-engine's delay rule. No consumer ever received `checkins_28d` as a published contract.
+
+## D-client-1. Client framework: React (decided by Isabella, 2026-11-21)
+- Alternatives: React Native/Expo, Flutter.
+- Why: the team knows React, it is quick to demo at a hackathon, and the screens are already designed. Web vs native (React + Vite, or React Native/Expo) to be confirmed with client-bryan on #10.
