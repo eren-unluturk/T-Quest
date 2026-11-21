@@ -8,3 +8,9 @@ See AGENT.md for charter, owned paths and definition of done.
 
 - `src/` - service code
 - `tests/` - tests
+
+## Develop
+
+- Install: `pip install -e ".[dev]"`
+- Run: `python -m insights_sponsors.main` (serves on port 8002, see `INSIGHTS_SPONSORS_PORT`)
+- Test: `pytest`
