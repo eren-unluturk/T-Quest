@@ -1,7 +1,7 @@
 ---
 id: 014
 title: One-command verification run for when a database exists
-status: ready
+status: done
 depends_on: [013]
 ---
 ## Goal

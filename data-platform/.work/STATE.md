@@ -22,3 +22,5 @@
 - Cycle 8: reviewed 010 (OK) and verified 011. Queued 015 (containers).
 - Cycle 9: reviewed 012 (home_line still 28d: builder used old prompt text) -> queued 016; verified 013 (pglast syntax checks pass).
 - Next: review 014-016. Publish (#27) after 016 so contracts carry checkins_30d; then close #22.
+
+# STOPPED SAFELY (builder) at 13:17: 001-014 done, 015 not started, handoff in .work/HANDOFF.md

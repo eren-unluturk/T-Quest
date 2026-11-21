@@ -52,3 +52,15 @@ python -m data_platform.bench --synthetic-days 1 --users 100 --vehicles 50   # q
 python -m data_platform.bench --cleanup       # remove all synthetic rows and users
 ```
 Writes `bench/RESULTS.md` and `bench/results.json`: compression ratio for `vehicles` and `predictions`, and median latency of the leaderboard and home-line continuous aggregates against the same queries on raw tables. The default run inserts about 24 million vehicle rows; use the smaller flags for a quick check. If `TIGER_DATABASE_URL` is set the run is repeated there (migrate that database first) and results get a second column.
+
+## Verify everything
+One command runs the full check against whatever `DATABASE_URL` points at (connect, migrate twice, seed, MBTA load and one ingest cycle if `MBTA_API_KEY` is set, the test suite, a small benchmark with cleanup, TimescaleDB introspection). It writes `verify/VERIFY.md` and `verify/verify.json` (hostnames, passwords and IPs are redacted) and exits non-zero if any step failed.
+
+Local docker:
+```powershell
+docker compose up -d
+copy .env.example .env      # set MBTA_API_KEY to also test ingestion
+pip install -e .[dev]
+python -m data_platform.verify
+```
+Tiger Cloud: set `DATABASE_URL` in `.env` to the service URL (with `sslmode=require`), then run `python -m data_platform.verify`. Flags: `--skip-mbta`, `--skip-bench`, `--bench-days 2`.
