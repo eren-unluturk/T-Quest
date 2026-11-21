@@ -19,7 +19,7 @@ The `.dc.html` files are the canvas source (one file per screen, 390x844 phone f
 | Faves.dc.html | Faved fun facts | Opened from the star on Home, Traveled, Explore. Tap a star to unfave |
 | Profile.dc.html | User page | Rank avatar and name, points as a T line, "Show this page at partnered stores to get your prizes" with a member pass, sideways perks for the user's rank ("15% off for Boston Lobstahs"), one locked perk for the next rank |
 
-Bottom nav on every screen: This page (Home), Explore, Traveled. The avatar on Home opens the user page.
+Bottom nav on every screen: Home, Explore, Traveled, drawn as bubble icons from Isabella's sketch (design/sketches/2026-11-21-nav-buttons.png): a shamrock with HOME under it, a magnifying glass with EXPLORE arched around it, a sailboat with TRAVELED painted on the hull. SVGs in design/icons/. All three are the same size and level. The current page's icon sits on a colored blob (green, yellow, light blue) with a sparkle and wiggles; the others float gently; tap squishes, hover lifts. Animations are off for users with reduced motion. The avatar on Home opens the user page.
 
 ## Placeholders
 

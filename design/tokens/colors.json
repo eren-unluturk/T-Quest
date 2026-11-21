@@ -22,12 +22,32 @@
     "promo-badge": "red-dark with white text",
     "accents": "yellow, pink, light-blue, light-green, orange"
   },
-  "t-lines": { "green": "#00843D", "red": "#DA291C", "blue": "#003DA5", "orange": "#ED8B00" },
-  "ownership-dots": { "latinx-owned": "#E63946", "women-owned": "#F4A6C6", "black-owned": "#457B9D (placeholder)" },
+  "t-lines": {
+    "green": "#00843D",
+    "red": "#DA291C",
+    "blue": "#003DA5",
+    "orange": "#ED8B00"
+  },
+  "ownership-dots": {
+    "latinx-owned": "#E63946",
+    "women-owned": "#F4A6C6",
+    "black-owned": "#457B9D (placeholder)"
+  },
   "fonts": {
     "headings": "Space Grotesk 700",
     "body": "Inter 400-800",
-    "handwritten-notes": "Caveat 700"
+    "handwritten-notes": "Caveat 700",
+    "nav-icon-words": "Fredoka 700"
   },
-  "style": "Playful, hand-drawn (BostonHacks 2026 'Boston Bound' feel): thick navy outlines, offset shadows, slight card tilts, sparkles, squiggles, clouds, dashed lines, pill buttons"
+  "style": "Playful, hand-drawn (BostonHacks 2026 'Boston Bound' feel): thick navy outlines, offset shadows, slight card tilts, sparkles, squiggles, clouds, dashed lines, pill buttons",
+  "nav-icons": {
+    "home": "design/icons/nav-home.svg",
+    "explore": "design/icons/nav-explore.svg",
+    "traveled": "design/icons/nav-traveled.svg",
+    "active-blob": {
+      "home": "#D3EDCB",
+      "explore": "#FFE7A0",
+      "traveled": "#CFE8F0"
+    }
+  }
 }
