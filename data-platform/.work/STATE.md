@@ -17,4 +17,5 @@
 - Cycle 4: reviewed 006 (built from pre-amendment prompt) -> queued 012 for user_stop_daily/stop_popularity_hourly and checkins_28d. 009 already covers CAGG-vs-raw timing.
 - Cycle 5: reviewed 007 (OK; live run needs key + DB, asked on #25).
 - Billing rule received: no per-token API billing; audited data-platform (clean), recorded in ROADMAP. Never queue LLM/API-key work.
-- Next: review 008+; queue holds 009-012 ready.
+- Cycle 6: reviewed 008 (OK, DB-unverified).
+- Next: review 009-012; then, if a DB exists, queue the verification prompt.

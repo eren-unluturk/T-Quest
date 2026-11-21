@@ -25,7 +25,7 @@
 - [ ] 012 Insights aggregates + home_line checkins_28d rename (queue/012-insights-aggregates.md, #22)
 - [ ] 006 Continuous aggregates: leaderboard, home line, personal stats (queue/006-continuous-aggregates.md, #4) -- reviewed: OK (runner no-transaction fix good), DB unverified; missed the #22 amendment -> 012
 - [ ] 007 MBTA static loader and realtime ingestion worker (queue/007-mbta-ingestion.md) -- reviewed: OK (parse/mock tests pass); live load needs MBTA_API_KEY + DB (#25)
-- [ ] 008 Read API implementation (queue/008-read-api.md, #8)
+- [ ] 008 Read API implementation (queue/008-read-api.md, #8) -- reviewed: OK (paths/params match spec; SQL DB-unverified). OpenAPI draft tweaked (limit/since_s defaults), so publish the current draft (#27)
 - [ ] 009 Demo benchmark: compression ratio and aggregate latency (queue/009-benchmarks.md)
 - [ ] 010 Schema v0.1: insights-sponsors additions + user_rank for all users (queue/010-schema-v01-insights.md, #22)
 - [ ] HUMAN: Eren publishes v0.1 contracts-draft/ (then planner closes #22)
