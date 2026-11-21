@@ -1,7 +1,7 @@
 ---
 id: 006
 title: Continuous aggregates - leaderboard, home line, personal stats
-status: ready
+status: done
 issue: 4
 depends_on: [002]
 ---
