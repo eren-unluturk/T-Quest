@@ -29,13 +29,14 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 - [ ] 014 Postgres backend: catalog, content, consent, place visits (queue/014-postgres-catalog-content-consent.md, #1)
 - [ ] 015 Bus parity in seed, analytics, recs (queue/015-bus-parity-seed.md)
 - [ ] 016 Analytics, recs and Boston analytics on Postgres, plus latency bench (queue/016-postgres-analytics-recs.md, #1)
+- [ ] 017 store_id validation and demo smoke script (queue/017-store-id-validation-demo-smoke.md)
 
 ## Phase 4: hardening and AI
 - [x] 008 Hardening and contract conformance test (queue/008-hardening-contract-conformance.md, #8) verified
 - [-] 009 CANCELLED: AI reasons (AGENTS.md Billing: no API keys)
 - [x] 011 Document consent error responses in OpenAPI (queue/011-openapi-error-responses.md, #8) verified
 - [x] 012 Boston analytics GET /analytics/boston, k-anonymous (queue/012-boston-analytics.md, #3) verified
-- [ ] 013 Consented place-visit ingest and delete-on-revoke (queue/013-place-visit-ingest.md)
+- [x] 013 Consented place-visit ingest and delete-on-revoke (queue/013-place-visit-ingest.md) verified
 - [x] 010 Seed coverage (neighborhoods, bus) and MBTA API verification (queue/010-seed-coverage-and-verification.md) verified
 
 ## Out of scope: do later (needs pay-per-usage, not this hackathon)
@@ -60,3 +61,4 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 - 0005 landed (data-platform): ids are uuid for sponsors, stores, offers and physical_rewards, so 014 maps slugs with uuid5. Badge slugs follow `line-red-complete` (posted on #5). Our aggregates come in data-platform 012 (home_line becomes checkins_30d), so 016 comes later.
 - data-platform 012 delivered migration 0006 (user_stop_daily, user_stop_hourly, stop_popularity_hourly, home_line.checkins_28d), not yet run against a DB. 016 queued and may be the first run.
 - 012 verified: 123 passed; k-anonymity (3 riders) enforced on stops, days, totals and previous-period baselines; no ids in the body; spec 0.2.0; conformance covers 12 operations. Accepted the stricter privacy deviations.
+- 013 verified: 149 passed; write never called without consent (spy plus source scan), revoke deletes visits, coordinates rounded, spec 0.3.0. store_id not validated (a 500 risk on uuid in postgres), so 017. 0.3.0 announced on #8 and #26.
