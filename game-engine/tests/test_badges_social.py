@@ -15,13 +15,13 @@ NOW = datetime(2026, 11, 21, 12, 0, 0)
 
 class BadgeTests(unittest.TestCase):
     def test_line_complete(self):
-        got = unlocked_badges(visited_stops=badges.LINES["red"], rank=1, already_have=set())
-        self.assertIn("line-red", got)
-        self.assertNotIn("line-green-b", got)
+        got = unlocked_badges(visited_stops=badges.LINES["Red"], rank=1, already_have=set())
+        self.assertIn("line-red-complete", got)
+        self.assertNotIn("line-green-b-complete", got)
 
     def test_partial_line_no_badge(self):
-        stops = set(badges.LINES["red"]) - {"harvard"}
-        self.assertNotIn("line-red", unlocked_badges(visited_stops=stops, rank=1, already_have=set()))
+        stops = set(badges.LINES["Red"]) - {"harvard"}
+        self.assertNotIn("line-red-complete", unlocked_badges(visited_stops=stops, rank=1, already_have=set()))
 
     def test_freedom_trail(self):
         got = unlocked_badges(visited_stops=badges.FREEDOM_TRAIL, rank=1, already_have=set())
@@ -29,16 +29,16 @@ class BadgeTests(unittest.TestCase):
 
     def test_rank_badges(self):
         self.assertEqual(unlocked_badges(visited_stops=set(), rank=2, already_have=set()), set())
-        self.assertEqual(unlocked_badges(visited_stops=set(), rank=3, already_have=set()), {"rank-3-patch"})
-        self.assertEqual(unlocked_badges(visited_stops=set(), rank=5, already_have={"rank-3-patch"}),
-                         {"rank-5-patch"})
+        self.assertEqual(unlocked_badges(visited_stops=set(), rank=3, already_have=set()), {"rank-3"})
+        self.assertEqual(unlocked_badges(visited_stops=set(), rank=5, already_have={"rank-3"}),
+                         {"rank-5"})
 
     def test_no_repeat(self):
-        got = unlocked_badges(visited_stops=badges.LINES["red"], rank=1, already_have={"line-red"})
-        self.assertNotIn("line-red", got)
+        got = unlocked_badges(visited_stops=badges.LINES["Red"], rank=1, already_have={"line-red-complete"})
+        self.assertNotIn("line-red-complete", got)
 
     def test_physical_rewards(self):
-        self.assertEqual(badges.physical_rewards_for({"line-red", "nope"}), {"red-line-patch"})
+        self.assertEqual(badges.physical_rewards_for({"line-red-complete", "nope"}), {"red-line-patch"})
 
 
 class QuestTests(unittest.TestCase):
