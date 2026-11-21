@@ -85,3 +85,14 @@ test('guard refuses when identity missing', () => {
   stage(dir, sh, ['docs/x.md']);
   assert.equal(runGuard(dir).status, 1);
 });
+
+import { spawnSync as _spawnSync } from 'node:child_process';
+test('every script in scripts/ parses (node --check)', async () => {
+  const { readdirSync } = await import('node:fs');
+  const path2 = await import('node:path');
+  const dir = path2.resolve(import.meta.dirname, '..', 'scripts');
+  for (const f of readdirSync(dir).filter((n) => n.endsWith('.mjs'))) {
+    const r = _spawnSync(process.execPath, ['--check', path2.join(dir, f)], { encoding: 'utf8' });
+    assert.equal(r.status, 0, `${f}: ${r.stderr}`);
+  }
+});

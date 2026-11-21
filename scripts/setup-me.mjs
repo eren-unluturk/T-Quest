@@ -22,8 +22,7 @@ if (set.status !== 0 || got !== '.githooks') {
 }
 console.log('Hooks verified: core.hooksPath = .githooks');
 const sync = spawnSync(process.execPath, [path.join(root, 'scripts', 'sync-claude-config.mjs')], { cwd: root, encoding: 'utf8' });
-if (sync.status !== 0) { console.error('sync-claude-config failed:
-' + (sync.stderr || sync.stdout)); process.exit(1); }
+if (sync.status !== 0) { console.error('sync-claude-config failed:\n' + (sync.stderr || sync.stdout)); process.exit(1); }
 console.log(sync.stdout.trim());
 const p = team[who];
 console.log(`Identity set: ${who}`);
