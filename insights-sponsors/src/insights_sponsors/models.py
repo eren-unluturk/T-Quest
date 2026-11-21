@@ -25,6 +25,7 @@ class Stop(BaseModel):
     lat: float
     lon: float
     neighborhood: str
+    mode: Literal["subway", "bus"] = "subway"
 
 
 class Sponsor(BaseModel):

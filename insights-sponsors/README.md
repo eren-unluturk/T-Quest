@@ -36,6 +36,13 @@ Settings are read from the environment or from the repo-root `.env` (copy `../.e
 | `DATA_BACKEND` | `memory` | `memory` uses the seed JSON in `data/seed/`. `postgres` is not implemented yet |
 | `DATABASE_URL` | unset | Tiger Data connection string, for the future Postgres backend |
 
+## Scope for this hackathon
+
+No pay-per-usage services. This service uses only free resources: the in-memory seed data, Tiger Data (free plan) and the free MBTA V3 API. Anything billed per call or per token is out of scope for now and listed here to do later:
+
+- LLM-written recommendation text (`ANTHROPIC_API_KEY` in `.env.example`); recommendations stay SQL/rule based.
+- Any paid geocoding, places or maps API for store and place-visit data.
+
 ## Contract
 
 The OpenAPI draft lives in `openapi/insights-sponsors.yaml` until it is promoted to `contracts/api/insights-sponsors.yaml` (done by a human, builders never write to `contracts/`).

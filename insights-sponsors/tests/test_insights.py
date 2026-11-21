@@ -109,9 +109,15 @@ def test_recommendations_exclude_visited_neighborhoods(repo):
         "neighborhood.fenway-kenmore",
         "neighborhood.west-end",
         "neighborhood.north-end",
+        "neighborhood.dorchester",
+        "neighborhood.allston",
+        "neighborhood.somerville",
+        "neighborhood.mission-hill",
     ]
     scores = [i.score for i in rec.items if i.kind == "neighborhood"]
-    assert scores == [1.0, 0.5, 0.3333, 0.25]
+    assert scores == [1.0, 0.5, 0.3333, 0.25, 0.2, 0.1667, 0.1429, 0.125]
+    # Orange-only neighborhoods are not reachable on the lines user-1 rides
+    assert not {"neighborhood.jamaica-plain", "neighborhood.roxbury", "neighborhood.east-boston"} & set(hoods)
 
 
 def test_route_recommendation_connects_to_home_line(repo):
@@ -135,8 +141,13 @@ def test_place_signal_requires_consent(client, repo):
 
     grant_place_visits(client, h)
     r = client.get("/recommendations", params={"kind": "stop"}, headers=h)
-    assert [i["id"] for i in r.json()["items"]] == ["place-haecl", "place-coecl"]
-    assert [i["score"] for i in r.json()["items"]] == [0.4, 0.2]
+    assert [i["id"] for i in r.json()["items"]] == [
+        "place-davis",
+        "place-haecl",
+        "place-coecl",
+        "place-forhl",
+    ]
+    assert [i["score"] for i in r.json()["items"]] == [0.4, 0.4, 0.2, 0.2]
     spy.assert_called_once()
 
     spy.reset_mock()
@@ -206,7 +217,7 @@ def test_recommendations_are_per_user(client):
 def test_seed_rider_events_shape(repo):
     users = {"user-1", "user-2", "user-3"}
     total = sum(len(repo.rider_events(u)) for u in users)
-    assert 200 <= total <= 220
+    assert total == 254
     assert not repo.rider_events("nobody")
     since = datetime.now(timezone.utc) - timedelta(days=30)
     assert all(e.time >= since for e in repo.rider_events("user-1", since))

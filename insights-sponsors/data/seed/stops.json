@@ -2,92 +2,233 @@
   {
     "id": "place-pktrm",
     "name": "Park Street",
-    "lat": 42.35639,
-    "lon": -71.06242,
-    "neighborhood": "Downtown"
+    "lat": 42.3563946,
+    "lon": -71.0624242,
+    "neighborhood": "Downtown",
+    "mode": "subway"
   },
   {
     "id": "place-dwnxg",
     "name": "Downtown Crossing",
-    "lat": 42.35555,
-    "lon": -71.06026,
-    "neighborhood": "Downtown"
+    "lat": 42.355518,
+    "lon": -71.060225,
+    "neighborhood": "Downtown",
+    "mode": "subway"
   },
   {
     "id": "place-gover",
     "name": "Government Center",
-    "lat": 42.3597,
-    "lon": -71.0594,
-    "neighborhood": "Downtown"
+    "lat": 42.359705,
+    "lon": -71.059215,
+    "neighborhood": "Downtown",
+    "mode": "subway"
   },
   {
     "id": "place-state",
     "name": "State",
-    "lat": 42.35888,
-    "lon": -71.05781,
-    "neighborhood": "Downtown"
+    "lat": 42.358978,
+    "lon": -71.057598,
+    "neighborhood": "Downtown",
+    "mode": "subway"
   },
   {
     "id": "place-haecl",
     "name": "Haymarket",
-    "lat": 42.36302,
+    "lat": 42.363021,
     "lon": -71.05829,
-    "neighborhood": "North End"
+    "neighborhood": "North End",
+    "mode": "subway"
   },
   {
     "id": "place-north",
     "name": "North Station",
-    "lat": 42.36528,
+    "lat": 42.365577,
     "lon": -71.06129,
-    "neighborhood": "West End"
+    "neighborhood": "West End",
+    "mode": "subway"
   },
   {
     "id": "place-coecl",
     "name": "Copley",
-    "lat": 42.34998,
-    "lon": -71.07733,
-    "neighborhood": "Back Bay"
+    "lat": 42.349974,
+    "lon": -71.077447,
+    "neighborhood": "Back Bay",
+    "mode": "subway"
   },
   {
     "id": "place-harsq",
     "name": "Harvard",
-    "lat": 42.37336,
-    "lon": -71.11893,
-    "neighborhood": "Cambridge"
+    "lat": 42.373362,
+    "lon": -71.118956,
+    "neighborhood": "Cambridge",
+    "mode": "subway"
   },
   {
     "id": "place-kencl",
     "name": "Kenmore",
-    "lat": 42.34885,
-    "lon": -71.09737,
-    "neighborhood": "Fenway-Kenmore"
+    "lat": 42.348949,
+    "lon": -71.095169,
+    "neighborhood": "Fenway-Kenmore",
+    "mode": "subway"
   },
   {
     "id": "place-sstat",
     "name": "South Station",
-    "lat": 42.35224,
-    "lon": -71.0552,
-    "neighborhood": "Downtown"
+    "lat": 42.352271,
+    "lon": -71.055242,
+    "neighborhood": "Downtown",
+    "mode": "subway"
   },
   {
     "id": "place-bbsta",
     "name": "Back Bay",
     "lat": 42.34735,
-    "lon": -71.07529,
-    "neighborhood": "Back Bay"
+    "lon": -71.075727,
+    "neighborhood": "Back Bay",
+    "mode": "subway"
   },
   {
     "id": "place-aqucl",
     "name": "Aquarium",
-    "lat": 42.3598,
-    "lon": -71.05165,
-    "neighborhood": "Waterfront"
+    "lat": 42.359784,
+    "lon": -71.051652,
+    "neighborhood": "Waterfront",
+    "mode": "subway"
   },
   {
     "id": "place-ccmnl",
     "name": "Community College",
-    "lat": 42.37363,
-    "lon": -71.06947,
-    "neighborhood": "Charlestown"
+    "lat": 42.373622,
+    "lon": -71.069533,
+    "neighborhood": "Charlestown",
+    "mode": "subway"
+  },
+  {
+    "id": "place-forhl",
+    "name": "Forest Hills",
+    "lat": 42.300713,
+    "lon": -71.113943,
+    "neighborhood": "Jamaica Plain",
+    "mode": "subway"
+  },
+  {
+    "id": "place-davis",
+    "name": "Davis",
+    "lat": 42.39674,
+    "lon": -71.121815,
+    "neighborhood": "Somerville",
+    "mode": "subway"
+  },
+  {
+    "id": "place-mvbcl",
+    "name": "Maverick",
+    "lat": 42.3691186,
+    "lon": -71.0395296,
+    "neighborhood": "East Boston",
+    "mode": "subway"
+  },
+  {
+    "id": "place-jfk",
+    "name": "JFK/UMass",
+    "lat": 42.320685,
+    "lon": -71.052391,
+    "neighborhood": "Dorchester",
+    "mode": "subway"
+  },
+  {
+    "id": "place-masta",
+    "name": "Massachusetts Avenue",
+    "lat": 42.341512,
+    "lon": -71.083423,
+    "neighborhood": "South End",
+    "mode": "subway"
+  },
+  {
+    "id": "place-harvd",
+    "name": "Harvard Avenue",
+    "lat": 42.350243,
+    "lon": -71.131355,
+    "neighborhood": "Allston",
+    "mode": "subway"
+  },
+  {
+    "id": "place-rugg",
+    "name": "Ruggles",
+    "lat": 42.336377,
+    "lon": -71.088961,
+    "neighborhood": "Roxbury",
+    "mode": "subway"
+  },
+  {
+    "id": "place-brmnl",
+    "name": "Brigham Circle",
+    "lat": 42.334229,
+    "lon": -71.104609,
+    "neighborhood": "Mission Hill",
+    "mode": "subway"
+  },
+  {
+    "id": "place-chncl",
+    "name": "Chinatown",
+    "lat": 42.352547,
+    "lon": -71.062752,
+    "neighborhood": "Chinatown",
+    "mode": "subway"
+  },
+  {
+    "id": "place-fldcr",
+    "name": "Fields Corner",
+    "lat": 42.300093,
+    "lon": -71.061667,
+    "neighborhood": "Dorchester",
+    "mode": "subway"
+  },
+  {
+    "id": "place-knncl",
+    "name": "Kendall/MIT",
+    "lat": 42.3624908,
+    "lon": -71.0861765,
+    "neighborhood": "Cambridge",
+    "mode": "subway"
+  },
+  {
+    "id": "79",
+    "name": "Massachusetts Ave @ Newbury St",
+    "lat": 42.347671,
+    "lon": -71.088092,
+    "neighborhood": "Back Bay",
+    "mode": "bus"
+  },
+  {
+    "id": "1720",
+    "name": "Blue Hill Ave @ Mattapan Sq",
+    "lat": 42.26876,
+    "lon": -71.093955,
+    "neighborhood": "Mattapan",
+    "mode": "bus"
+  },
+  {
+    "id": "1164",
+    "name": "Centre St @ Myrtle St",
+    "lat": 42.313306,
+    "lon": -71.11416,
+    "neighborhood": "Jamaica Plain",
+    "mode": "bus"
+  },
+  {
+    "id": "10928",
+    "name": "Harvard Ave @ Brighton Ave",
+    "lat": 42.352614,
+    "lon": -71.132097,
+    "neighborhood": "Allston",
+    "mode": "bus"
+  },
+  {
+    "id": "place-crtst",
+    "name": "Courthouse",
+    "lat": 42.35245,
+    "lon": -71.04685,
+    "neighborhood": "Seaport",
+    "mode": "bus"
   }
 ]

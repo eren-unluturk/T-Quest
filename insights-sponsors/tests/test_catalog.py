@@ -62,7 +62,7 @@ def test_offers_list_and_filters(client, auth_headers):
     r = client.get("/offers", headers=auth_headers)
     assert r.status_code == 200
     body = r.json()
-    assert len(body) == 12
+    assert len(body) == 14
     check_shape(response_schema("/offers", "get"), body)
     by_store = client.get("/offers", params={"store_id": "st.cafe-parkst"}, headers=auth_headers).json()
     assert ids(by_store) == {"off.cafe-parkst-r1", "off.cafe-parkst-quest"}

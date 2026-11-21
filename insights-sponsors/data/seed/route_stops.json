@@ -1,17 +1,25 @@
 {
  "Red": [
+  "place-davis",
+  "place-harsq",
+  "place-knncl",
   "place-pktrm",
   "place-dwnxg",
   "place-sstat",
-  "place-harsq"
+  "place-jfk",
+  "place-fldcr"
  ],
  "Orange": [
+  "place-ccmnl",
   "place-north",
   "place-haecl",
   "place-state",
   "place-dwnxg",
+  "place-chncl",
   "place-bbsta",
-  "place-ccmnl"
+  "place-masta",
+  "place-rugg",
+  "place-forhl"
  ],
  "Green": [
   "place-north",
@@ -19,11 +27,14 @@
   "place-gover",
   "place-pktrm",
   "place-coecl",
-  "place-kencl"
+  "place-kencl",
+  "place-harvd",
+  "place-brmnl"
  ],
  "Blue": [
-  "place-gover",
+  "place-mvbcl",
+  "place-aqucl",
   "place-state",
-  "place-aqucl"
+  "place-gover"
  ]
 }

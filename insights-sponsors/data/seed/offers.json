@@ -190,5 +190,37 @@
     "starts_at": "2026-11-01T00:00:00Z",
     "ends_at": null,
     "placement": "local_pick"
+  },
+  {
+    "required_badge_id": null,
+    "per_user_limit": 1,
+    "starts_at": "2026-11-01T00:00:00Z",
+    "ends_at": null,
+    "placement": "local_pick",
+    "points_cost": null,
+    "id": "off.cafe-davis-r1",
+    "sponsor_id": "sp.demo-cafe",
+    "store_id": "st.cafe-davis",
+    "title": "3% off coffee",
+    "description": "Rank 1 riders get 3% off any drink.",
+    "kind": "discount",
+    "discount_pct": 3,
+    "min_rank": 1
+  },
+  {
+    "required_badge_id": null,
+    "per_user_limit": 1,
+    "starts_at": "2026-11-01T00:00:00Z",
+    "ends_at": null,
+    "placement": "local_pick",
+    "points_cost": null,
+    "id": "off.threads-forhl-r2",
+    "sponsor_id": "sp.demo-threads",
+    "store_id": "st.threads-forhl",
+    "title": "5% off apparel",
+    "description": "Rank 2 riders get 5% off one apparel item.",
+    "kind": "discount",
+    "discount_pct": 5,
+    "min_rank": 2
   }
 ]

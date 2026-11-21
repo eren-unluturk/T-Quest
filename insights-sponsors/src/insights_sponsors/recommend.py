@@ -182,7 +182,7 @@ def recommend(
         + _place_affinity_candidates(repo, user_id, visited_stops, now)
     )
     # Organic ranking first. Sponsorship below only adds a flag.
-    candidates.sort(key=lambda c: (-c.score, c.id))
+    candidates.sort(key=lambda c: (-round(c.score, 6), c.id))
     if kind:
         candidates = [c for c in candidates if c.kind == kind]
 

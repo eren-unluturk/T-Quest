@@ -22,11 +22,11 @@ def repo() -> MemoryRepository:
 
 
 def test_seed_loads_and_counts(repo):
-    assert len(repo.stops()) >= 12
+    assert len(repo.stops()) >= 23
     assert len(repo.trail_sites()) == 16
     assert len(repo.fun_facts()) == 25
-    assert len(repo.stores()) == 8
-    assert len(repo.offers()) == 12
+    assert len(repo.stores()) == 10
+    assert len(repo.offers()) == 14
     assert len(repo.physical_rewards()) == 6
 
 
@@ -34,7 +34,7 @@ def test_facts_reference_seeded_stops(repo):
     stop_ids = {s.id for s in repo.stops()}
     for stop in repo.stops():
         sf = repo.stop_facts(stop.id)
-        assert sf is not None and 2 <= len(sf.facts) <= 3
+        assert sf is not None and 1 <= len(sf.facts) <= 3
         assert sf.stop_id in stop_ids
         assert sf.stop_name == stop.name
     assert repo.stop_facts("place-nope") is None
@@ -135,3 +135,29 @@ def test_models_match_openapi_fields():
         assert required == set(schema.get("required", [])), name
         checked += 1
     assert checked == 14
+
+
+def test_seed_covers_neighborhoods_and_bus(repo):
+    stops = repo.stops()
+    assert len({s.neighborhood for s in stops}) >= 8
+    assert len([s for s in stops if s.mode == "bus"]) >= 3
+    assert all(s.mode in ("subway", "bus") for s in stops)
+    # numeric ids are MBTA bus stops, place-* ids are stations
+    assert all(s.mode == "bus" for s in stops if s.id.isdigit())
+    # local picks exist outside Downtown
+    assert repo.offers(stop_id="place-davis") and repo.offers(stop_id="place-forhl")
+
+
+def test_trail_nearest_stop_is_closest_subway_stop(repo):
+    from insights_sponsors.repo.memory import haversine_m
+
+    subway = [s for s in repo.stops() if s.mode == "subway"]
+    for t in repo.trail_sites():
+        closest = min(subway, key=lambda s: haversine_m(t.lat, t.lon, s.lat, s.lon))
+        assert t.nearest_stop_id == closest.id, t.name
+
+
+def test_source_urls_are_https(repo):
+    for stop in repo.stops():
+        for fact in repo.stop_facts(stop.id).facts:
+            assert fact.source_url is None or fact.source_url.startswith("https://"), fact.id

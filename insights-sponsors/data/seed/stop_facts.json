@@ -255,5 +255,191 @@
       "body": "The Bunker Hill Monument is a 221-foot granite obelisk with 294 steps to the top.",
       "source_url": "https://en.wikipedia.org/wiki/Bunker_Hill_Monument"
     }
+  ],
+  "place-forhl": [
+    {
+      "id": "fact.forhl.1",
+      "kind": "fast_fact",
+      "title": "End of the Orange Line",
+      "body": "Forest Hills is the southern end of the Orange Line, in Jamaica Plain. The line reached it in 1987 when the Southwest Corridor replaced the Washington Street Elevated.",
+      "source_url": "https://en.wikipedia.org/wiki/Forest_Hills_station"
+    },
+    {
+      "id": "fact.forhl.2",
+      "kind": "fast_fact",
+      "title": "Arnold Arboretum",
+      "body": "The Arnold Arboretum of Harvard University, established in 1872, borders Forest Hills.",
+      "source_url": "https://en.wikipedia.org/wiki/Arnold_Arboretum"
+    }
+  ],
+  "place-davis": [
+    {
+      "id": "fact.davis.1",
+      "kind": "history",
+      "title": "Northwest Extension",
+      "body": "Davis Square station opened in December 1984 as part of the Red Line's Northwest Extension.",
+      "source_url": "https://en.wikipedia.org/wiki/Davis_station"
+    },
+    {
+      "id": "fact.davis.2",
+      "kind": "fast_fact",
+      "title": "Somerville Theatre",
+      "body": "The Somerville Theatre in Davis Square has been showing films and hosting performances since 1914.",
+      "source_url": "https://en.wikipedia.org/wiki/Somerville_Theatre"
+    }
+  ],
+  "place-mvbcl": [
+    {
+      "id": "fact.mvbcl.1",
+      "kind": "fast_fact",
+      "title": "East Boston on the Blue Line",
+      "body": "Maverick serves Maverick Square in East Boston on the Blue Line, which runs through the East Boston Tunnel that opened in 1904.",
+      "source_url": "https://en.wikipedia.org/wiki/Maverick_station_(MBTA)"
+    }
+  ],
+  "place-jfk": [
+    {
+      "id": "fact.jfk.1",
+      "kind": "fast_fact",
+      "title": "Where the Red Line splits",
+      "body": "JFK/UMass is where the Red Line divides into the Ashmont and Braintree branches.",
+      "source_url": "https://en.wikipedia.org/wiki/JFK/UMass_station"
+    },
+    {
+      "id": "fact.jfk.2",
+      "kind": "fast_fact",
+      "title": "Kennedy Library",
+      "body": "The John F. Kennedy Presidential Library and Museum stands on Columbia Point, near the station.",
+      "source_url": "https://en.wikipedia.org/wiki/John_F._Kennedy_Presidential_Library_and_Museum"
+    }
+  ],
+  "place-masta": [
+    {
+      "id": "fact.masta.1",
+      "kind": "fast_fact",
+      "title": "Mass Ave to Cambridge",
+      "body": "Massachusetts Avenue crosses the Charles River on the Harvard Bridge, which was famously measured in Smoots in 1958.",
+      "source_url": "https://en.wikipedia.org/wiki/Harvard_Bridge"
+    }
+  ],
+  "place-harvd": [
+    {
+      "id": "fact.harvd.1",
+      "kind": "fast_fact",
+      "title": "Allston on the B branch",
+      "body": "Harvard Avenue is a Green Line B branch stop in Allston, a neighborhood with a large student population.",
+      "source_url": "https://en.wikipedia.org/wiki/Harvard_Avenue_station"
+    }
+  ],
+  "place-rugg": [
+    {
+      "id": "fact.rugg.1",
+      "kind": "fast_fact",
+      "title": "Roxbury hub",
+      "body": "Ruggles is an Orange Line and commuter rail station in Roxbury, next to Northeastern University.",
+      "source_url": "https://en.wikipedia.org/wiki/Ruggles_station"
+    },
+    {
+      "id": "fact.rugg.2",
+      "kind": "fast_fact",
+      "title": "Bus connections",
+      "body": "Ruggles has a busway where many MBTA bus routes meet the Orange Line.",
+      "source_url": "https://en.wikipedia.org/wiki/Ruggles_station"
+    }
+  ],
+  "place-brmnl": [
+    {
+      "id": "fact.brmnl.1",
+      "kind": "fast_fact",
+      "title": "Mission Hill",
+      "body": "Brigham Circle in Mission Hill is a Green Line E branch stop named for the Peter Bent Brigham Hospital.",
+      "source_url": "https://en.wikipedia.org/wiki/Brigham_Circle_station"
+    }
+  ],
+  "place-chncl": [
+    {
+      "id": "fact.chncl.1",
+      "kind": "fast_fact",
+      "title": "Chinatown Gate",
+      "body": "The Chinatown Gate on Beach Street was a 1982 gift from Taiwan.",
+      "source_url": "https://en.wikipedia.org/wiki/Chinatown,_Boston"
+    },
+    {
+      "id": "fact.chncl.2",
+      "kind": "history",
+      "title": "A neighborhood since the 1870s",
+      "body": "Boston's Chinatown grew from a Chinese community that began settling in the area in the 1870s.",
+      "source_url": "https://en.wikipedia.org/wiki/Chinatown,_Boston"
+    }
+  ],
+  "place-fldcr": [
+    {
+      "id": "fact.fldcr.1",
+      "kind": "fast_fact",
+      "title": "Dorchester",
+      "body": "Fields Corner is a Red Line station in Dorchester, one of the largest neighborhoods in Boston.",
+      "source_url": "https://en.wikipedia.org/wiki/Fields_Corner_station"
+    }
+  ],
+  "place-knncl": [
+    {
+      "id": "fact.knncl.1",
+      "kind": "fast_fact",
+      "title": "MIT and Kendall Square",
+      "body": "Kendall/MIT serves the MIT campus and Kendall Square, a hub for biotech and technology companies.",
+      "source_url": "https://en.wikipedia.org/wiki/Kendall/MIT_station"
+    },
+    {
+      "id": "fact.knncl.2",
+      "kind": "history",
+      "title": "Opened in 1912",
+      "body": "The Red Line station opened in 1912 with the original Cambridge subway.",
+      "source_url": "https://en.wikipedia.org/wiki/Kendall/MIT_station"
+    }
+  ],
+  "place-crtst": [
+    {
+      "id": "fact.crtst.1",
+      "kind": "fast_fact",
+      "title": "Silver Line in the Seaport",
+      "body": "Courthouse is a Silver Line station in the Seaport, named for the nearby John Joseph Moakley United States Courthouse.",
+      "source_url": "https://en.wikipedia.org/wiki/Courthouse_station_(MBTA)"
+    }
+  ],
+  "79": [
+    {
+      "id": "fact.79.1",
+      "kind": "fast_fact",
+      "title": "Route 1 on Mass Ave",
+      "body": "MBTA Route 1 runs along Massachusetts Avenue between Harvard Square and Nubian Station, crossing the Charles River on the Harvard Bridge.",
+      "source_url": "https://en.wikipedia.org/wiki/MBTA_Bus_Route_1"
+    }
+  ],
+  "1720": [
+    {
+      "id": "fact.1720.1",
+      "kind": "fast_fact",
+      "title": "Route 28 to Mattapan",
+      "body": "MBTA Route 28 connects Mattapan Square with Ruggles along Blue Hill Avenue and Warren Street, one of the busiest bus routes in the system.",
+      "source_url": "https://en.wikipedia.org/wiki/MBTA_Bus_Route_28"
+    }
+  ],
+  "1164": [
+    {
+      "id": "fact.1164.1",
+      "kind": "fast_fact",
+      "title": "Route 39 through Jamaica Plain",
+      "body": "MBTA Route 39 links Forest Hills and Back Bay, passing through the center of Jamaica Plain on Centre Street.",
+      "source_url": "https://en.wikipedia.org/wiki/MBTA_Bus_Route_39"
+    }
+  ],
+  "10928": [
+    {
+      "id": "fact.10928.1",
+      "kind": "fast_fact",
+      "title": "Route 66 through Allston",
+      "body": "MBTA Route 66 links Harvard Square and Nubian Station through Allston, Brookline and Roxbury.",
+      "source_url": "https://en.wikipedia.org/wiki/MBTA_Bus_Route_66"
+    }
   ]
 }

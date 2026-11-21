@@ -70,5 +70,23 @@
     "lon": -71.1186,
     "nearest_stop_id": "place-harsq",
     "address": "Demo address near Harvard"
+  },
+  {
+    "id": "st.cafe-davis",
+    "name": "Demo Cafe Davis Sq",
+    "category": "food",
+    "lat": 42.39704,
+    "lon": -71.12151,
+    "nearest_stop_id": "place-davis",
+    "address": "Demo address near Davis"
+  },
+  {
+    "id": "st.threads-forhl",
+    "name": "Demo Threads Forest Hills",
+    "category": "clothing",
+    "lat": 42.30101,
+    "lon": -71.11364,
+    "nearest_stop_id": "place-forhl",
+    "address": "Demo address near Forest Hills"
   }
 ]

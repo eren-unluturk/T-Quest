@@ -1,7 +1,7 @@
 ---
 id: 010
 title: Broaden seed coverage (neighborhoods and bus) and check coordinates against the MBTA V3 API
-status: ready
+status: done
 issue:
 depends_on: [006]
 ---
