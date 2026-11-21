@@ -2,6 +2,7 @@
 
 MAX_DISTANCE_M = 75
 VEHICLE_SEEN_WITHIN_S = 300
+VEHICLE_RADIUS_M = 300  # a live vehicle must be this close to the stop
 COOLDOWN_PER_STOP_S = 1800
 
 FIRST_VISIT_POINTS = 20
