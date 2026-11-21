@@ -72,3 +72,41 @@ def test_active_alerts_excludes_expired(conn):
         assert active == {ids["live"], ids["open"]}
     finally:
         conn.execute("DELETE FROM alerts WHERE id = ANY(%s)", (list(ids.values()),))
+
+
+# ------------------------------------------------ compression vs unique indexes
+import re
+from pathlib import Path
+
+MIGRATION_0003 = Path(__file__).resolve().parents[1] / "migrations" / "0003_realtime.sql"
+
+
+def _cols(csv: str) -> set[str]:
+    return {re.sub(r"\s+(ASC|DESC)\b.*$", "", c.strip(), flags=re.I) for c in csv.split(",") if c.strip()}
+
+
+def test_0003_unique_index_columns_are_in_compression_settings():
+    """TimescaleDB rejects compression when a unique-index column is neither segmentby nor orderby."""
+    sql = MIGRATION_0003.read_text(encoding="utf-8")
+    unique = {}
+    for table, cols in re.findall(r"CREATE UNIQUE INDEX[^;]*?\bON\s+(\w+)\s*\(([^)]*)\)", sql, flags=re.I):
+        unique.setdefault(table, set()).update(_cols(cols))
+    compressed = {}
+    for table, body in re.findall(r"ALTER TABLE\s+(\w+)\s+SET\s*\((.*?)\);", sql, flags=re.S | re.I):
+        seg = re.search(r"compress_segmentby\s*=\s*'([^']*)'", body)
+        order = re.search(r"compress_orderby\s*=\s*'([^']*)'", body)
+        compressed[table] = _cols(seg.group(1) if seg else "") | _cols(order.group(1) if order else "")
+
+    assert set(unique) == {"vehicles", "predictions"} == set(compressed)
+    for table, cols in unique.items():
+        missing = cols - compressed[table]
+        assert not missing, f"{table}: unique index columns {missing} not in segmentby/orderby"
+
+
+def test_compression_settings_list_id_columns_as_orderby(conn):
+    rows = conn.execute(
+        "SELECT hypertable_name, attname FROM timescaledb_information.compression_settings"
+        " WHERE hypertable_name IN ('vehicles', 'predictions') AND orderby_column_index IS NOT NULL"
+    ).fetchall()
+    assert ("vehicles", "vehicle_id") in rows
+    assert ("predictions", "prediction_id") in rows

@@ -113,10 +113,10 @@ Written by insights-sponsors only after `place_visits` consent. `id uuid`, `time
 
 ## Realtime (0003)
 ### vehicles (hypertable on `time`, chunk 1 day)
-`time` (poll time), `vehicle_id not null`, `route_id`, `trip_id`, `stop_id`, `direction_id smallint`, `current_status`, `lat`, `lon`, `bearing real`, `speed real`, `label`, `updated_at`. Unique `(vehicle_id, time)`. Indexes `(stop_id, time desc)`, `(route_id, time desc)`. Compression segmentby `route_id`, orderby `time DESC`; compressed after 1 day, dropped after 30 days.
+`time` (poll time), `vehicle_id not null`, `route_id`, `trip_id`, `stop_id`, `direction_id smallint`, `current_status`, `lat`, `lon`, `bearing real`, `speed real`, `label`, `updated_at`. Unique `(vehicle_id, time)`. Indexes `(stop_id, time desc)`, `(route_id, time desc)`. Compression segmentby `route_id`, orderby `vehicle_id, time DESC` (the unique index columns must be segmentby or orderby); compressed after 1 day, dropped after 30 days.
 
 ### predictions (hypertable on `time`, chunk 1 day)
-`time` (poll time), `prediction_id not null`, `stop_id`, `route_id`, `trip_id`, `direction_id`, `arrival_time`, `departure_time`, `status`, `schedule_relationship`. Unique `(prediction_id, time)`. Index `(stop_id, time desc)`. Same compression and retention as `vehicles`.
+`time` (poll time), `prediction_id not null`, `stop_id`, `route_id`, `trip_id`, `direction_id`, `arrival_time`, `departure_time`, `status`, `schedule_relationship`. Unique `(prediction_id, time)`. Index `(stop_id, time desc)`. Compression segmentby `route_id`, orderby `prediction_id, time DESC`; same compression and retention schedule as `vehicles`.
 
 ### alerts
 `id text pk`, `effect`, `cause`, `severity int`, `header`, `description`, `lifecycle`, `active_start`, `active_end`, `first_seen_at`, `last_seen_at`, `raw jsonb`. Upserted by the ingestion worker.

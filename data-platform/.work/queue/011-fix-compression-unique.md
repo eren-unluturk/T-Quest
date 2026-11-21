@@ -1,7 +1,7 @@
 ---
 id: 011
 title: Make realtime compression settings compatible with the unique indexes
-status: ready
+status: done
 depends_on: [005]
 ---
 ## Goal

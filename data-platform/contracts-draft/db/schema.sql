@@ -357,15 +357,20 @@ SELECT create_hypertable('predictions', 'time',
 CREATE UNIQUE INDEX IF NOT EXISTS predictions_pred_time_uq ON predictions (prediction_id, time);
 CREATE INDEX IF NOT EXISTS predictions_stop_time_idx ON predictions (stop_id, time DESC);
 
+-- TimescaleDB only allows compression on a table with a unique index when every column of
+-- that index is a segmentby or orderby column. The unique index is (vehicle_id, time), so
+-- vehicle_id goes into orderby next to time. The unique index is kept: ingestion relies on
+-- it (ON CONFLICT DO NOTHING) to avoid duplicate samples.
 ALTER TABLE vehicles SET (
     timescaledb.compress,
     timescaledb.compress_segmentby = 'route_id',
-    timescaledb.compress_orderby = 'time DESC'
+    timescaledb.compress_orderby = 'vehicle_id, time DESC'
 );
+-- Same rule: the unique index is (prediction_id, time), so prediction_id is in orderby.
 ALTER TABLE predictions SET (
     timescaledb.compress,
     timescaledb.compress_segmentby = 'route_id',
-    timescaledb.compress_orderby = 'time DESC'
+    timescaledb.compress_orderby = 'prediction_id, time DESC'
 );
 
 SELECT add_compression_policy('vehicles',    INTERVAL '1 day',  if_not_exists => TRUE);
