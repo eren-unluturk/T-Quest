@@ -16,7 +16,7 @@
 - [ ] HUMAN: promote the OpenAPI draft to contracts/api/insights-sponsors.yaml (#26, then close #8)
 
 ## Phase 2: catalog, content, consent (in-memory)
-- [ ] 003 Models, repository, seed content (queue/003-models-memory-repo-seed.md)
+- [x] 003 Models, repository, seed content (queue/003-models-memory-repo-seed.md) verified
 - [ ] 004 Content and catalog endpoints (queue/004-content-catalog-endpoints.md, #5)
 - [ ] 005 Consent endpoints and guard (queue/005-consent-endpoints-and-guard.md)
 
@@ -27,6 +27,7 @@
 ## Phase 4: hardening and AI
 - [ ] 008 Hardening and contract conformance test (queue/008-hardening-contract-conformance.md, #8)
 - [ ] 009 Optional AI-written recommendation reasons (queue/009-ai-recommendation-reasons.md)
+- [ ] 010 Seed coverage (neighborhoods, bus) and MBTA API verification (queue/010-seed-coverage-and-verification.md)
 
 ## Later
 - Demo numbers: aggregate latency vs raw (with data-platform)
@@ -34,3 +35,4 @@
 ## Review notes
 - 001 verified: 6 tests pass, /health on :8002. Nit for a later hardening prompt: `config.py` reads `../.env` relative to cwd; resolve it from the package path instead.
 - 002 verified: 10 tests pass, the spec validates, and every path and field matches the prompt. Accepted deviations: shared components, a recs limit max of 50, extra 404/422 responses. Draft announced on #8 and #5.
+- 003 verified: 22 tests pass, a model/OpenAPI field-parity test, referential integrity, no real brands. Sampled fun facts read as accurate. Gaps: coordinates approximate, URLs unchecked, 5 of 13 stops Downtown, no bus stops, so follow-up 010. The consent default-rows question is already answered by 005 step 1. Badge ids posted on #5.
