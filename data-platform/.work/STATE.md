@@ -28,3 +28,5 @@
 STOPPED SAFELY at 2026-11-21 13:20 (planner). See .work/HANDOFF.md.
 
 # Builder session 2026-11-21: 016 and contracts done; DB steps blocked by missing password in DATABASE_URL (see HANDOFF.md)
+
+# Builder 2026-11-21 run 2: DB steps done and verified; MBTA ingestion skipped (no key). See HANDOFF.md
