@@ -1,7 +1,7 @@
 ---
 id: 008
 title: Hardening, with a contract conformance test across all routes
-status: ready
+status: done
 issue: 8
 depends_on: [006]
 ---
