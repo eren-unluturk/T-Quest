@@ -1,0 +1,47 @@
+{
+  "generated_at": "2026-11-21T20:13:34.199644+00:00",
+  "postgres": "18.7",
+  "timescaledb": "2.32.1",
+  "seed": 0.2026,
+  "counts": {
+    "rider_events": 250000,
+    "points_ledger": 125000,
+    "users": 500
+  },
+  "generate_seconds": 17,
+  "compress_seconds": 1.6,
+  "before": {
+    "chunks": 6,
+    "table_bytes": 39682048,
+    "index_bytes": 60964864,
+    "toast_bytes": 57344,
+    "total_bytes": 100704256
+  },
+  "after": {
+    "chunks": 6,
+    "table_bytes": 2785280,
+    "index_bytes": 622592,
+    "toast_bytes": 13574144,
+    "total_bytes": 16982016
+  },
+  "compression_stats_bytes": [
+    100655104,
+    16637952
+  ],
+  "timings_before_compression": {
+    "leaderboard_cagg": 129.69,
+    "leaderboard_raw": 104.71,
+    "home_line_cagg": 264.66,
+    "home_line_raw": 396.34,
+    "leaderboard_speedup": 0.8,
+    "home_line_speedup": 1.5
+  },
+  "timings_after_compression": {
+    "leaderboard_cagg": 49.48,
+    "leaderboard_raw": 79.56,
+    "home_line_cagg": 220.38,
+    "home_line_raw": 183.86,
+    "leaderboard_speedup": 1.6,
+    "home_line_speedup": 0.8
+  }
+}

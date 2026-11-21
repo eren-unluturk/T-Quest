@@ -11,7 +11,11 @@
 - A stale DATABASE_URL (no password) exists in the Windows/shell environment and overrides ../.env (dotenv does not override). Remove it or run with `unset DATABASE_URL`.
 - Do not leave demo rows in the DB: 500 demo users crowd the leaderboard test (top 50). Run `python -m data_platform.demo_measure --cleanup` after demos.
 
+## Update 2026-11-21 (real data run)
+- MBTA key works. Real static data loaded (158 routes, 141 lines, 6774 stops). Collector: `python -m data_platform.collector` (Ctrl+C to stop). Benchmarks: `bench_real` and `demo_measure` write sections of docs/TIGER_DATA_RESULTS.md.
+- Synthetic demo rows were cleaned out of the DB after the benchmark (they crowd the leaderboard test). Re-run `demo_measure` only for demos, then `--cleanup`.
+- Real vehicles data accumulated so far is small (days of sporadic polling); run the collector longer for a stronger benchmark.
+
 ## Remaining
-- MBTA ingestion not run (MBTA_API_KEY missing). Add the key, then `python -m data_platform.verify`.
 - Prompt 015 (Dockerfile and compose services) still queued.
 - schema.sql is a concatenation of migrations, not a pg_dump (no pg_dump binary here).

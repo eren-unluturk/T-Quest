@@ -3,40 +3,34 @@
     python -m data_platform.demo_measure            # generate, compress, time, write docs/TIGER_DATA_RESULTS.md
     python -m data_platform.demo_measure --cleanup  # remove the demo rows and users
 
-Generates ~1,000,000 rider_events (plus ~500,000 points_ledger rows) over 30 days for 500
-synthetic users `demo_0001`..`demo_0500`, using a fixed seed (setseed per slice, md5-derived ids).
+Generates ~250,000 SYNTHETIC rider_events (is_synthetic = true; plus ~125,000 points_ledger rows) over
+30 days for 500 synthetic users `demo_0001`..`demo_0500`, using a fixed seed. Riders are anchored to the
+real MBTA data loaded by `python -m data_platform.load_static`: real routes, the real stops served by
+each route and direction, and the hour-of-day distribution of scheduled trips (route_schedule_hourly).
 Demo ledger rows have ref_type = 'demo'. Output contains no connection details.
 """
 import argparse
 import json
+import random
+import uuid
+from zoneinfo import ZoneInfo
 import statistics
 import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from . import db
+from . import db, docs_util
 from .bench import HOME_LINE_RAW
 
 SEED = 0.2026
 USERS = 500
-EVENTS = 1_000_000
-LEDGER = 500_000
+EVENTS = 250_000
+LEDGER = 125_000
 DAYS = 30
-SLICES = 6  # 5 days each
 DOCS = Path(__file__).resolve().parents[3] / "docs" / "TIGER_DATA_RESULTS.md"
 JSON_OUT = Path(__file__).resolve().parents[2] / "bench" / "demo_measure.json"
 
-STOPS = ["place-pktrm", "place-dwnxg", "place-sstat", "place-state", "place-haecl", "place-north",
-         "place-cntsq", "place-knncl", "place-harsq", "place-portr", "place-davis", "place-alfcl",
-         "place-asmnl", "place-jfk", "place-nqncy", "place-forhl", "place-ogmnl", "place-rugg",
-         "place-bbsta", "place-bckhl", "place-coecl", "place-kencl", "place-hymnl", "place-lech",
-         "place-gover", "place-bomnl", "place-aport", "place-wondl", "place-rvrwy", "place-mfa",
-         "place-lngmd", "place-fenwy", "place-hsmnl", "place-chill", "place-sbmnl", "place-brico",
-         "place-sull", "place-mlmnl", "place-welln", "place-masta"]
-ROUTES = ["Red", "Orange", "Blue", "Green-B", "Green-C", "Green-D", "Green-E", "1", "66", "39"]
-SQL_STOPS = "ARRAY[" + ",".join(f"'{s}'" for s in STOPS) + "]"
-SQL_ROUTES = "ARRAY[" + ",".join(f"'{r}'" for r in ROUTES) + "]"
 
 LEADERBOARD_RAW_30D = """
     WITH t AS (
@@ -52,7 +46,7 @@ def cleanup(conn):
     conn.execute("SET timescaledb.max_tuples_decompressed_per_dml_transaction = 0")
     # Decompress first so re-runs start from clean, uncompressed chunks (no partially compressed leftovers).
     conn.execute("SELECT decompress_chunk(c, if_compressed => true) FROM show_chunks('rider_events') c").fetchall()
-    conn.execute("DELETE FROM rider_events WHERE user_id IN (SELECT id FROM users WHERE starts_with(username, 'demo_'))")
+    conn.execute("DELETE FROM rider_events WHERE is_synthetic OR user_id IN (SELECT id FROM users WHERE starts_with(username, 'demo_'))")
     conn.execute("ALTER TABLE points_ledger DISABLE TRIGGER points_ledger_no_mutation")
     try:
         conn.execute("DELETE FROM points_ledger WHERE ref_type = 'demo'")
@@ -68,38 +62,65 @@ def cleanup(conn):
         conn.execute(f"VACUUM (FULL, ANALYZE) {m}")
 
 
+def _load_anchors(conn):
+    """Real routes, route stops and scheduled hourly trips from the database."""
+    routes = {r[0]: r[1] for r in conn.execute("SELECT id, mode FROM routes").fetchall()}
+    stops = {}
+    for rid, did, sid, lat, lon in conn.execute(
+            "SELECT rs.route_id, rs.direction_id, s.id, s.lat, s.lon FROM route_stops rs JOIN stops s ON s.id = rs.stop_id"):
+        stops.setdefault((rid, did), []).append((sid, lat, lon))
+    sched = {}
+    for rid, did, hour, trips in conn.execute("SELECT route_id, direction_id, hour_of_day, trips FROM route_schedule_hourly"):
+        sched.setdefault(rid, {}).setdefault(did, {})[hour] = trips
+    usable = sorted(r for r in sched if r in routes and any((r, d) in stops for d in sched[r]))
+    if not usable:
+        raise SystemExit("no real MBTA static data: run `python -m data_platform.load_static` first")
+    return routes, stops, sched, usable
+
+
 def generate(conn, now):
     conn.execute(
         "INSERT INTO users (id, username) SELECT md5('demo-user-' || n)::uuid, 'demo_' || lpad(n::text, 4, '0') "
         "FROM generate_series(1, %s) n ON CONFLICT DO NOTHING", (USERS,))
-    per_ev, per_led = EVENTS // SLICES, LEDGER // SLICES
-    for s in range(SLICES):
-        lo = now - (DAYS - s * (DAYS // SLICES)) * timedelta(days=1)
-        span = (DAYS // SLICES) * 86400
-        p = {"seed": SEED + s / 1000.0, "lo": lo, "span": span, "u": USERS, "s": s}
-        conn.execute("SELECT setseed(%(seed)s)", p)
-        # Each user has a home route used 70% of the time; ids are md5-derived so reruns match.
-        conn.execute(f"""
-            INSERT INTO rider_events (id, time, user_id, event_type, stop_id, route_id, mode, lat, lon, points_awarded, payload)
-            SELECT md5('demo-ev-' || %(s)s || '-' || g)::uuid,
-                   LEAST(%(lo)s::timestamptz + make_interval(secs => floor(random() * %(span)s)::int), %(hi)s::timestamptz),
-                   md5('demo-user-' || un)::uuid,
-                   (ARRAY['checkin','checkin','checkin','checkin','checkin','checkin','checkin','ride_start','ride_start','visit'])[1 + floor(random() * 10)::int],
-                   ({SQL_STOPS})[1 + floor(random() * {len(STOPS)})::int],
-                   CASE WHEN random() < 0.7 THEN ({SQL_ROUTES})[1 + (un %% {len(ROUTES)})]
-                        ELSE ({SQL_ROUTES})[1 + floor(random() * {len(ROUTES)})::int] END,
-                   'subway', 42.30 + random() * 0.1, -71.15 + random() * 0.12, 10, '{{"synthetic": true}}'
-            FROM (SELECT g, 1 + floor(random() * %(u)s)::int AS un FROM generate_series(1, {per_ev}) g) x
-            ON CONFLICT DO NOTHING""", {**p, "hi": now})
-        conn.execute(f"""
-            INSERT INTO points_ledger (id, at, user_id, delta, reason, ref_type, route_id)
-            SELECT md5('demo-led-' || %(s)s || '-' || g)::uuid,
-                   LEAST(%(lo)s::timestamptz + make_interval(secs => floor(random() * %(span)s)::int), %(hi)s::timestamptz),
-                   md5('demo-user-' || un)::uuid, 2 + floor(random() * 19)::int, 'checkin', 'demo',
-                   ({SQL_ROUTES})[1 + floor(random() * {len(ROUTES)})::int]
-            FROM (SELECT g, 1 + floor(random() * %(u)s)::int AS un FROM generate_series(1, {per_led}) g) x
-            ON CONFLICT DO NOTHING""", {**p, "hi": now})
-        print(f"slice {s + 1}/{SLICES} inserted", flush=True)
+    routes, stops, sched, usable = _load_anchors(conn)
+    rng = random.Random(SEED)
+    tz = ZoneInfo("America/New_York")
+    weights = [sum(sum(h.values()) for h in sched[r].values()) for r in usable]
+    users = [uuid.UUID(hex=__import__("hashlib").md5(f"demo-user-{n}".encode()).hexdigest()) for n in range(1, USERS + 1)]
+    home = [rng.choices(usable, weights)[0] for _ in users]  # each user's home route, used ~70% of the time
+    types = ["checkin"] * 7 + ["ride_start"] * 2 + ["visit"]
+    day0 = (now.astimezone(tz) - timedelta(days=DAYS)).replace(hour=0, minute=0, second=0, microsecond=0)
+
+    def pick_time(route):
+        dirs = [d for d in sched[route] if (route, d) in stops]
+        d = rng.choice(dirs)
+        hours = sched[route][d]
+        hour = rng.choices(list(hours), list(hours.values()))[0]
+        day = day0 + timedelta(days=rng.randrange(DAYS))
+        t = (day + timedelta(hours=hour, minutes=rng.randrange(60), seconds=rng.randrange(60))).astimezone(timezone.utc)
+        return d, min(t, now - timedelta(minutes=1))
+
+    def uid(kind, i):
+        return uuid.uuid5(uuid.NAMESPACE_URL, f"tquest-demo-{kind}-{SEED}-{i}")
+
+    with conn.cursor().copy(
+            "COPY rider_events (id, time, user_id, event_type, stop_id, route_id, mode, lat, lon, points_awarded, payload, is_synthetic) FROM STDIN") as cp:
+        for i in range(EVENTS):
+            u = rng.randrange(USERS)
+            route = home[u] if rng.random() < 0.7 else rng.choices(usable, weights)[0]
+            d, t = pick_time(route)
+            sid, lat, lon = rng.choice(stops[(route, d)])
+            cp.write_row((uid("ev", i), t, users[u], rng.choice(types), sid, route, routes[route], lat, lon, 10,
+                          '{"synthetic": true}', True))
+    print(f"rider_events inserted: {EVENTS}", flush=True)
+    with conn.cursor().copy(
+            "COPY points_ledger (id, at, user_id, delta, reason, ref_type, route_id) FROM STDIN") as cp:
+        for i in range(LEDGER):
+            u = rng.randrange(USERS)
+            route = home[u] if rng.random() < 0.7 else rng.choices(usable, weights)[0]
+            _, t = pick_time(route)
+            cp.write_row((uid("led", i), t, users[u], 2 + rng.randrange(19), "checkin", "demo", route))
+    print(f"points_ledger inserted: {LEDGER}", flush=True)
     conn.execute("ANALYZE rider_events")
     conn.execute("ANALYZE points_ledger")
 
@@ -147,7 +168,7 @@ def run():
         generate(conn, now)
         gen_s = round(time.time() - t0)
         counts = {
-            "rider_events": conn.execute("SELECT count(*) FROM rider_events WHERE user_id IN (SELECT id FROM users WHERE starts_with(username,'demo_'))").fetchone()[0],
+            "rider_events": conn.execute("SELECT count(*) FROM rider_events WHERE is_synthetic").fetchone()[0],
             "points_ledger": conn.execute("SELECT count(*) FROM points_ledger WHERE ref_type='demo'").fetchone()[0],
             "users": conn.execute("SELECT count(*) FROM users WHERE starts_with(username,'demo_')").fetchone()[0],
         }
@@ -184,22 +205,22 @@ def write_doc(r):
     sb, sa = r["compression_stats_bytes"]
     ratio_stats = sb / sa if sa else 0
     tb, ta = r["timings_before_compression"], r["timings_after_compression"]
-    doc = f"""# Tiger Data results
+    doc = f"""Source of every number in this section: SYNTHETIC rider events (`rider_events.is_synthetic = true`) generated by `data_platform.demo_measure`, not real riders. The stops, routes and scheduled hours they are anchored to are real MBTA static data.
 
 Measured {r['generated_at'][:10]} on a Tiger Cloud service (0.5 CPU, 2 GiB RAM), PostgreSQL {r['postgres']}, TimescaleDB {r['timescaledb']}.
 Reproduce with `python -m data_platform.demo_measure` from `data-platform/` (fixed seed {r['seed']}, safe to re-run; `--cleanup` removes the demo rows).
 
-## Data
+### Data
 
 | Item | Rows |
 |---|---|
-| `rider_events` (30 days, ~40 stop ids, 10 routes) | {r['counts']['rider_events']:,} |
+| `rider_events` (30 days, real MBTA stops/routes, schedule-weighted hours) | {r['counts']['rider_events']:,} |
 | `points_ledger` (ref_type `demo`) | {r['counts']['points_ledger']:,} |
 | Synthetic users (`demo_0001`..`demo_0500`) | {r['counts']['users']} |
 
 Generation took {r['generate_seconds']} s. Each user has a home route used about 70% of the time.
 
-## Compression (`rider_events`, hypertable with 7-day chunks)
+### Compression (`rider_events`, hypertable with 7-day chunks)
 
 Settings (migration 0008): `compress_segmentby = 'user_id'`, `compress_orderby = 'time DESC, id'`, policy after 7 days. For the measurement every chunk was compressed.
 
@@ -212,7 +233,7 @@ Settings (migration 0008): `compress_segmentby = 'user_id'`, `compress_orderby =
 - `hypertable_compression_stats` ({mb(sb)} before, {mb(sa)} after): **{ratio_stats:.1f}x**.
 - Compressing all chunks took {r['compress_seconds']} s.
 
-## Query latency (server-side planning + execution time from `EXPLAIN (ANALYZE)`, median of 5 runs after 1 warm-up, aggregates refreshed first; excludes network round trip)
+### Query latency (server-side planning + execution time from `EXPLAIN (ANALYZE)`, median of 5 runs after 1 warm-up, aggregates refreshed first; excludes network round trip)
 
 | Query | Continuous aggregate (ms) | Raw table (ms) | Speedup |
 |---|---|---|---|
@@ -249,25 +270,20 @@ Home line, raw table:
 {HOME_LINE_RAW.strip()}
 ```
 
-## Summary for the pitch
+### Summary for the pitch
 
 {summary(r, ratio_total, tb, ta)}
 """
-    DOCS.parent.mkdir(exist_ok=True)
-    DOCS.write_text(doc, encoding="utf-8")
+    docs_util.upsert_section(DOCS, "synthetic", "Synthetic rider events", doc)
 
 
 def summary(r, ratio, tb, ta):
-    return (f"T-Quest records every rider check-in as a time-series event. We loaded about {r['counts']['rider_events']:,} rider "
-            f"events across 30 days into a small Tiger Data service (0.5 CPU, 2 GiB RAM), and TimescaleDB's columnar compression "
-            f"shrank the hypertable (data plus indexes) by {ratio:.1f}x. The leaderboard and home line, the two screens riders hit "
-            f"most, are served from continuous aggregates that the database keeps fresh on its own: the leaderboard takes "
-            f"{tb['leaderboard_cagg']} ms instead of {tb['leaderboard_raw']} ms ({tb['leaderboard_speedup']}x) and the home line "
-            f"{tb['home_line_cagg']} ms instead of {tb['home_line_raw']} ms ({tb['home_line_speedup']}x) on uncompressed data. "
-            f"Be upfront that this synthetic set has only about 3 rows per aggregate bucket, so the speedup is modest and grows "
-            f"with real traffic. Once the events are compressed, the raw home-line query also gets much faster "
-            f"({ta['home_line_raw']} ms) and is about as quick as the aggregate ({ta['home_line_cagg']} ms), so the main win "
-            f"at this size is the storage saving with no loss of query speed.")
+    return (f"{r['counts']['rider_events']:,} synthetic rider events (anchored to real MBTA stops, routes and schedule hours) "
+            f"compress {ratio:.1f}x on total hypertable size. Query timings are reported as measured, with no claim of a "
+            f"continuous-aggregate win: on this small, single-run dataset on a 0.5 CPU service, the aggregate was "
+            f"{tb['leaderboard_speedup']}x (leaderboard) and {tb['home_line_speedup']}x (home line) relative to raw before compression, "
+            f"and {ta['leaderboard_speedup']}x and {ta['home_line_speedup']}x after. Timings vary run to run on a shared service; "
+            f"treat speedups near or below 1x as noise at this size. The real-data section has the continuous-aggregate comparison on live MBTA data.")
 
 
 if __name__ == "__main__":

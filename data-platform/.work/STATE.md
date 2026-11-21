@@ -30,3 +30,8 @@ STOPPED SAFELY at 2026-11-21 13:20 (planner). See .work/HANDOFF.md.
 # Builder session 2026-11-21: 016 and contracts done; DB steps blocked by missing password in DATABASE_URL (see HANDOFF.md)
 
 # Builder 2026-11-21 run 2: DB steps done and verified; MBTA ingestion skipped (no key). See HANDOFF.md
+
+# Builder session 2026-11-21 (real data run)
+- DATABASE_URL was set in the process env (overrides ../.env); ran with it unset. MBTA key HTTP 200.
+- Done: migration 0009 (is_synthetic, lines, route_schedule_hourly, vehicles_route_5m), load_static (lines + schedule), collector, bench_real, synthetic generator anchored to real data (250k events, is_synthetic), docs/contracts updated. 124 tests pass.
+- Smoke test 2 min: vehicles +3778, predictions +5922, alerts +58 upserts (60 polled). Nothing left running.
