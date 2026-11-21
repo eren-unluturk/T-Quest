@@ -83,6 +83,28 @@ class PgTests(unittest.TestCase):
         pts = self.c.get("/me/points", headers=H(u)).json()
         self.assertTrue(any(e["reason"].startswith("complete_line:line-blue") for e in pts["recent"]))
 
+    def test_delay_job_pays_once(self):
+        from game_engine import delay_job
+        self.conn.execute("insert into users (username, home_line_override) values ('pytest-rider', 'Red')")
+        self.conn.execute("insert into users (username, home_line_override) values ('pytest-green', 'Green-B')")
+        self.conn.execute("insert into alerts (id, effect, active_start) values ('pytest-alert', 'NO_SERVICE', now() - interval '1 hour')")
+        self.conn.execute("insert into alerts (id, effect, active_start) values ('pytest-minor', 'DELAY', now() - interval '1 hour')")
+        self.conn.execute("insert into alert_entities (alert_id, route_id) values ('pytest-alert', 'Red')")
+        self.conn.execute("insert into alert_entities (alert_id, route_id) values ('pytest-minor', 'Green-B')")
+        before = delay_job.run(self.conn, dry_run=True)
+        self.assertGreaterEqual(before["paid"], 1)
+        first = delay_job.run(self.conn)
+        self.assertGreaterEqual(first["paid"], 1)
+        def paid(alert_id):
+            return self.conn.execute(
+                "select count(*), coalesce(sum(delta), 0) from points_ledger where ref_type='alert' and ref_id=%s "
+                "and reason='delay_compensation'", (alert_id,)).fetchone()
+
+        self.assertEqual(paid("pytest-alert"), (1, 50))   # Red home-line rider, once
+        self.assertEqual(paid("pytest-minor"), (0, 0))    # a plain DELAY pays nothing
+        second = delay_job.run(self.conn)
+        self.assertEqual(second["paid"], 0)               # nothing new on a second run
+        self.assertEqual(paid("pytest-alert"), (1, 50))
     def test_unknown_stop_and_far(self):
         self.assertEqual(self.c.post("/checkins", json=dict(self.stop, stop_id="nope-nope"),
                                      headers=H("pytest-bob")).status_code, 404)

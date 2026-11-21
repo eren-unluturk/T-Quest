@@ -7,6 +7,10 @@ from . import config
 HOME_LINE_WINDOW_DAYS = 30
 HOME_LINE_MIN_RIDES = 5
 
+# MBTA alert effects that count as an outage (plus the older generic names)
+OUTAGE_EFFECTS = frozenset({"NO_SERVICE", "SUSPENSION", "SHUTTLE", "SIGNIFICANT_DELAY",
+                            "OUTAGE", "CANCELLATION"})
+
 
 def home_line(rides, now):
     """rides: iterable of (at, line_id). Most-ridden line in the last 30 days.
@@ -29,7 +33,7 @@ def home_line(rides, now):
 
 def compensation_points(*, alert_id, alert_line, alert_effect, user_home_line, already_paid_alerts):
     """Points owed for one alert. Only outages, only home-line users, once per alert."""
-    if alert_effect not in ("outage", "suspension", "cancellation"):
+    if (alert_effect or "").upper() not in OUTAGE_EFFECTS:
         return 0
     if user_home_line is None or user_home_line != alert_line:
         return 0
