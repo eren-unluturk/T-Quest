@@ -20,4 +20,5 @@
 - Cycle 6: reviewed 008 (OK, DB-unverified).
 - Cycle 7: reviewed 009 (code OK, no numbers without DB). Amended 012 to mirror game-engine delay.py home line (30d, tie to most recent, checkins_30d); told #22 and #4. Queued 013 (pglast syntax check) and 014 (verify command).
 - Cycle 8: reviewed 010 (OK) and verified 011. Queued 015 (containers).
-- Next: review 012-015. After 012, #27 publish covers v0.1; then close #22 once published.
+- Cycle 9: reviewed 012 (home_line still 28d: builder used old prompt text) -> queued 016; verified 013 (pglast syntax checks pass).
+- Next: review 014-016. Publish (#27) after 016 so contracts carry checkins_30d; then close #22.
