@@ -26,3 +26,6 @@
 
 ## Update (merge and cleanup pass)
 - The shared `ranks` table now has 8 named ranks (game-engine). Anything that hard-codes the old 5-rank table is stale; the data-platform test no longer does.
+
+## Update (final checks)
+- Added `node scripts/demo.mjs` and docs/DEMO.md. Fixed: blank-title MHC rows (365 removed), 500s on malformed ids in Postgres mode, setup-me.mjs syntax error (#39). 198 insights-sponsors tests, 130 data-platform tests, 58 node tests pass.
