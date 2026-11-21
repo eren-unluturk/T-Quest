@@ -50,6 +50,16 @@ curl -H "Authorization: Bearer ann" http://127.0.0.1:8003/me/rank
 | `VEHICLE_CHECK` | `off` skips the live vehicle check. Default: on with the database, off in memory mode. |
 | `STORE_KEY` | Store key accepted by `POST /redemptions/verify` (memory-mode default: `dev-store-key`). With the database, a store's `X-Store-Key` must match its sha256 hash in `stores.store_key_hash`. |
 
+## Demo
+
+Walks through check-ins, points, ranks, a badge, friends, leaderboards, quests and a redemption with fake data, and prints every call. Nothing real is written.
+
+```powershell
+python game-engine/demo/demo.py
+```
+
+To try calls by hand: start the server in demo mode (no `DATABASE_URL`), open `http://127.0.0.1:8003/docs`, and put `Bearer ann` in the `authorization` box of any call. Fake stops: `park`, `downtown`, `harvard`, `alewife`, `south-station`. Offers `o1` and `o2`. Store key `dev-store-key`.
+
 ## Delay bonus job
 
 Pays 50 points once per alert to riders whose home line has an outage. It does not run by itself. Run it on a schedule:
