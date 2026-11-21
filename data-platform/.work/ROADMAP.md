@@ -8,7 +8,8 @@
 - game-engine needs "vehicle seen at stop within 300 s": served by `/vehicles?stop_id=&since_s=` (008) on `vehicles` (005).
 - Attribution check fails on history commit 6732e8d (a teammate's Co-authored-by trailer, merged via PR #19). Fix requires a history rewrite + force-push, which agents may not do. Raised to humans.
 - **No database on this machine (#25, to:humans).** Docker and Postgres are absent; all DB acceptance checks are deferred until a Tiger Cloud DATABASE_URL or Docker is available. Items are ticked only after a DB run.
-- MBTA_API_KEY needed for live ingestion (007); prompt falls back to fixtures.
+- MBTA_API_KEY needed for live ingestion (007); requested on #25. Without a key the API allows ~20 req/min.
+- Once a DB exists: queue a verification prompt that runs migrate, load_static, ingest --once and the full pytest suite, then tick 001-003, 005-007.
 
 ## Phase 1: schema v0 and contracts (unblocks game-engine, insights-sponsors, clients)
 - [ ] 001 Scaffold service, docker-compose, env, migration runner (queue/001-scaffold-compose-migrations.md, #1) -- reviewed: code OK, DB criteria unverified (no DB, #25)
@@ -22,7 +23,7 @@
 - [ ] 011 Fix compression settings vs unique indexes (queue/011-fix-compression-unique.md)
 - [ ] 012 Insights aggregates + home_line checkins_28d rename (queue/012-insights-aggregates.md, #22)
 - [ ] 006 Continuous aggregates: leaderboard, home line, personal stats (queue/006-continuous-aggregates.md, #4) -- reviewed: OK (runner no-transaction fix good), DB unverified; missed the #22 amendment -> 012
-- [ ] 007 MBTA static loader and realtime ingestion worker (queue/007-mbta-ingestion.md)
+- [ ] 007 MBTA static loader and realtime ingestion worker (queue/007-mbta-ingestion.md) -- reviewed: OK (parse/mock tests pass); live load needs MBTA_API_KEY + DB (#25)
 - [ ] 008 Read API implementation (queue/008-read-api.md, #8)
 - [ ] 009 Demo benchmark: compression ratio and aggregate latency (queue/009-benchmarks.md)
 - [ ] 010 Schema v0.1: insights-sponsors additions + user_rank for all users (queue/010-schema-v01-insights.md, #22)
