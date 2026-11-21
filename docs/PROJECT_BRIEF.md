@@ -1,5 +1,7 @@
 # T-Quest: Project Brief
 
+> Original brief. Later decisions supersede parts of it (see `DECISIONS.md`): we are not pursuing real partnerships, so every sponsor, store, team, discount and label is a demo placeholder, and rank discount percentages are placeholders from game-engine's rank table. Demo placeholder. No partnership, endorsement or real discount is implied.
+
 Boston Hacks, Transit Gamification track + "Best Use of Tiger Data" subtrack.
 
 **T-Quest** is a Pokemon-Go-style gamification layer over the MBTA (subway AND bus). Daily commuting is mundane, and nothing is gained when the T breaks. Riding becomes gameplay.

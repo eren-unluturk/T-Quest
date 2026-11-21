@@ -2,20 +2,22 @@
 
 Boston Hacks, Transit Gamification track, Best Use of Tiger Data subtrack. Working name T-Quest.
 
+> **Demo disclaimer.** T-Quest is a hackathon prototype. Every sponsor, store, team, discount and label is a demo placeholder. No partnership, endorsement or real discount is implied. We are not pursuing real partnerships. Rider data is synthetic (flagged `is_synthetic`); stops, routes, schedules and live vehicles are real MBTA data.
+
 ## 30-second hook
-Hundreds of thousands of people ride the T every day and nothing happens when they do. T-Quest turns every stop into something to collect and every ride into progress: points, a travel rank, rewards at the local cafe, and a reason for visitors to step off the train. Underneath, one Tiger Data database holds the profiles and the live MBTA streams together.
+Hundreds of thousands of people ride the T every day and nothing happens when they do. T-Quest turns every stop into something to collect and every ride into progress: points, a travel rank, demo rewards at placeholder local spots, and a reason for visitors to step off the train. Underneath, one Tiger Data database holds the profiles and the live MBTA streams together.
 
 ## Problem and solution
 **Problem.** The T is a necessity: routine, waiting, friction, and nothing gained when it breaks. For tourists it is passive and disconnected from the city.
 
-**Solution.** A Pokemon-Go-style layer over subway and bus. Check in at stops and collect them, track routes Strava-style, earn points, level a travel rank that unlocks tiered discounts, and redeem rewards near stops. At every stop riders can browse what is nearby and filter by category and verified community label. Tourists get stop facts, Freedom Trail spots and Boston history. When your home line goes down, you get compensation points.
+**Solution.** A Pokemon-Go-style layer over subway and bus. Check in at stops and collect them, track routes Strava-style, earn points, level a travel rank that unlocks tiered discounts, and redeem demo rewards near stops. At every stop riders can browse what is nearby and filter by category and verified community label. Tourists get stop facts, Freedom Trail spots and Boston history. When your home line goes down, you get compensation points.
 
 ## The six guiding questions
 1. **What aspect of riding can be more exciting?** The wait and the trip become progress: stops to collect, routes to complete, ranks to reach, and loading-screen facts about where you are.
 2. **How do we make the T engaging and memorable for tourists?** A tourist layer per stop (fast facts, Freedom Trail, history) from open civic and heritage sources, with attribution, plus collectible stop check-ins and patches.
-3. **How do we encourage community engagement?** Community quests that send riders to local businesses near stops, and nearby-spot filters for verified community labels so riders can support the communities they care about. Labels appear only when declared by the business or listed in an official directory.
+3. **How do we encourage community engagement?** Community quests that send riders to local businesses near stops, and nearby-spot filters for verified community labels so riders could support the communities they care about. In the demo no real business carries a label; filtering is shown on fictional "Sample ... (demo)" spots. Labels would appear only when declared by the business or listed in an official directory.
 4. **How do we introduce it and make it widely accessible?** Works for subway and bus from day one, uses open MBTA data, no special hardware, opt-in location. Rollout: start with a few stations and partner stores, expand by line. TODO: confirm accessibility approach with the design.
-5. **What incentivizes residents to use it?** Points and rank, tiered discounts (the first rank gives a small discount, higher ranks more, top ranks can unlock free items), friends and leaderboards, physical stickers and patches for the bag, and compensation points when the home line has an outage.
+5. **What incentivizes residents to use it?** Points and rank, tiered demo discounts (placeholder percentages from game-engine's rank table; the top rank unlocks a placeholder free item), friends and leaderboards, physical stickers and patches for the bag, and compensation points when the home line has an outage.
 6. **How does it make the T better for all riders?** Delay and cancellation notifications, compensation when service fails, and aggregate, privacy-protected ridership insights that can inform service. TODO: confirm exact claims with data-platform before presenting.
 
 ## Why Tiger Data
@@ -90,12 +92,7 @@ Source of every number in this section: REAL data from the MBTA V3 API (`/vehicl
 
 ##### Compression (source: `hypertable_detailed_size` total, tables + indexes + toast; every chunk compressed for this measurement)
 
-| Hypertable | Size before | Size after | Ratio (total size) | Ratio (`hypertable_compression_stats`) |
-|---|---|---|---|---|
-| `vehicles` | 57.8 MB | 63.3 MB | 0.9x | 138.5x |
-| `predictions` | 81.8 MB | 87.0 MB | 0.9x | 29.0x |
-
-"Before" is the size when the benchmark started: chunks older than 1 day were already compressed by the policy, the newest were not. After, every chunk is compressed. The stats ratio covers compressed chunks only.
+TODO: measure. The earlier real-data compression figures were unreliable (the benchmark mixed already-compressed and uncompressed chunks) and were removed. Re-measure on settled chunks with `python -m data_platform.bench_real`, then record the result here.
 
 ##### Query latency: vehicle position reports per line per 5 minutes, last 3 days (source: `EXPLAIN (ANALYZE)` server-side planning + execution, median of 5 after 1 warm-up)
 
@@ -108,17 +105,15 @@ Source of every number in this section: REAL data from the MBTA V3 API (`/vehicl
 The dataset is only a few days of polling, so it is small for TimescaleDB; results at this size may not reflect larger volumes.
 <!-- AUTO:numbers:end -->
 
-## Sponsors and business model
-Demo examples only. All three are placeholders for the demo; no partnership, discount or endorsement is real until Eren confirms it.
-- **Boston Red Sox** (team sponsor, near Fenway and Kenmore): a hat redeemable with points and a ticket discount by rank.
-- **Mint Julep** (independent clothing boutique, Cambridge, near Harvard): a native placement and offer.
-- **Diesel Cafe** (cafe, Somerville, near Davis): a native placement and offer.
+## Sponsors and business model (a proposal, not existing deals)
+Demo placeholder. No partnership, endorsement or real discount is implied. We are not pursuing real partnerships. Everything below describes what a sponsor program could look like.
+- **Demo placeholders:** Boston Red Sox (near Fenway and Kenmore), Mint Julep (43 Brattle St, Cambridge, near Harvard, clothing) and Diesel Cafe (257 Elm St, Somerville, near Davis, cafe). We entered only name, address, nearby stop and category. Their merch, ticket and rank-tier offers are placeholders.
 
-How it works:
-- **Nearby spots at every stop**, with category filters and verified identity-label filters. Sponsors get native, highlighted placement and offers; other spots are free listings. No pop-up ads.
-- **Verified labels.** Shown only when declared by the business or listed in an official directory, evidence stored, never inferred. Businesses can correct or remove their listing.
-- **Physical rewards.** Stickers and patches redeemed at partner stores, tied to achievements, verified with a single-use code at the store.
-- **Who benefits.** Stores get foot traffic from riders with a reason to come in. Sports teams get merch and ticket redemption with points. Riders get discounts. Sponsors never change recommendation order.
+What a program could look like:
+- **Nearby spots at every stop**, with category filters and label filters. Sponsors could get native, highlighted placement and offers; other spots would be free listings. No pop-up ads.
+- **Labels.** In the demo no real business carries a label. A label would be shown only if the business declared it or an official certification or directory lists it, with evidence stored, never inferred. Filtering is demonstrated on fictional "Sample ... (demo)" spots. Businesses could correct or remove a listing (path in `docs/DATA_SOURCES.md`).
+- **Physical rewards.** Stickers and patches tied to achievements, redeemed at a store with a single-use code checked by staff.
+- **Who could benefit.** Stores could gain foot traffic from riders with a reason to come in, sports teams could offer merch and ticket redemption with points, riders could get discounts. Sponsors would never change recommendation order.
 
 ## Community and tourist engagement
 - Tourist content (stop facts, Freedom Trail, history) comes from open civic and cultural-heritage sources with attribution displayed. Any fast-fact text is our own wording.
@@ -126,22 +121,22 @@ How it works:
 - Opt-in tracking of other places visited, with explicit consent, revocable at any time, which deletes the stored visits.
 
 ## Accessibility and rollout
-Subway and bus share the same model (a stop is a stop). Start with a handful of stations around the demo sponsors, then extend by line. UI accessibility decisions come from the design. TODO: confirm with Bryan and Isabella.
+Subway and bus share the same model (a stop is a stop). Start with a handful of stations, then extend by line. UI accessibility decisions come from the design. TODO: confirm with Bryan and Isabella.
 
 ## 3-minute demo script
 | Time | Beat | Notes |
 |---|---|---|
 | 0:00 | Hook and problem | Use the 30-second hook above |
-| 0:30 | PLACEHOLDER: app UI, check in at a stop | Wait for Figma in `design/`; do not invent screens |
-| 1:00 | PLACEHOLDER: nearby spots at Harvard, filter by category and label | UI from design; data from the nearby endpoint; demo spots labeled |
-| 1:30 | PLACEHOLDER: live data moment, vehicles on a line right now | Real MBTA feed via the collector |
+| 0:30 | **[PLACEHOLDER: UI/Figma]** check in at a stop | Fill in from `design/` when it exists; do not invent screens |
+| 1:00 | **[PLACEHOLDER: UI/Figma]** nearby spots at Harvard, filter by category and label | UI from `design/`; data from the nearby endpoint; use the fictional "Sample ... (demo)" spots for label filters |
+| 1:30 | **[PLACEHOLDER: live data moment]** vehicles on a line right now | Real MBTA feed via the collector; TODO: pick the line and screen when the UI exists |
 | 2:00 | Tiger Data: compression and continuous aggregate numbers | Read from the generated block above |
-| 2:30 | PLACEHOLDER: rank, offer redemption, sticker or patch | UI from design |
-| 2:50 | Close: what we would do next | Real partners, more lines, tourist layer |
+| 2:30 | **[PLACEHOLDER: UI/Figma]** rank, demo offer redemption, sticker or patch | UI from `design/`; say clearly that offers are demo placeholders |
+| 2:50 | Close: what we would do next | More lines, tourist layer, a possible sponsor program (not pursued now) |
 
 ## Q&A prep
 - **Is the rider data real?** No. There are no users yet. Stops, routes, schedules, live vehicles, predictions and alerts are real MBTA data. Rider events are synthetic and flagged `is_synthetic`, and we say so.
-- **Are the sponsors real?** The Red Sox, Mint Julep and Diesel Cafe entries are demo placeholders. No discount or endorsement is real.
+- **Are the sponsors real?** No. The Red Sox, Mint Julep and Diesel Cafe entries are demo placeholders. No partnership, endorsement or real discount is implied. We are not pursuing real partnerships.
 - **How are identity labels verified?** Only when the business declared the label itself or an official certification or directory lists it. We store the evidence URL or declaration note, the date and who verified it. Never inferred from names, photos or reviews. Pending labels are never shown or matched by filters.
 - **What if a business is listed wrongly?** There is a correction and removal path in `docs/DATA_SOURCES.md`.
 - **Where does the tourist content come from?** Official APIs and downloads of open sources, with license and attribution stored for each record; we do not scrape.

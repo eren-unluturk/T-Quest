@@ -19,6 +19,8 @@ info:
     (POST /redemptions/verify). This service owns the catalog those routes reference by offer_id.
     Rank and discount numbers come from game-engine.yaml x-rules.ranks.
     Sponsor placements are native (local picks, sponsored quests), never pop-ups.
+    Demo placeholder. No partnership, endorsement or real discount is implied. Every sponsor, store, offer and label in the demo data is a placeholder (see the demo field);
+    real businesses carry no identity labels, and label filtering is demonstrated on fictional 'Sample ... (demo)' spots.
 servers:
   - url: http://localhost:8002
 security:
@@ -48,7 +50,7 @@ paths:
           schema: {type: integer, default: 5, minimum: 1, maximum: 20}
       responses:
         '200':
-          description: Nearby partner stores with their offers
+          description: Nearby demo stores with their offers
           content:
             application/json:
               schema:

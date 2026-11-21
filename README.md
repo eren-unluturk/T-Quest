@@ -4,7 +4,9 @@
 
 **Boston Hacks. Track: Transit Gamification. Subtrack: Best Use of Tiger Data.**
 
-T-Quest is a Pokemon-Go-style game layer over the MBTA, subway and bus. Riders check in at stops, collect them, track routes Strava-style, earn points, climb a travel rank and spend points on local rewards. Every stop also shows what is nearby (food, coffee, shops), which riders can narrow by category and by verified community label. Tiger Data (Postgres + TimescaleDB) holds the relational profiles and the high-frequency MBTA streams in one database.
+> **Demo disclaimer.** T-Quest is a hackathon prototype. Every sponsor, store, team, discount and label is a demo placeholder. No partnership, endorsement or real discount is implied. We are not pursuing real partnerships. Rider data is synthetic (flagged `is_synthetic`); stops, routes, schedules and live vehicles are real MBTA data.
+
+T-Quest is a Pokemon-Go-style game layer over the MBTA, subway and bus. Riders check in at stops, collect them, track routes Strava-style, earn points, climb a travel rank and spend points on demo rewards (placeholder sponsors, see the disclaimer above). Every stop also shows what is nearby (food, coffee, shops), which riders can narrow by category and by verified community label. Tiger Data (Postgres + TimescaleDB) holds the relational profiles and the high-frequency MBTA streams in one database.
 
 ## The problem
 Hundreds of thousands of people ride the MBTA every day. For residents it is a functional necessity: a predictable routine, platform waits, friction, and nothing gained when the T breaks. For tourists the T feels passive and disconnected from the city. The question we answer: how do we make the T ride something people look forward to? See [PITCH.md](PITCH.md) for our answers to the six track questions.
@@ -14,24 +16,27 @@ Hundreds of thousands of people ride the MBTA every day. For residents it is a f
 Status is derived from each agent's `.work/ROADMAP.md` and handoff notes. See [PLAN.md](PLAN.md) for the live checklist counts.
 
 **Built**
-- Tiger Data schema (migrations 0000-0009) applied to a live Tiger Cloud database: rider events, MBTA vehicles/predictions/alerts as hypertables, continuous aggregates, compression policies. `python -m data_platform.verify` passed on the live database.
+- Tiger Data schema (migrations 0000-0011) applied to a live Tiger Cloud database: rider events, MBTA vehicles/predictions/alerts as hypertables, continuous aggregates, compression policies. `python -m data_platform.verify` passed on the live database.
 - Real MBTA static data loaded (routes, lines, stops, schedules) and a standalone live collector for vehicles, predictions and alerts.
-- Benchmark commands and measured results: [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md).
+- Benchmark commands and measured results: [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md). The real-data compression figures are TODO: measure.
 - data-platform read API (FastAPI) and published contracts in `contracts/`.
-- insights-sponsors service: stop facts, Freedom Trail, loading-screen facts, offers, physical-reward catalog, consent, place visits, personal and Boston analytics, deterministic recommendations. Runs on an in-memory backend with seed data (OpenAPI draft v0.3.0).
-- game-engine service (Tobi): check-in, points, rank, redemption, badges, quests, friends, leaderboards, home line and delay compensation rules, on an in-memory backend, with its OpenAPI published.
+- insights-sponsors service, OpenAPI v0.5.0 published in `contracts/api/`: stop facts, Freedom Trail, loading-screen facts, tourist content with attribution, demo offers and rank tiers, physical-reward catalog, and **nearby spots with category and label filters**. Its Postgres backend serves stops, offers, physical rewards, nearby spots and tourist content.
+- Tourist content ingestion (Analyze Boston, MHC inventory, Digital Commonwealth, Freedom Trail seed), run once; counts in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md). MHC terms are unconfirmed.
+- game-engine service (Tobi): check-in, points, rank, redemption, badges, quests, friends, leaderboards, home line and delay compensation rules, with an in-memory mode and a Tiger Data (Postgres) store, OpenAPI published.
 
-**In progress** (code exists, see handoff for what is verified)
-- insights-sponsors on Postgres for catalog, offers, physical rewards, tourist content and the **nearby-spots feature** (consent, place visits and analytics still run in memory) (every stop lists nearby spots; filter by category and by verified identity label; sponsors get native highlighted placement, other spots are free listings).
-- Tourist content: ingestion built and run (Analyze Boston, MHC inventory, Digital Commonwealth, Freedom Trail seed) with attribution per record; MHC terms still to confirm, see docs/DATA_SOURCES.md.
+**In progress**
+- Consent, place visits, route analytics and recommendations run on the in-memory backend with seed data; moving them to Postgres is planned, not done.
 
 **Planned**
 - Rider-facing apps (client-bryan, client-isabella). They wait on sketches and Figma in `design/`; nobody invents UI.
-- game-engine on Postgres, community quests ("visit three local spots near stops"), delay and cancellation notifications.
+- Community quests ("visit three local spots near stops") proposed to game-engine, delay and cancellation notifications.
 - Opt-in tracking of other places visited, with explicit consent (the consent table and gate exist).
 
+## Demo placeholders
+The Boston Red Sox, Mint Julep (43 Brattle St, Cambridge, near Harvard) and Diesel Cafe (257 Elm St, Somerville, near Davis) appear only as demo placeholders, with just the facts we entered: name, address, nearby stop, category. Demo placeholder. No partnership, endorsement or real discount is implied. Real businesses carry no identity labels in the demo. Filtering by label is demonstrated on fictional "Sample ... (demo)" spots.
+
 ### Verified labels policy
-A label such as local/independent, woman-owned or veteran-owned is shown for a business only if the business declared it itself or an official certification or directory lists it. We never infer a label from a name, photo, review or menu, and no model assigns labels. Pending labels are never returned and never match a filter.
+In the demo no real business carries a label. In general, a label such as local/independent, woman-owned or veteran-owned would be shown for a business only if the business declared it itself or an official certification or directory lists it. We never infer a label from a name, photo, review or menu, and no model assigns labels. Pending labels are never returned and never match a filter.
 
 ## Architecture
 

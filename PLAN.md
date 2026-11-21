@@ -9,7 +9,7 @@ Make the T something riders look forward to: a Pokemon-Go-style game layer over 
 **Must-have for the demo**
 - Tiger Data schema live, real MBTA data flowing, measured compression and aggregate numbers.
 - Check-in, points, rank and leaderboard (game-engine) on real stops.
-- Nearby spots at a stop with category and verified-label filters; three labeled demo sponsors.
+- Nearby spots at a stop with category and label filters (demonstrated on fictional sample spots); three labeled demo placeholders.
 - Offers by rank tier, physical-reward catalog (stickers and patches).
 - UI from the Figma/sketches in `design/` (not started, waiting on design).
 
@@ -20,7 +20,7 @@ Make the T something riders look forward to: a Pokemon-Go-style game layer over 
 - Delay notifications and compensation points.
 
 **Future**
-- Real sponsor partnerships (we confirm each one ourselves), per-token or paid tiers (out of scope now), real auth, bus-specific features beyond parity.
+- Per-token or paid tiers (out of scope now), real auth, bus-specific features beyond parity. Not pursuing real partnerships; all sponsors are demo placeholders.
 
 ## Architecture and ownership
 See [README.md](README.md) for the diagram. Ownership is in `TEAM.md` and `team.json`: Eren owns data-platform and insights-sponsors plus root files and `contracts/db`, Tobi owns game-engine, Bryan and Isabella own their clients and `design/`. GitHub Issues is the only inter-agent channel.
@@ -53,8 +53,8 @@ Total open issues: 27.
 
 ## Per-agent roadmap (hand-written, as of 2026-11-21)
 - **data-platform:** schema 0000-0009 applied and verified on a live Tiger Cloud database; real static data loaded; collector running; benchmarks recorded in `docs/TIGER_DATA_RESULTS.md`. Left: Dockerfile and compose services (015). Some roadmap checkboxes still read "DB-unverified" and lag the verified state.
-- **insights-sponsors:** all OpenAPI operations run on the in-memory backend (149 tests at last handoff). In this phase: Postgres backend, offers, nearby spots with category and label filters, physical-reward catalog; stretch: content ingestion and SQL analytics.
-- **game-engine:** in-memory service and rules done; Postgres move and check-in event schema pending. Its roadmap file is empty; status comes from git history.
+- **insights-sponsors:** OpenAPI v0.5.0 published. Postgres backend serves stops, offers, physical rewards, nearby spots with category and label filters, and tourist content (ingested once). Consent, place visits, analytics and recommendations are still in memory (planned).
+- **game-engine:** service and rules done, with a Tiger Data (Postgres) store and 8 named ranks merged; its roadmap file is empty, so status comes from git history and its README.
 - **client-bryan, client-isabella:** no UI built, by design, until sketches and Figma land in `design/`.
 
 ## Hackathon timeline
@@ -82,9 +82,9 @@ No open issues carry `priority:blocker`.
 |---|---|
 | Plan usage limits hit mid-work | Small commits, handoff notes, queue prompts; stop cleanly |
 | Real data volume is small (days of polling) so TimescaleDB gains are modest | Report numbers as measured, keep the collector running, no claims beyond `docs/TIGER_DATA_RESULTS.md` |
-| Sponsor logistics: no real partner confirmed | Demo sponsors are labeled placeholders; Eren confirms any real partnership |
+| Sponsors read as real | Not pursuing real partnerships; all sponsors are demo placeholders, flagged `demo` in every response. Demo placeholder. No partnership, endorsement or real discount is implied. |
 | UI waits on Figma | Backends and contracts first; clients build only from `design/` |
-| Ownership labels wrong or offensive | Only declared or certified labels are shown, evidence stored, pending never exposed, correction and removal path in `docs/DATA_SOURCES.md` |
+| Ownership labels wrong or offensive | Real businesses carry no labels in the demo; labels show only if declared or certified, filtering is demonstrated on fictional sample spots, pending never exposed, correction and removal path in `docs/DATA_SOURCES.md` |
 | Source licenses | Official APIs and downloads only, per-record license and attribution, commercial_ok flag, checklist before any commercial launch |
 | Synthetic data mistaken for real | `is_synthetic` flag and explicit wording everywhere |
 

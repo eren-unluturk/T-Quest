@@ -1,5 +1,7 @@
 # insights-sponsors
 
+> Demo placeholder. No partnership, endorsement or real discount is implied. All sponsors, stores, offers and labels in the seed data are placeholders.
+
 Owner: Eren. Python 3.11+ FastAPI service (see DECISIONS.md).
 
 Own route analytics, recommendations, the sponsor/offer data model and matching, store partners and the physical-reward catalog (stickers/patches), tourist content (stop facts, Freedom Trail, fun facts), and consent-based tracking logic.
@@ -45,4 +47,4 @@ No pay-per-usage services. This service uses only free resources: the in-memory 
 
 ## Contract
 
-The OpenAPI draft lives in `openapi/insights-sponsors.yaml` until it is promoted to `contracts/api/insights-sponsors.yaml` (done by a human, builders never write to `contracts/`).
+The OpenAPI file lives in `openapi/insights-sponsors.yaml` and is copied to `contracts/api/insights-sponsors.yaml` (published, v0.5.0).

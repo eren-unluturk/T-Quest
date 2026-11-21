@@ -93,27 +93,22 @@ Source of every number in this section: REAL data from the MBTA V3 API (`/vehicl
 
 | Table | Rows |
 |---|---|
-| `vehicles` (positions, 2026-11-19 19:37 to 2026-11-21 20:19 UTC) | 53,309 |
-| `predictions` | 20,675 |
-| `alerts` | 60 |
-| `alert_entities` | 265 |
-| `vehicles_route_5m` aggregate buckets | 292 |
+| `vehicles` (positions, 2026-11-19 19:37 to 2026-11-21 22:16 UTC) | 274,565 |
+| `predictions` | 335,050 |
+| `alerts` | 74 |
+| `alert_entities` | 290 |
+| `vehicles_route_5m` aggregate buckets | 3,330 |
 
 ### Compression (source: `hypertable_detailed_size` total, tables + indexes + toast; every chunk compressed for this measurement)
 
-| Hypertable | Size before | Size after | Ratio (total size) | Ratio (`hypertable_compression_stats`) |
-|---|---|---|---|---|
-| `vehicles` | 156.2 MB | 41.4 MB | 3.8x | 138.5x |
-| `predictions` | 15.2 MB | 2.6 MB | 6.0x | 29.0x |
-
-"Before" is the size when the benchmark started: chunks older than 1 day were already compressed by the policy, the newest were not. After, every chunk is compressed. The stats ratio covers compressed chunks only.
+TODO: measure. The earlier real-data compression figures were unreliable (the benchmark mixed already-compressed and uncompressed chunks) and were removed. Re-measure on settled chunks with `python -m data_platform.bench_real`, then record the result here.
 
 ### Query latency: vehicle position reports per line per 5 minutes, last 3 days (source: `EXPLAIN (ANALYZE)` server-side planning + execution, median of 5 after 1 warm-up)
 
 | State | Continuous aggregate `vehicles_route_5m` (ms) | Raw `vehicles` (ms) | Speedup |
 |---|---|---|---|
-| Before forced compression | 1.56 | 98.0 | 62.82x |
-| After compression | 1.97 | 74.85 | 37.99x |
+| Before forced compression | 67.5 | 567.93 | 8.41x |
+| After compression | 8.25 | 563.79 | 68.34x |
 
 Aggregate query:
 

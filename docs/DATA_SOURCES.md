@@ -35,9 +35,9 @@ Total `stop_content` links: 9,818 (stops include bus stops). Loading-screen fact
 - V3 API and GTFS under the MassDOT Developers License: stops, routes, lines, schedules and live vehicles, predictions and alerts. See `docs/TIGER_DATA_RESULTS.md` for row counts and measurements.
 
 ## Nearby spots and identity labels
-- Business names, addresses and nearby stops for the three demo sponsors (Boston Red Sox, Mint Julep, Diesel Cafe) were entered by hand from facts given by the team. Nothing was copied from Google Places or Google Maps. They are demo placeholders (`demo_placeholder = true`); no partnership, discount or endorsement is real. "Sample ... (demo)" spots and their labels are fictional.
+- Business names, addresses and nearby stops for the three demo sponsors (Boston Red Sox, Mint Julep, Diesel Cafe) were entered by hand from facts given by the team. Nothing was copied from Google Places or Google Maps. Demo placeholder. No partnership, endorsement or real discount is implied. They are demo placeholders (`demo_placeholder = true`). We are not pursuing real partnerships. "Sample ... (demo)" spots and their labels are fictional.
 - Label policy: a label (local/independent, woman-owned, African American-owned, Latino-owned, Asian-owned, immigrant-owned, veteran-owned, LGBTQ+-owned, family-owned) may be shown only when (a) the business declared it itself, or (b) an official certification or directory lists it (record the URL). Never inferred from a name, owner's name, photo, review, menu language or by any model. Each label row stores label, status (`declared`, `certified`, `pending`), `evidence_url` or `declaration_note`, `verified_at` and `verified_by`. The database refuses declared or certified rows without evidence. The API reads only the `spot_labels_public` view, so pending labels are never returned and never match a filter.
-- Mint Julep and Diesel Cafe hold `local-independent` at status `pending` until the owner confirms.
+- In the demo no real business carries a visible label: Mint Julep and Diesel Cafe hold `local-independent` at status `pending` (never exposed). Filtering is demonstrated on fictional "Sample ... (demo)" spots.
 
 ## Business correction and removal path
 Any business can ask us to correct or remove its listing or labels. Contact: TODO: contact placeholder (a monitored email address must be set before any public launch). On request we set `nearby_spots.removed_at` (the spot disappears from the API immediately) or change/remove the label rows, and record who did it and when. Corrections to labels need the business's own declaration or an official listing URL.
@@ -47,7 +47,7 @@ Any business can ask us to correct or remove its listing or labels. Contact: TOD
 - Replace the contact placeholder in the ingestion User-Agent and in this document.
 - Human-verify every `needs_verify` item (Freedom Trail text, loading facts).
 - Check Digital Commonwealth rights per item again at display time; keep the link to the source.
-- Get written confirmation from every real sponsor; remove demo flags only after that.
+- Not pursuing real partnerships; all sponsors are demo placeholders. If that ever changes, get written agreement from each business first and only then remove its demo flag.
 - Verify every identity label with evidence; no label without declaration or official listing.
 - Review each source's attribution wording and display it in the apps.
 - Review privacy: consent flows, retention (90 days for place visits), and rounding of coordinates.
