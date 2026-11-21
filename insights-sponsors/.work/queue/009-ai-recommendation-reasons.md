@@ -1,10 +1,12 @@
 ---
 id: 009
 title: Optional AI-written reasons for recommendations, with a deterministic fallback
-status: ready
+status: cancelled
 issue:
 depends_on: [006]
 ---
+> CANCELLED: no API-key / per-token billing for this hackathon (see AGENTS.md "Billing", DECISIONS.md D15). Do not build. Possible future feature only. Recommendations stay deterministic SQL.
+
 ## Goal
 The brief asks for "AI-assisted recommendations". The SQL/in-memory logic stays the only thing that picks and orders recommendations. When `ANTHROPIC_API_KEY` is set, an LLM rewrites only the short `reason` text in a friendlier tone. With no key, a timeout, or an error, the deterministic reason from 006 is returned unchanged. The contract does not change.
 

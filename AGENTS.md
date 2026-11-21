@@ -5,6 +5,9 @@
 Read `docs/PROJECT_BRIEF.md` for product context, `docs/PROTOCOL.md` for the full message protocol, `TEAM.md` for ownership, and your own `<agent>/AGENT.md`.
 
 
+## Billing
+- NO API-KEY / PER-TOKEN BILLING FOR THIS HACKATHON PROJECT. Everyone uses their own Claude plan only. Never add, read or depend on ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN. Per-token API billing is a possible FUTURE feature, explicitly out of scope now.
+
 ## Ownership
 - You may READ everything. You may WRITE only inside your own folders (see `TEAM.md`, `team.json`).
 - `design/` is the shared intake folder for client agents. `contracts/` is shared: changes require a `type:contract-change` issue acked by every consumer. `docs/` and `DECISIONS.md` may be edited by anyone (append, do not rewrite others' entries).

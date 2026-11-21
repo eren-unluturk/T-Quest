@@ -79,3 +79,5 @@ Format: decision, alternatives, why. Append new entries; do not rewrite others'.
 - Alternatives: warn only; strip silently without refusing.
 - Why: a stray key silently switches Claude Code to per-token billing. Stripping alone would hide a misconfigured machine, so we refuse and print the fix.
 - Scan on 2026-11-21: git history, working tree, commit messages and issues/PRs contain no real key (no `sk-ant-` strings). The variable NAME appeared in `.env.example` (removed) and in `insights-sponsors/.work/queue/009-ai-recommendation-reasons.md` plus `insights-sponsors/.work/ROADMAP.md`. Task 009 plans an optional LLM call keyed by ANTHROPIC_API_KEY, which conflicts with this rule; it must not be built that way (raised with the owner, not edited here).
+
+- D15 addendum: API-key / per-token billing is explicitly NOT part of this hackathon project. It may be a future feature; until then no code, task, config or doc may depend on an Anthropic key.

@@ -30,6 +30,7 @@ Everyone uses their OWN Claude plan. There is never per-token API billing for th
 1. Unset the variables (PowerShell). Current terminal: `Remove-Item Env:ANTHROPIC_API_KEY, Env:ANTHROPIC_AUTH_TOKEN -ErrorAction SilentlyContinue`. Permanently: `[Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', $null, 'User')` and the same for `ANTHROPIC_AUTH_TOKEN` (use `'Machine'` from an Administrator PowerShell if it is set there). Then close all terminals and VS Code and reopen.
 2. Run `/status` in `claude` and confirm it shows your subscription plan, not API usage billing.
 3. In claude.ai go to Settings > Usage and disable usage credits / extra usage, so nothing can bill past your plan limit.
-4. Never add an Anthropic key or token to `.env`, `.env.example`, code, issues or docs.
+4. Out of scope for this hackathon: API-key / per-token billing. It is a possible future feature, not something to build or enable now.
+5. Never add an Anthropic key or token to `.env`, `.env.example`, code, issues or docs.
 
 `node scripts/doctor.mjs` FAILS if either variable is set in the process, Windows User or Windows Machine environment (it prints the exact fix, never the value). `scripts/duo.mjs` strips both variables from the child environment and refuses to launch if they are set at the User or Machine level. Its `--allow-api-key` override exists for emergencies only and is not used by any VS Code task. Do not use it.
