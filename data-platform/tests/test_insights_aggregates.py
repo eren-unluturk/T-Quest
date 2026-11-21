@@ -24,11 +24,11 @@ def test_migrate_rerun_is_noop(conn):
     assert migrate.migrate() == []
 
 
-def test_home_line_has_checkins_28d_column(conn):
+def test_home_line_has_checkins_30d_column(conn):
     cols = [r[0] for r in conn.execute(
         "SELECT column_name FROM information_schema.columns WHERE table_name = 'home_line'"
         " ORDER BY ordinal_position").fetchall()]
-    assert cols == ["user_id", "route_id", "checkins_28d"]
+    assert cols == ["user_id", "route_id", "checkins_30d"]
 
 
 def test_stop_popularity_and_user_stop_daily(conn):

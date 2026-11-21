@@ -48,7 +48,7 @@ CREATE OR REPLACE VIEW stop_popularity_hourly AS
     FROM user_stop_hourly
     GROUP BY bucket, stop_id;
 
--- --------------------------------------- home_line: rides_28d -> checkins_28d
+-- --------------------------------------- home_line: rides_28d -> checkins_30d
 -- A view cannot rename a column in place, and users_affected_by_alert depends on it.
 DROP FUNCTION IF EXISTS users_affected_by_alert(text);
 
@@ -58,20 +58,20 @@ DROP VIEW IF EXISTS home_line;
 -- users.home_line_override wins when set.
 CREATE OR REPLACE VIEW home_line AS
     WITH recent AS (
-        SELECT w.user_id, w.route_id, sum(w.rides)::bigint AS checkins_28d
+        SELECT w.user_id, w.route_id, sum(w.rides)::bigint AS checkins_30d
         FROM home_line_weekly w
         WHERE w.week >= time_bucket('7 days', now() - INTERVAL '28 days')
         GROUP BY w.user_id, w.route_id
     ), ranked AS (
         SELECT r.*, row_number() OVER (PARTITION BY r.user_id
-                                       ORDER BY r.checkins_28d DESC, r.route_id) AS rn
+                                       ORDER BY r.checkins_30d DESC, r.route_id) AS rn
         FROM recent r
     ), best AS (
-        SELECT user_id, route_id, checkins_28d FROM ranked WHERE rn = 1 AND checkins_28d >= 5
+        SELECT user_id, route_id, checkins_30d FROM ranked WHERE rn = 1 AND checkins_30d >= 5
     )
     SELECT u.id AS user_id,
            coalesce(u.home_line_override, b.route_id) AS route_id,
-           b.checkins_28d
+           b.checkins_30d
     FROM users u
     LEFT JOIN best b ON b.user_id = u.id
     WHERE u.home_line_override IS NOT NULL OR b.route_id IS NOT NULL;

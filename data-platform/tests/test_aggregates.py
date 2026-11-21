@@ -102,7 +102,7 @@ def test_home_line_and_affected_users(conn):
         _event(conn, d, r2, i + 1)
     for i in range(4):  # below the 5-ride minimum
         _event(conn, e, r1, i + 1)
-    _refresh(conn, "home_line_weekly")
+    _refresh(conn, "user_route_daily")
     alert_id = f"test-{run}"
     conn.execute("INSERT INTO alerts (id, effect) VALUES (%s, 'DELAY')", (alert_id,))
     conn.execute("INSERT INTO alert_entities (alert_id, route_id) VALUES (%s, %s)", (alert_id, r1))
@@ -110,7 +110,7 @@ def test_home_line_and_affected_users(conn):
         rows = {
             r[0]: r[1:]
             for r in conn.execute(
-                "SELECT user_id, route_id, checkins_28d FROM home_line WHERE user_id = ANY(%s)", ([d, e, f],)
+                "SELECT user_id, route_id, checkins_30d FROM home_line WHERE user_id = ANY(%s)", ([d, e, f],)
             ).fetchall()
         }
         assert rows[d] == (r1, 6)
@@ -144,3 +144,57 @@ def test_personal_stats_and_stop_visits(conn):
     finally:
         conn.execute("DELETE FROM rider_events WHERE user_id = %s", (u,))
         conn.execute("DELETE FROM users WHERE id = %s", (u,))
+
+
+def _cleanup_users(conn, *users):
+    for u in users:
+        conn.execute("DELETE FROM rider_events WHERE user_id = %s", (u,))
+        conn.execute("DELETE FROM users WHERE id = %s", (u,))
+
+
+def test_home_line_tie_goes_to_most_recent(conn):
+    run = uuid.uuid4().hex[:8]
+    r1, r2 = f"T-{run}-1", f"T-{run}-2"
+    u = _user(conn)
+    try:
+        for i in range(5):
+            _event(conn, u, r1, 48 + i)  # older rides
+            _event(conn, u, r2, 1 + i)   # more recent rides
+        _refresh(conn, "user_route_daily")
+        row = conn.execute("SELECT route_id, checkins_30d FROM home_line WHERE user_id = %s", (u,)).fetchone()
+        assert row == (r2, 5)
+    finally:
+        _cleanup_users(conn, u)
+
+
+def test_home_line_window_is_30_days(conn):
+    run = uuid.uuid4().hex[:8]
+    r1, r2 = f"T-{run}-1", f"T-{run}-2"
+    u, v = _user(conn), _user(conn)
+    try:
+        for i in range(5):
+            _event(conn, u, r1, 31 * 24 + 1 + i)  # 31 days old: ignored
+            _event(conn, v, r2, 29 * 24 + i)      # 29 days old: counts
+        _refresh(conn, "user_route_daily")
+        rows = {r[0]: r[1:] for r in conn.execute(
+            "SELECT user_id, route_id, checkins_30d FROM home_line WHERE user_id = ANY(%s)", ([u, v],))}
+        assert u not in rows
+        assert rows[v] == (r2, 5)
+    finally:
+        _cleanup_users(conn, u, v)
+
+
+def test_home_line_override_wins_with_own_count(conn):
+    run = uuid.uuid4().hex[:8]
+    r1, r2 = f"T-{run}-1", f"T-{run}-2"
+    u = _user(conn, override=r2)
+    try:
+        for i in range(6):
+            _event(conn, u, r1, i + 1)
+        for i in range(2):
+            _event(conn, u, r2, i + 1)
+        _refresh(conn, "user_route_daily")
+        row = conn.execute("SELECT route_id, checkins_30d FROM home_line WHERE user_id = %s", (u,)).fetchone()
+        assert row == (r2, 2)
+    finally:
+        _cleanup_users(conn, u)

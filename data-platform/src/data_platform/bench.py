@@ -24,7 +24,7 @@ import psycopg
 from . import db, migrate
 
 HYPERTABLES = ("vehicles", "predictions")
-CAGGS = ("leaderboard_daily", "home_line_weekly", "personal_stats_daily")
+CAGGS = ("leaderboard_daily", "home_line_weekly", "user_route_daily", "personal_stats_daily")
 OUT_DIR = Path(__file__).resolve().parents[2] / "bench"
 
 ROUTES_SQL = "ARRAY['Red','Orange','Blue','Green-B','Green-C','Green-D','Green-E','1','66','39']"
@@ -171,12 +171,13 @@ LEADERBOARD_RAW = """
 
 HOME_LINE_RAW = """
     WITH recent AS (
-        SELECT user_id, route_id, count(*) AS checkins_28d FROM rider_events
+        SELECT user_id, route_id, count(*) AS checkins_30d, max(time) AS last_ride FROM rider_events
         WHERE event_type IN ('checkin', 'ride_start') AND route_id IS NOT NULL
-          AND time >= time_bucket('7 days', now() - interval '28 days') GROUP BY user_id, route_id),
-    ranked AS (SELECT *, row_number() OVER (PARTITION BY user_id ORDER BY checkins_28d DESC, route_id) AS rn
+          AND time >= time_bucket('1 day', now() - interval '30 days') GROUP BY user_id, route_id),
+    ranked AS (SELECT *, row_number() OVER (PARTITION BY user_id
+                                            ORDER BY checkins_30d DESC, last_ride DESC, route_id) AS rn
                FROM recent)
-    SELECT user_id, route_id, checkins_28d FROM ranked WHERE rn = 1 AND checkins_28d >= 5"""
+    SELECT user_id, route_id, checkins_30d FROM ranked WHERE rn = 1 AND checkins_30d >= 5"""
 
 VEHICLES_AT_STOP = """
     SELECT DISTINCT ON (vehicle_id) vehicle_id, time, route_id, stop_id, lat, lon FROM vehicles

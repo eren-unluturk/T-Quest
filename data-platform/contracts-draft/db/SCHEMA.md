@@ -23,7 +23,7 @@ Notes: game-engine owns unlock and rank rules, so `badges` and `ranks` are its t
 | `store_partners` | `stores` |
 | `physical_rewards.kind` | `physical_rewards.item_type` |
 | `store_inventory.quantity` | `store_inventory.stock` |
-| `home line checkins_28d` | `home_line.checkins_28d` (renamed from `rides_28d` in migration 0006) |
+| `home line checkins_30d` | `home_line.checkins_30d` (renamed from `rides_28d`; true 30-day window since migration 0007) |
 | rank (`user_id, rank`) | view `user_rank` |
 | badges (`user_id, badge_id`) | table `user_collections` |
 | fun facts | `fun_facts` |
@@ -128,7 +128,8 @@ Written by insights-sponsors only after `place_visits` consent. `id uuid`, `time
 - `leaderboard_daily` (CAGG on `points_ledger`, 1 day): `day, user_id, route_id, points_earned, entries`. Refresh every 5 minutes (30 day window). Real-time aggregation on.
 - `leaderboard(p_scope, p_period, p_user, p_route, p_limit)`: scope `global|friends|line`, period `week|month|all`; returns `position, user_id, username, points`; ties share a position.
 - `home_line_weekly` (CAGG on `rider_events`, 7 days, checkin and ride_start with a route): `week, user_id, route_id, rides`. Refresh every 15 minutes (90 day window).
-- `home_line` (view): `user_id, route_id, checkins_28d`; most-ridden route over the last four weekly buckets, at least 5 check-ins; `users.home_line_override` wins when set.
+- `user_route_daily` (CAGG on `rider_events`, 1 day, checkin and ride_start with a route): `bucket, user_id, route_id, rides, last_ride`. Refresh every 15 minutes (40 day window).
+- `home_line` (view, migration 0007): `user_id, route_id, checkins_30d`; most-ridden route in the last 30 days, at least 5 check-ins, ties go to the most recently ridden line (same rule as game-engine `delay.py`); `users.home_line_override` wins when set (`checkins_30d` is then the user's count on that route, 0 if none).
 - `users_affected_by_alert(p_alert_id)`: users whose `home_line.route_id` appears in the alert's `alert_entities`.
 - `personal_stats_daily` (CAGG on `rider_events`, 1 day): `day, user_id, checkins, bus_events, rail_events`.
 - `user_stop_visits` (view): `user_id, stop_id, first_visit, visits` over checkin and visit events.
@@ -144,4 +145,4 @@ Written by insights-sponsors only after `place_visits` consent. `id uuid`, `time
 - `user_stop_daily` (CAGG on `rider_events` where `stop_id is not null`, 1 day): `bucket, user_id, stop_id, route_id, visits`. Refresh every 15 minutes (30 day window), real-time aggregation on.
 - `user_stop_hourly` (CAGG, 1 hour): `bucket, stop_id, user_id, checkins` (check-in events only). Same policy.
 - `stop_popularity_hourly` (view over `user_stop_hourly`): `bucket, stop_id, checkins, unique_users`.
-- `home_line` column `rides_28d` was renamed `checkins_28d`; `users_affected_by_alert` was recreated on top of it.
+- `home_line` column `rides_28d` was renamed `checkins_30d` and moved to a true 30-day window (0007); `users_affected_by_alert` was recreated on top of it.

@@ -34,7 +34,7 @@ def test_file_parses_with_postgres_parser(path):
 
 
 def test_no_transaction_files_are_detected():
-    assert {f.name for f in NO_TX_FILES} >= {"0004_aggregates.sql", "0006_insights_aggregates.sql"}
+    assert {f.name for f in NO_TX_FILES} >= {"0004_aggregates.sql", "0006_insights_aggregates.sql", "0007_home_line_30d.sql"}
 
 
 @pytest.mark.parametrize("path", NO_TX_FILES, ids=_ids(NO_TX_FILES))
