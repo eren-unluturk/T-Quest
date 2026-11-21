@@ -46,6 +46,11 @@ class CompensationTests(unittest.TestCase):
 
     def test_minor_delay_not_paid(self):
         self.assertEqual(self.pay(alert_effect="delay"), 0)
+        self.assertEqual(self.pay(alert_effect="DELAY"), 0)
+
+    def test_mbta_outage_effects_paid(self):
+        for effect in ("NO_SERVICE", "SUSPENSION", "SHUTTLE", "SIGNIFICANT_DELAY"):
+            self.assertEqual(self.pay(alert_effect=effect), 50, effect)
 
     def test_once_per_alert(self):
         self.assertEqual(self.pay(already_paid_alerts={"a1"}), 0)
