@@ -1,7 +1,7 @@
 ---
 id: 005
 title: MBTA realtime tables with compression and retention
-status: ready
+status: done
 depends_on: [002]
 ---
 ## Goal
