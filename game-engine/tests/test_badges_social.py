@@ -70,6 +70,14 @@ class QuestTests(unittest.TestCase):
         self.assertEqual(completed_quests([self.q], {"a", "b"}, set()), [self.q])
         self.assertEqual(completed_quests([self.q], {"a", "b"}, {"q1"}), [])
 
+    def test_any_n_stops(self):
+        q = Quest("q2", "Any three", frozenset({"a", "b", "c", "d"}), 40, "local-explorer", None, 3)
+        self.assertEqual(quest_progress(q, {"a", "b"}), (2, 3))
+        self.assertEqual(quest_progress(q, {"a", "b", "c", "d"}), (3, 3))
+        self.assertEqual(completed_quests([q], {"a", "b"}, set()), [])
+        self.assertEqual(completed_quests([q], {"a", "c", "d"}, set()), [q])
+        self.assertEqual(completed_quests([q], {"a", "x", "y"}, set()), [])
+
 
 class FriendTests(unittest.TestCase):
     def test_add_is_mutual(self):

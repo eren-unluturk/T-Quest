@@ -103,17 +103,41 @@ class PgStore:
         return _naive(t) if t else None
 
     def quests(self):
-        """Visit-these-stops quests. criteria jsonb: {"stops": ["id", ...]}."""
+        """Visit-stations quests from the quests table (criteria jsonb).
+
+        {"stops": ["place-x", ...]}                      visit every listed station
+        {"stops": [...], "min_stops": 3}                  visit any 3 of them
+        {"type": "spots_near_stops", "min_stops": 3}      visit any 3 stations that have a nearby spot
+                                                          (stations come from spot_stop_links)
+        """
         rows = self._q("select id, title, criteria, reward_points, reward_badge_id, sponsor_id "
-                       "from quests where active", many=True)
+                       "from quests where active and (starts_at is null or starts_at <= now()) "
+                       "and (ends_at is null or ends_at > now())", many=True)
         out = []
+        spot_stations = None
         for qid, title, criteria, pts, badge, sponsor in rows:
-            stops = (criteria or {}).get("stops")
+            criteria = criteria or {}
+            stops = criteria.get("stops")
+            if criteria.get("type") == "spots_near_stops":
+                if spot_stations is None:
+                    spot_stations = frozenset(r[0] for r in self._q(
+                        "select distinct l.stop_id from spot_stop_links l join nearby_spots s on s.id = l.spot_id "
+                        "where s.active and s.removed_at is null", many=True))
+                stops = spot_stations
             if stops:
                 out.append(badge_rules.Quest(str(qid), title, frozenset(stops), pts or 0, badge,
-                                             str(sponsor) if sponsor else None))
+                                             str(sponsor) if sponsor else None,
+                                             criteria.get("min_stops")))
         return out
 
+    def physical_rewards_for(self, badge_ids):
+        """Names of the stickers and patches the badges unlock (physical_rewards table)."""
+        ids = list(badge_ids)
+        if not ids:
+            return []
+        rows = self._q("select distinct name from physical_rewards where active and badge_id = any(%s) order by name",
+                       (ids,), many=True)
+        return [r[0] for r in rows]
     def offer(self, offer_id):
         oid = _uuid_or_none(offer_id)
         if not oid:

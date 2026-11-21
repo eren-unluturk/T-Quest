@@ -175,13 +175,14 @@ def get_collection(user: str = Depends(current_user)):
     st = get_store()
     owned = st.badges(user)
     return {"stops": sorted(st.visited_stops(user)), "badges": sorted(owned),
-            "physical_rewards": sorted(badges.physical_rewards_for(owned))}
+            "physical_rewards": st.physical_rewards_for(owned)}
 
 
 @app.get("/quests")
 def get_quests(user: str = Depends(current_user)):
     return [{"id": q.id, "title": q.title, "sponsor_id": q.sponsor_id,
-             "goal": "Visit: " + ", ".join(sorted(q.goal_stops)),
+             "goal": (f"Visit {q.min_stops} different stations" if q.min_stops
+                      else "Visit: " + ", ".join(sorted(q.goal_stops))),
              "reward_points": q.reward_points, "reward_badge_id": q.reward_badge_id}
             for q in get_store().quests()]
 
