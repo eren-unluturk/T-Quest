@@ -29,11 +29,20 @@ const results = [];
 const hit = (area, where, line) => results.push({ area, where, line: line.trim().slice(0, 100) });
 const ran = [];
 
+// Commits listed in .attribution-allow (one hash or hash prefix of 7+ chars per line, # comments) are skipped by
+// the history scan. Use only for a legitimate human co-author credit, never for an agent.
+let allow = [];
+try {
+  allow = readFileSync(path.join(root, '.attribution-allow'), 'utf8').split(/\r?\n/)
+    .map((l) => l.replace(/#.*/, '').trim().toLowerCase()).filter((l) => /^[0-9a-f]{7,40}$/.test(l));
+} catch { /* no allowlist */ }
+
 // 1. history
 const log = git(['log', '--all', '--format=%H%x1f%B%x1e'], root);
 ran.push('git history');
 for (const rec of log.stdout.split('\x1e').map((s) => s.trim()).filter(Boolean)) {
   const [h, body = ''] = rec.split('\x1f');
+  if (allow.some((p) => h.toLowerCase().startsWith(p))) continue;
   for (const l of body.split(/\r?\n/)) if (isBanned(l)) hit('history', h.slice(0, 10), l);
 }
 

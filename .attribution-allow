@@ -1,0 +1,3 @@
+# Commits ignored by the history scan in scripts/check-attribution.mjs.
+# Only for a legitimate human co-author credit, never for an agent.
+6732e8d1f5713d451f5a97158e12195a2ca4a36e  # teammate credit (human co-author)

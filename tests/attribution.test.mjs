@@ -146,3 +146,17 @@ test('check-attribution excludes rule-carrying files from the file scan only', (
   const r = check(dir);
   assert.equal(r.status, 0, r.stdout);
 });
+
+test('check-attribution ignores an allowlisted commit but still fails on others', () => {
+  const dir = makeRepo();
+  const h = commit(dir, 'one\n\nCo-authored-by: Human <h@h.h>\n', 'README.md', '# hi\n');
+  assert.equal(check(dir).status, 1);
+  writeFileSync(path.join(dir, '.attribution-allow'), `# note\n${h.slice(0, 10)}  # human teammate\n`);
+  sh(dir, 'add', '-A');
+  assert.equal(sh(dir, 'commit', '--no-verify', '-q', '-m', 'allow').status, 0);
+  assert.equal(check(dir).status, 0, check(dir).stdout);
+  commit(dir, 'two\n\nCo-Authored-By: Bot <b@b.b>\n');
+  const r = check(dir);
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /Bot/);
+});
