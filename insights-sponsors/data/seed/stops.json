@@ -230,5 +230,13 @@
     "lon": -71.04685,
     "neighborhood": "Seaport",
     "mode": "bus"
+  },
+  {
+    "id": "place-fenwy",
+    "name": "Fenway",
+    "lat": 42.345403,
+    "lon": -71.104213,
+    "neighborhood": "Fenway-Kenmore",
+    "mode": "subway"
   }
 ]

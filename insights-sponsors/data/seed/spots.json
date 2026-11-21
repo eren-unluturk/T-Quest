@@ -1,0 +1,446 @@
+{
+  "categories": [
+    [
+      "restaurant",
+      "Restaurant"
+    ],
+    [
+      "cafe",
+      "Cafe"
+    ],
+    [
+      "store",
+      "Store"
+    ],
+    [
+      "clothing",
+      "Clothing"
+    ],
+    [
+      "grocery",
+      "Grocery"
+    ],
+    [
+      "bar",
+      "Bar"
+    ],
+    [
+      "other",
+      "Other"
+    ]
+  ],
+  "label_types": [
+    [
+      "local-independent",
+      "Local / independent"
+    ],
+    [
+      "woman-owned",
+      "Woman-owned"
+    ],
+    [
+      "african-american-owned",
+      "African American-owned"
+    ],
+    [
+      "latino-owned",
+      "Latino-owned"
+    ],
+    [
+      "asian-owned",
+      "Asian-owned"
+    ],
+    [
+      "immigrant-owned",
+      "Immigrant-owned"
+    ],
+    [
+      "veteran-owned",
+      "Veteran-owned"
+    ],
+    [
+      "lgbtq-owned",
+      "LGBTQ+-owned"
+    ],
+    [
+      "family-owned",
+      "Family-owned"
+    ]
+  ],
+  "spots": [
+    {
+      "id": "spot.redsox",
+      "name": "Boston Red Sox",
+      "category": "other",
+      "address": null,
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": "sp.boston-red-sox",
+      "placement_type": "sponsored",
+      "active": true,
+      "source": "given-by-team",
+      "stops": [
+        {
+          "stop_id": "place-fenwy",
+          "distance_m": null
+        },
+        {
+          "stop_id": "place-kencl",
+          "distance_m": null
+        }
+      ],
+      "labels": []
+    },
+    {
+      "id": "spot.mintjulep",
+      "name": "Mint Julep",
+      "category": "clothing",
+      "address": "43 Brattle St, Cambridge",
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": "sp.mint-julep",
+      "placement_type": "sponsored",
+      "active": true,
+      "source": "given-by-team",
+      "stops": [
+        {
+          "stop_id": "place-harsq",
+          "distance_m": null
+        }
+      ],
+      "labels": [
+        {
+          "label": "local-independent",
+          "status": "pending",
+          "evidence_url": null,
+          "declaration_note": null,
+          "verified_at": null,
+          "verified_by": null
+        }
+      ]
+    },
+    {
+      "id": "spot.diesel",
+      "name": "Diesel Cafe",
+      "category": "cafe",
+      "address": "257 Elm St, Somerville",
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": "sp.diesel-cafe",
+      "placement_type": "sponsored",
+      "active": true,
+      "source": "given-by-team",
+      "stops": [
+        {
+          "stop_id": "place-davis",
+          "distance_m": null
+        }
+      ],
+      "labels": [
+        {
+          "label": "local-independent",
+          "status": "pending",
+          "evidence_url": null,
+          "declaration_note": null,
+          "verified_at": null,
+          "verified_by": null
+        }
+      ]
+    },
+    {
+      "id": "spot.sample-noodle",
+      "name": "Sample Noodle House (demo)",
+      "category": "restaurant",
+      "address": "Fictional address",
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": null,
+      "placement_type": "listed",
+      "active": true,
+      "source": "demo-seed",
+      "stops": [
+        {
+          "stop_id": "place-harsq",
+          "distance_m": 180
+        }
+      ],
+      "labels": [
+        {
+          "label": "asian-owned",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        },
+        {
+          "label": "family-owned",
+          "status": "certified",
+          "evidence_url": "https://example.org/demo-directory/fictional-listing",
+          "declaration_note": null,
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        },
+        {
+          "label": "local-independent",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        }
+      ]
+    },
+    {
+      "id": "spot.sample-books",
+      "name": "Sample Books & Gifts (demo)",
+      "category": "store",
+      "address": "Fictional address",
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": null,
+      "placement_type": "listed",
+      "active": true,
+      "source": "demo-seed",
+      "stops": [
+        {
+          "stop_id": "place-harsq",
+          "distance_m": 240
+        }
+      ],
+      "labels": [
+        {
+          "label": "woman-owned",
+          "status": "certified",
+          "evidence_url": "https://example.org/demo-directory/fictional-listing",
+          "declaration_note": null,
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        },
+        {
+          "label": "local-independent",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        }
+      ]
+    },
+    {
+      "id": "spot.sample-roasters",
+      "name": "Sample Roasters (demo)",
+      "category": "cafe",
+      "address": "Fictional address",
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": null,
+      "placement_type": "listed",
+      "active": true,
+      "source": "demo-seed",
+      "stops": [
+        {
+          "stop_id": "place-davis",
+          "distance_m": 120
+        }
+      ],
+      "labels": [
+        {
+          "label": "immigrant-owned",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        },
+        {
+          "label": "local-independent",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        }
+      ]
+    },
+    {
+      "id": "spot.sample-taqueria",
+      "name": "Sample Taqueria (demo)",
+      "category": "restaurant",
+      "address": "Fictional address",
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": null,
+      "placement_type": "listed",
+      "active": true,
+      "source": "demo-seed",
+      "stops": [
+        {
+          "stop_id": "place-davis",
+          "distance_m": 210
+        }
+      ],
+      "labels": [
+        {
+          "label": "latino-owned",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        },
+        {
+          "label": "family-owned",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        },
+        {
+          "label": "woman-owned",
+          "status": "pending",
+          "evidence_url": null,
+          "declaration_note": null,
+          "verified_at": null,
+          "verified_by": null
+        }
+      ]
+    },
+    {
+      "id": "spot.sample-slice",
+      "name": "Sample Slice Shop (demo)",
+      "category": "restaurant",
+      "address": "Fictional address",
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": null,
+      "placement_type": "listed",
+      "active": true,
+      "source": "demo-seed",
+      "stops": [
+        {
+          "stop_id": "place-fenwy",
+          "distance_m": 150
+        }
+      ],
+      "labels": [
+        {
+          "label": "veteran-owned",
+          "status": "certified",
+          "evidence_url": "https://example.org/demo-directory/fictional-listing",
+          "declaration_note": null,
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        }
+      ]
+    },
+    {
+      "id": "spot.sample-fenway-cafe",
+      "name": "Sample Cafe Fenway (demo)",
+      "category": "cafe",
+      "address": "Fictional address",
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": null,
+      "placement_type": "listed",
+      "active": true,
+      "source": "demo-seed",
+      "stops": [
+        {
+          "stop_id": "place-fenwy",
+          "distance_m": 260
+        },
+        {
+          "stop_id": "place-kencl",
+          "distance_m": 700
+        }
+      ],
+      "labels": [
+        {
+          "label": "african-american-owned",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        },
+        {
+          "label": "lgbtq-owned",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        }
+      ]
+    },
+    {
+      "id": "spot.sample-grocery",
+      "name": "Sample Grocery (demo)",
+      "category": "grocery",
+      "address": "Fictional address",
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": null,
+      "placement_type": "listed",
+      "active": true,
+      "source": "demo-seed",
+      "stops": [
+        {
+          "stop_id": "place-fenwy",
+          "distance_m": 320
+        }
+      ],
+      "labels": [
+        {
+          "label": "local-independent",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        }
+      ]
+    },
+    {
+      "id": "spot.sample-closed",
+      "name": "Sample Closed Spot (demo)",
+      "category": "store",
+      "address": "Fictional address",
+      "lat": null,
+      "lon": null,
+      "demo_placeholder": true,
+      "sponsor_id": null,
+      "placement_type": "listed",
+      "active": false,
+      "source": "demo-seed",
+      "stops": [
+        {
+          "stop_id": "place-harsq",
+          "distance_m": 90
+        }
+      ],
+      "labels": [
+        {
+          "label": "local-independent",
+          "status": "declared",
+          "evidence_url": null,
+          "declaration_note": "Fictional declaration for demo data only.",
+          "verified_at": "2026-11-21T12:00:00Z",
+          "verified_by": "demo seed (fictional)"
+        }
+      ]
+    }
+  ]
+}

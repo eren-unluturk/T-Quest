@@ -441,5 +441,14 @@
       "body": "MBTA Route 66 links Harvard Square and Nubian Station through Allston, Brookline and Roxbury.",
       "source_url": "https://en.wikipedia.org/wiki/MBTA_Bus_Route_66"
     }
+  ],
+  "place-fenwy": [
+    {
+      "id": "fact.fenwy.1",
+      "kind": "fast_fact",
+      "title": "Green Line D branch",
+      "body": "Fenway station is on the Green Line D branch, in the neighborhood that gave the nearby ballpark its name. Verify before showing.",
+      "source_url": "https://www.mbta.com/stops/place-fenwy"
+    }
   ]
 }

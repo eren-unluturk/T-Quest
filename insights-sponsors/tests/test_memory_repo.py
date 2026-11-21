@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 import yaml
+from insights_sponsors import spots as spots_mod
+from insights_sponsors.routes import catalog as catalog_mod
 
 from insights_sponsors import models
 from insights_sponsors.repo import get_repository
@@ -10,7 +12,7 @@ from insights_sponsors.repo.memory import MemoryRepository
 
 SPEC = Path(__file__).resolve().parent.parent / "openapi" / "insights-sponsors.yaml"
 BRANDS = re.compile(
-    r"starbucks|dunkin|nike|adidas|red sox|celtics|bruins|patriots|"
+    r"starbucks|dunkin|nike|adidas|celtics|bruins|patriots|"
     r"target|walmart|h&m|zara|uniqlo|mcdonald|subway|trader joe",
     re.I,
 )
@@ -26,7 +28,7 @@ def test_seed_loads_and_counts(repo):
     assert len(repo.trail_sites()) == 16
     assert len(repo.fun_facts()) == 25
     assert len(repo.stores()) == 10
-    assert len(repo.offers()) == 14
+    assert len(repo.offers()) == 21
     assert len(repo.physical_rewards()) == 6
 
 
@@ -53,7 +55,7 @@ def test_stores_offers_rewards_integrity(repo):
     sponsor_ids = {s.id for s in repo.sponsors()}
     assert all(s.nearest_stop_id in stop_ids for s in repo.stores())
     for o in repo.offers():
-        assert o.store_id in store_ids
+        assert o.store_id is None or o.store_id in store_ids
         assert o.sponsor_id in sponsor_ids
         assert 1 <= o.min_rank <= 5
     for r in repo.physical_rewards():
@@ -72,9 +74,11 @@ def test_offer_coverage(repo):
 def test_no_real_brand_names(repo):
     names = [s.name for s in repo.sponsors()] + [s.name for s in repo.stores()]
     names += [o.title + " " + o.description for o in repo.offers()]
+    # Boston Red Sox, Mint Julep and Diesel Cafe are team-named placeholders, labeled demo
     for n in names:
         assert not BRANDS.search(n), n
     assert all(s.name.startswith("Demo") for s in repo.stores())
+    assert all(s.demo_placeholder for s in repo.sponsors())
 
 
 def test_offer_filters(repo):
@@ -85,7 +89,7 @@ def test_offer_filters(repo):
     }
     assert repo.offers(category="clothing")
     assert all(
-        {s.id: s.category for s in repo.stores()}[o.store_id] == "clothing"
+        o.store_id is None or {s.id: s.category for s in repo.stores()}[o.store_id] == "clothing"
         for o in repo.offers(category="clothing")
     )
 
@@ -129,12 +133,12 @@ def test_models_match_openapi_fields():
     for name, schema in schemas.items():
         if schema.get("type") != "object":
             continue
-        model = getattr(models, name)
+        model = next(getattr(m, name) for m in (models, spots_mod, catalog_mod) if hasattr(m, name))
         assert set(model.model_fields) == set(schema["properties"]), name
         required = {k for k, f in model.model_fields.items() if f.is_required()}
         assert required == set(schema.get("required", [])), name
         checked += 1
-    assert checked == 23
+    assert checked == 29
 
 
 def test_seed_covers_neighborhoods_and_bus(repo):

@@ -14,7 +14,9 @@ IGNORED = {"/health", "/docs", "/openapi.json", "/redoc", "/docs/oauth2-redirect
 HTTP_METHODS = {"get", "post", "put", "patch", "delete"}
 
 # Concrete values for path parameters and request bodies, using seeded ids.
-PATH_VALUES = {"stop_id": "place-pktrm", "scope": "place_visits"}
+from insights_sponsors.repo.ids import slug_to_uuid
+
+PATH_VALUES = {"stop_id": "place-pktrm", "scope": "place_visits", "spot_id": str(slug_to_uuid("spot.sample-noodle"))}
 def _visit_body() -> dict:
     return {
         "lat": 42.3564,
@@ -56,7 +58,7 @@ def is_public(path: str, method: str) -> bool:
 
 
 def test_operations_found():
-    assert len(OPERATIONS) == 14
+    assert len(OPERATIONS) == 19
 
 
 @pytest.mark.parametrize("path,method", OPERATIONS, ids=[f"{m.upper()} {p}" for p, m in OPERATIONS])

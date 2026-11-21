@@ -4,6 +4,8 @@ from datetime import datetime, timedelta, timezone
 from math import asin, cos, radians, sin, sqrt
 from pathlib import Path
 
+from ..spots import CategoryRef, Spot, SpotLabel, public_labels
+from .ids import slug_to_uuid
 from ..models import (
     Category,
     Consent,
@@ -64,6 +66,10 @@ class MemoryRepository:
         self._offers = [Offer(**o) for o in load("offers.json")]
         self._rewards = [PhysicalReward(**r) for r in load("physical_rewards.json")]
         self._route_stops = load("route_stops.json")
+        spots_seed = load("spots.json")
+        self._categories = {c[0]: CategoryRef(slug=c[0], display_name=c[1]) for c in spots_seed["categories"]}
+        self._label_names = {l[0]: l[1] for l in spots_seed["label_types"]}
+        self._spot_raw = {r["id"]: r for r in spots_seed["spots"]}
         self._events = sorted(
             (
                 RiderEvent(
@@ -122,6 +128,14 @@ class MemoryRepository:
         pairs.sort(key=lambda p: p[1])
         return pairs[:limit]
 
+    def _spot_sponsor_stops(self) -> dict[str, set[str]]:
+        """sponsor id -> stops where that sponsor has an active nearby spot."""
+        m: dict[str, set[str]] = {}
+        for r in self._spot_raw.values():
+            if r["active"] and r["sponsor_id"]:
+                m.setdefault(r["sponsor_id"], set()).update(x["stop_id"] for x in r["stops"])
+        return m
+
     def offers(
         self,
         stop_id: str | None = None,
@@ -129,16 +143,79 @@ class MemoryRepository:
         category: Category | None = None,
     ) -> list[Offer]:
         out = []
+        via_spot = self._spot_sponsor_stops()
         for o in self._offers:
-            store = self._stores.get(o.store_id)
+            store = self._stores.get(o.store_id) if o.store_id else None
+            sponsor = self._sponsors.get(o.sponsor_id)
             if store_id and o.store_id != store_id:
                 continue
-            if stop_id and (store is None or store.nearest_stop_id != stop_id):
-                continue
-            if category and (store is None or store.category != category):
-                continue
-            out.append(o)
+            if stop_id:
+                near_store = store is not None and store.nearest_stop_id == stop_id
+                near_spot = stop_id in via_spot.get(o.sponsor_id, set())
+                if not (near_store or near_spot):
+                    continue
+            if category:
+                cat = store.category if store else (sponsor.category if sponsor else None)
+                if cat != category:
+                    continue
+            out.append(o.model_copy(update={"demo": sponsor.demo_placeholder if sponsor else True}))
         return out
+
+    # nearby spots
+    def spot_categories(self) -> list[CategoryRef]:
+        return list(self._categories.values())
+
+    def label_types(self) -> list[dict]:
+        return [{"slug": k, "display_name": v} for k, v in self._label_names.items()]
+
+    def _build_spot(self, raw: dict, distance_m: float | None) -> Spot:
+        spot = Spot(
+            id=str(slug_to_uuid(raw["id"])),
+            name=raw["name"],
+            category=self._categories[raw["category"]],
+            address=raw["address"],
+            lat=raw["lat"],
+            lon=raw["lon"],
+            placement_type=raw["placement_type"],
+            demo=raw["demo_placeholder"],
+            sponsor_id=raw["sponsor_id"],
+            distance_m=distance_m,
+            source=raw["source"],
+            offers=[],
+            labels=[
+                SpotLabel(
+                    slug=l["label"],
+                    display_name=self._label_names[l["label"]],
+                    status=l["status"],
+                    evidence_url=l["evidence_url"],
+                    declaration_note=l["declaration_note"],
+                    verified_at=l["verified_at"],
+                    verified_by=l["verified_by"],
+                )
+                for l in raw["labels"]
+            ],
+        )
+        spot = public_labels(spot)  # pending labels never leave the repository
+        if raw["sponsor_id"]:
+            spot.offers = [o for o in self.offers() if o.sponsor_id == raw["sponsor_id"]]
+        return spot
+
+    def spots_for_stop(self, stop_id: str) -> list[Spot]:
+        out = []
+        for raw in self._spot_raw.values():
+            if not raw["active"]:
+                continue
+            for link in raw["stops"]:
+                if link["stop_id"] == stop_id:
+                    out.append(self._build_spot(raw, link["distance_m"]))
+        return out
+
+    def get_spot(self, spot_id: str) -> Spot | None:
+        for raw in self._spot_raw.values():
+            if str(slug_to_uuid(raw["id"])) == spot_id and raw["active"]:
+                dists = [x["distance_m"] for x in raw["stops"] if x["distance_m"] is not None]
+                return self._build_spot(raw, min(dists) if dists else None)
+        return None
 
     def physical_rewards(self) -> list[PhysicalReward]:
         return list(self._rewards)

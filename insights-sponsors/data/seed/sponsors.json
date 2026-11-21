@@ -1,18 +1,44 @@
 [
   {
     "id": "sp.demo-cafe",
-    "name": "Demo Cafe Group"
+    "name": "Demo Cafe Group",
+    "demo_placeholder": true,
+    "category": "other"
   },
   {
     "id": "sp.demo-bakery",
-    "name": "Demo Bakery Collective"
+    "name": "Demo Bakery Collective",
+    "demo_placeholder": true,
+    "category": "other"
   },
   {
     "id": "sp.demo-threads",
-    "name": "Demo Threads"
+    "name": "Demo Threads",
+    "demo_placeholder": true,
+    "category": "other"
   },
   {
     "id": "sp.demo-sports",
-    "name": "Demo Sports Co"
+    "name": "Demo Sports Co",
+    "demo_placeholder": true,
+    "category": "other"
+  },
+  {
+    "id": "sp.boston-red-sox",
+    "name": "Boston Red Sox",
+    "category": "sports",
+    "demo_placeholder": true
+  },
+  {
+    "id": "sp.mint-julep",
+    "name": "Mint Julep",
+    "category": "clothing",
+    "demo_placeholder": true
+  },
+  {
+    "id": "sp.diesel-cafe",
+    "name": "Diesel Cafe",
+    "category": "food",
+    "demo_placeholder": true
   }
 ]

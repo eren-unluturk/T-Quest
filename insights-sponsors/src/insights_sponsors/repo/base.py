@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Protocol
 
+from ..spots import CategoryRef, Spot
 from ..models import (
     Category,
     Consent,
@@ -32,6 +33,16 @@ class Repository(Protocol):
         store_id: str | None = None,
         category: Category | None = None,
     ) -> list[Offer]: ...
+
+    def spot_categories(self) -> list[CategoryRef]: ...
+
+    def label_types(self) -> list[dict]: ...
+
+    def spots_for_stop(self, stop_id: str) -> list[Spot]:
+        """Active spots linked to the stop, with ONLY declared or certified labels."""
+        ...
+
+    def get_spot(self, spot_id: str) -> Spot | None: ...
 
     def physical_rewards(self) -> list[PhysicalReward]: ...
 

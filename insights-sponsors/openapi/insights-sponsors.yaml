@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
   title: T-Quest insights-sponsors API
-  version: 0.3.0
+  version: 0.4.0
   x-changelog:
+    - '0.4.0: add GET /stops/{stop_id}/nearby, /categories, /labels, /spots/{spot_id}, /rank-tiers; /offers gains rank and placement filters; Offer.store_id nullable and Offer.demo added'
     - '0.3.0: add POST and DELETE /place-visits (consent-gated ingest); revoking place_visits deletes stored visits'
     - '0.2.0: add GET /analytics/boston (anonymous city analytics, k=3)'
     - '0.1.1: document 409 on POST /consent and ConsentRequired'
@@ -102,6 +103,14 @@ paths:
           in: query
           description: When true, only offers the caller's rank and badges qualify for.
           schema: {type: boolean, default: false}
+        - name: rank
+          in: query
+          description: Offers available at this rank tier (min_rank <= rank).
+          schema: {type: integer, minimum: 1, maximum: 5}
+        - name: placement
+          in: query
+          description: local_pick or sponsored_quest (native placements, never pop-ups).
+          schema: {type: string, enum: [local_pick, sponsored_quest]}
       responses:
         '200':
           description: Offers
@@ -270,6 +279,89 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Consent'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+  /stops/{stop_id}/nearby:
+    get:
+      summary: Everything nearby a stop, with optional category and label filters
+      description: |
+        Returns all active nearby spots with no filters. Filters combine: category (repeatable, OR),
+        label (repeatable; match=all by default, any optional), sponsored, q (name search).
+        Only declared or certified labels are ever returned or matched; pending labels are invisible.
+        facets hold category and label counts for the whole stop (before category/label filters).
+        Sponsored spots are native placements and carry their offers. Demo spots have demo=true.
+      parameters:
+        - {$ref: '#/components/parameters/StopId'}
+        - {name: category, in: query, schema: {type: array, items: {type: string}}, style: form, explode: true}
+        - {name: label, in: query, schema: {type: array, items: {type: string}}, style: form, explode: true}
+        - {name: match, in: query, schema: {type: string, enum: [any, all], default: all}}
+        - {name: sponsored, in: query, schema: {type: boolean}}
+        - {name: include_demo, in: query, schema: {type: boolean, default: true}}
+        - {name: q, in: query, schema: {type: string}}
+        - {name: sort, in: query, schema: {type: string, enum: [distance, name, sponsored_first], default: distance}}
+        - {name: limit, in: query, schema: {type: integer, default: 50, minimum: 1, maximum: 100}}
+        - {name: offset, in: query, schema: {type: integer, default: 0, minimum: 0}}
+      responses:
+        '200':
+          description: Nearby spots and filter facets
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/NearbyResponse'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {description: Unknown stop}
+  /categories:
+    get:
+      summary: Spot categories
+      responses:
+        '200':
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/CategoryRef'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /labels:
+    get:
+      summary: Identity label types (display wording is configurable)
+      responses:
+        '200':
+          description: Label types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [slug, display_name]
+                  properties:
+                    slug: {type: string}
+                    display_name: {type: string}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /spots/{spot_id}:
+    get:
+      summary: One nearby spot
+      parameters:
+        - {name: spot_id, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: The spot (declared or certified labels only)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Spot'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {description: Unknown spot}
+  /rank-tiers:
+    get:
+      summary: Placeholder rank-tier discounts and the offers available at each tier
+      description: Percentages mirror game-engine's rank table (3/5/7/10/12); the top tier unlocks a free item. Demo placeholders.
+      responses:
+        '200':
+          description: Tiers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/RankTier'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
 components:
   securitySchemes:
     bearerAuth: {type: http, scheme: bearer}
@@ -291,6 +383,83 @@ components:
         application/json:
           schema: {$ref: '#/components/schemas/Error'}
   schemas:
+    CategoryRef:
+      type: object
+      required: [slug, display_name]
+      properties:
+        slug: {type: string}
+        display_name: {type: string}
+    SpotLabel:
+      type: object
+      required: [slug, display_name, status]
+      properties:
+        slug: {type: string}
+        display_name: {type: string}
+        status: {type: string, enum: [declared, certified]}
+        evidence_url: {type: string, nullable: true}
+        declaration_note: {type: string, nullable: true}
+        verified_at: {type: string, format: date-time, nullable: true}
+        verified_by: {type: string, nullable: true}
+    Spot:
+      type: object
+      required: [id, name, category, placement_type, demo, labels, offers]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        category: {$ref: '#/components/schemas/CategoryRef'}
+        address: {type: string, nullable: true}
+        lat: {type: number, nullable: true}
+        lon: {type: number, nullable: true}
+        placement_type: {type: string, enum: [sponsored, listed]}
+        demo: {type: boolean}
+        sponsor_id: {type: string, nullable: true}
+        distance_m: {type: number, nullable: true}
+        source: {type: string}
+        labels:
+          type: array
+          items: {$ref: '#/components/schemas/SpotLabel'}
+        offers:
+          type: array
+          items: {$ref: '#/components/schemas/Offer'}
+    FacetCount:
+      type: object
+      required: [slug, display_name, count]
+      properties:
+        slug: {type: string}
+        display_name: {type: string}
+        count: {type: integer}
+    NearbyResponse:
+      type: object
+      required: [stop_id, total, limit, offset, spots, facets]
+      properties:
+        stop_id: {type: string}
+        total: {type: integer}
+        limit: {type: integer}
+        offset: {type: integer}
+        spots:
+          type: array
+          items: {$ref: '#/components/schemas/Spot'}
+        facets:
+          type: object
+          required: [categories, labels]
+          properties:
+            categories:
+              type: array
+              items: {$ref: '#/components/schemas/FacetCount'}
+            labels:
+              type: array
+              items: {$ref: '#/components/schemas/FacetCount'}
+    RankTier:
+      type: object
+      required: [rank, discount_pct, free_item, offers]
+      properties:
+        rank: {type: integer}
+        discount_pct: {type: integer}
+        free_item: {type: boolean}
+        demo: {type: boolean}
+        offers:
+          type: array
+          items: {$ref: '#/components/schemas/Offer'}
     Error:
       type: object
       required: [detail]
@@ -333,11 +502,11 @@ components:
         address: {type: string}
     Offer:
       type: object
-      required: [id, sponsor_id, store_id, title, description, kind, min_rank, per_user_limit, starts_at, placement]
+      required: [id, sponsor_id, title, description, kind, min_rank, per_user_limit, starts_at, placement]
       properties:
         id: {type: string}
         sponsor_id: {type: string}
-        store_id: {type: string}
+        store_id: {type: string, nullable: true}
         title: {type: string}
         description: {type: string}
         kind: {type: string, enum: [discount, free_item, points_item]}
@@ -349,6 +518,7 @@ components:
         starts_at: {type: string, format: date-time}
         ends_at: {type: string, format: date-time, nullable: true}
         placement: {type: string, enum: [local_pick, sponsored_quest]}
+        demo: {type: boolean, description: 'true when the sponsor is a demo placeholder; no real partnership'}
     LocalPick:
       type: object
       required: [store, offers, distance_m]

@@ -38,6 +38,8 @@ class Sponsor(BaseModel):
 
     id: str
     name: str
+    category: str = "other"
+    demo_placeholder: bool = True
 
 
 class Fact(BaseModel):
@@ -67,7 +69,7 @@ class StorePartner(BaseModel):
 class Offer(BaseModel):
     id: str
     sponsor_id: str
-    store_id: str
+    store_id: str | None = None
     title: str
     description: str
     kind: Literal["discount", "free_item", "points_item"]
@@ -79,6 +81,7 @@ class Offer(BaseModel):
     starts_at: datetime
     ends_at: datetime | None = None
     placement: Literal["local_pick", "sponsored_quest"]
+    demo: bool = True
 
 
 class LocalPick(BaseModel):

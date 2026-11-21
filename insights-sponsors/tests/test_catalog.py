@@ -62,14 +62,14 @@ def test_offers_list_and_filters(client, auth_headers):
     r = client.get("/offers", headers=auth_headers)
     assert r.status_code == 200
     body = r.json()
-    assert len(body) == 14
+    assert len(body) == 21
     check_shape(response_schema("/offers", "get"), body)
     by_store = client.get("/offers", params={"store_id": "st.cafe-parkst"}, headers=auth_headers).json()
     assert ids(by_store) == {"off.cafe-parkst-r1", "off.cafe-parkst-quest"}
     by_stop = client.get("/offers", params={"stop_id": "place-dwnxg"}, headers=auth_headers).json()
     assert {o["store_id"] for o in by_stop} == {"st.bakery-dtx", "st.threads-dtx"}
     by_cat = client.get("/offers", params={"category": "sports"}, headers=auth_headers).json()
-    assert {o["store_id"] for o in by_cat} == {"st.sports-north", "st.sports-kenmore"}
+    assert {o["store_id"] for o in by_cat} == {"st.sports-north", "st.sports-kenmore", None}
     assert client.get("/offers", params={"category": "bogus"}, headers=auth_headers).status_code == 422
 
 
