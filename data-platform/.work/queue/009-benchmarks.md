@@ -1,7 +1,7 @@
 ---
 id: 009
 title: Demo benchmark - compression ratio and aggregate latency
-status: ready
+status: done
 depends_on: [005, 006]
 ---
 ## Goal

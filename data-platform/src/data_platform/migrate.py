@@ -95,12 +95,12 @@ def _checksum(sql: str) -> str:
     return hashlib.sha256(sql.encode("utf-8")).hexdigest()
 
 
-def migrate(migrations_dir: Path = MIGRATIONS_DIR) -> list[str]:
+def migrate(migrations_dir: Path = MIGRATIONS_DIR, url: str | None = None) -> list[str]:
     """Apply pending migrations. Returns the list of versions applied."""
     files = sorted(migrations_dir.glob("[0-9][0-9][0-9][0-9]_*.sql"))
     applied: list[str] = []
 
-    with db.connect(autocommit=True) as conn:
+    with db.connect(url, autocommit=True) as conn:
         conn.execute(CREATE_TABLE)
         done = dict(conn.execute("SELECT version, checksum FROM schema_migrations").fetchall())
 

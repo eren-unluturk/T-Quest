@@ -44,3 +44,11 @@ python -m data_platform.ingest --interval 15 # poll every 15 seconds until stopp
 ```
 Predictions are polled for subway and light-rail routes only (the MBTA API requires a route filter), so run `load_static` first. A failed cycle is logged and the loop continues.
 
+
+## Benchmark (demo numbers)
+```powershell
+python -m data_platform.bench                 # 7 days, 2000 users, 600 vehicles polled every 15 s
+python -m data_platform.bench --synthetic-days 1 --users 100 --vehicles 50   # quick run
+python -m data_platform.bench --cleanup       # remove all synthetic rows and users
+```
+Writes `bench/RESULTS.md` and `bench/results.json`: compression ratio for `vehicles` and `predictions`, and median latency of the leaderboard and home-line continuous aggregates against the same queries on raw tables. The default run inserts about 24 million vehicle rows; use the smaller flags for a quick check. If `TIGER_DATABASE_URL` is set the run is repeated there (migrate that database first) and results get a second column.

@@ -15,8 +15,9 @@ def database_url() -> str:
     return url
 
 
-def connect(**kwargs) -> psycopg.Connection:
-    return psycopg.connect(database_url(), **kwargs)
+def connect(url: str | None = None, **kwargs) -> psycopg.Connection:
+    """Connect to `url`, or to DATABASE_URL when no url is given."""
+    return psycopg.connect(url or database_url(), **kwargs)
 
 
 def fetch_all(sql: str, params=None) -> list[dict]:
