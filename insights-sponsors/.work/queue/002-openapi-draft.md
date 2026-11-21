@@ -1,7 +1,7 @@
 ---
 id: 002
 title: Draft the insights-sponsors OpenAPI v0
-status: ready
+status: done
 issue: 8
 depends_on: [001]
 ---

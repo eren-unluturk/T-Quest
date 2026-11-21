@@ -14,3 +14,7 @@ See AGENT.md for charter, owned paths and definition of done.
 - Install: `pip install -e ".[dev]"`
 - Run: `python -m insights_sponsors.main` (serves on port 8002, see `INSIGHTS_SPONSORS_PORT`)
 - Test: `pytest`
+
+## Contract
+
+The OpenAPI draft lives in `openapi/insights-sponsors.yaml` until it is promoted to `contracts/api/insights-sponsors.yaml` (done by a human, builders never write to `contracts/`).
