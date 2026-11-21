@@ -1,54 +1,72 @@
-# HANDOFF: insights-sponsors (builder side)
+# HANDOFF: insights-sponsors (safe stop 2026-11-21 13:17)
 
 ## Status
-The in-memory service is complete and tested: 149 tests pass, 1 skipped (public route has no 401 case). Prompts 001-006, 008, 010-013 are done. Prompt 014 (Postgres backend) was interrupted with only its badge-rename step finished, parked on branch `wip/insights-sponsors-014`; main contains no half-done work. Nothing has run against a real database yet: there was no Docker or Postgres in this environment.
+The insights-sponsors service runs fully on the in-memory backend with real Boston seed data. Every route in the OpenAPI draft (v0.3.0, 14 operations) is implemented and checked by a conformance test, and 149 tests pass. That covers content, catalog, consent, place visits, personal analytics, Boston analytics and recommendations. The Tiger Data (Postgres) backend has not been built yet. Prompt 014 was interrupted early, its partial work is on a wip branch, and 015-017 are queued and not started. The contract is still a draft inside our folder and waits on a human to copy it into `contracts/` (#26).
 
-## Done (all on main, 013 is the last commit)
-- 001 FastAPI scaffold, config (`.env` resolved from the repo root), dev bearer auth. `/health`.
-- 002/011/012/013 OpenAPI draft `openapi/insights-sponsors.yaml`, now version 0.3.0 (13 paths, 14 operations). Not yet promoted to `contracts/api/` (human step, #26).
-- 003 Models, `Repository` Protocol, `MemoryRepository`, seed JSON in `data/seed/`.
-- 004 `GET /stops/{id}/facts`, `/stops/{id}/local-picks`, `/freedom-trail`, `/fun-facts` (no auth), `/offers` (eligibility via `eligibility.is_eligible`), `/physical-rewards/catalog`.
-- 005 `GET/POST /consent`, `DELETE /consent/{scope}`; `consent.has_consent` / `require_consent`; policy version 2026-11-21 (409 on mismatch).
-- 006 `GET /analytics/me`, `GET /recommendations`; SQL drafts in `sql/` (analytics_me, recs_unvisited_neighborhoods, recs_routes, recs_place_affinity). Place signals only after `has_consent`.
-- 008 Contract conformance test over every operation, no route outside the contract, `.env` path fix, README "Run locally".
-- 010 29 stops (19 neighborhoods, 5 bus-mode), coordinates verified with `scripts/verify_stops.py` against the MBTA V3 API (exit 0), 2 more stores/offers, events for users 1-6.
-- 012 `GET /analytics/boston`, k-anonymity (min 3 riders), `sql/analytics_boston.sql`.
-- 013 `POST/DELETE /place-visits` (consent-gated, coordinates rounded to 3 decimals, 90-day retention); revoking `place_visits` deletes stored visits.
-- Reports: `.work/reports/001.md` to `013.md` (no 007, 009, 014).
+## Done (built and verified)
+- 001 FastAPI skeleton: `src/insights_sponsors/{main,config,auth}.py`, `GET /health`, port 8002. Dev auth treats the bearer token as the user id.
+- 002, 011, 012, 013 OpenAPI draft `openapi/insights-sponsors.yaml` v0.3.0 (validated, changelog in `info.x-changelog`).
+- 003 models, repository Protocol, memory backend, seed JSON in `data/seed/` (stops, facts, Freedom Trail, fun facts, fictional sponsors, stores, offers, physical rewards).
+- 004 `GET /stops/{id}/facts`, `/stops/{id}/local-picks`, `/freedom-trail`, `/fun-facts` (no auth), `/offers` (with `eligible_only`), `/physical-rewards/catalog`. Eligibility rule in `eligibility.py` (agreed with game-engine on #5).
+- 005 `GET/POST /consent`, `DELETE /consent/{scope}`. Single gate `consent.py` (`has_consent`, `require_consent`). Policy version 409.
+- 006 `GET /analytics/me`, `GET /recommendations` (deterministic, sponsorship never changes order, place signals only with consent). SQL drafts in `sql/` (analytics_me, recs_*).
+- 008 conformance test (every YAML operation vs the live app, no extra routes); `.env` resolved from the package path.
+- 010 29 stops verified against the MBTA V3 API (`scripts/verify_stops.py`), 19 neighborhoods, 5 bus-mode stops.
+- 012 `GET /analytics/boston` with k-anonymity (buckets under 3 riders hidden), plus `sql/analytics_boston.sql`.
+- 013 `POST /place-visits` (consent-gated, coordinates rounded, 90-day retention) and `DELETE /place-visits`. Revoking consent deletes visits.
+- Reports for each are in `.work/reports/NNN.md`. Issue #3 is closed.
 
 ## In progress / partial
-- Prompt 014. Branch `wip/insights-sponsors-014` (pushed, one commit "WIP: 014 ...") has the badge id rename (`line-green-complete`, `freedom-trail`, `rank-3` and so on) in seed JSON and tests, `psycopg-pool` dependency and a `db` pytest marker. The queue file is back to `ready` with detailed "Resume notes" (migration facts, design for ids/postgres repo/composite repo/loader). To resume: `git merge wip/insights-sponsors-014` (or cherry-pick) on main, then follow the Steps in `queue/014-postgres-catalog-content-consent.md`.
+- **014 Postgres backend (catalog, content, consent, place visits)**. Branch `wip/insights-sponsors-014` (pushed, commit ed294ec) holds only:
+  - the badge-slug rename in the seed and tests
+  - the `psycopg-pool` dependency and a `db` pytest marker (149 tests pass on it)
+
+  Resume:
+  1. Merge or cherry-pick ed294ec into main.
+  2. Follow "Resume notes" in `.work/queue/014-postgres-catalog-content-consent.md`. They hold the worked-out design: uuid5 ids, `resolve_user`, a composite repo for insights routes, and the schema quirks (`stores.sponsor_id NOT NULL`, generated `consent.granted`, and others).
+
+  The queue file is back to `ready`, with its resume notes committed on main.
 
 ## Remaining (priority order)
-1. 014 Postgres backend for catalog, content, consent, place visits (blocks 016).
-2. 015 Bus parity in seed, analytics and recommendations.
-3. 016 Analytics, recommendations and Boston analytics on Postgres plus latency bench (needs data-platform aggregates).
-4. 017 store_id validation and demo smoke script.
-Next 3 queue prompts: 014, 015, 017 (016 depends on 014 and 015). 007 stays blocked/superseded, 009 cancelled.
-Items that block other agents: promoting the OpenAPI draft (#26, human) blocks client-bryan (#8).
+1. **HUMAN #26:** copy `insights-sponsors/openapi/insights-sponsors.yaml` (main, v0.3.0) to `contracts/api/insights-sponsors.yaml` and commit it. Blocks client-bryan (#8).
+2. **014** Postgres backend for catalog, content, consent and place visits (resume from the wip branch). Next queue prompt.
+3. **015** Bus parity: bus routes and events, and a bus home line in analytics and recs.
+4. **016** Analytics, recs and Boston analytics on Postgres, plus `scripts/bench_queries.py` and `docs/bench.md` latency numbers (the Tiger Data demo angle). Needs a local TimescaleDB.
+5. **017** `store_id` validation on place visits (avoids a 500 on a bad uuid in postgres mode) and `scripts/demo_smoke.py` for the presentation.
+- Later, free only: aggregate-vs-raw demo numbers with data-platform. Out of scope (pay-per-usage): AI-written recommendation text (009, cancelled), paid Tiger tiers, and paid geocoding.
+
+Next 3 queue prompts: **014, 015, 016** (017 depends on 016). 007 is superseded and 009 cancelled. Blocking other agents: #26 (human promotion) blocks client-bryan (#8).
 
 ## Blockers and open issues
-- #1 data-platform schema: migrations 0000-0006 exist in `data-platform/migrations`; `contracts/db/` is still empty. Postgres work reads their migrations directly.
-- #5 game-engine: badge ids and the redemption split need reconciling (we now use DB-style slugs on the WIP branch).
-- #8 client-bryan: waits on the promoted contract (human, #26).
-- #23 history trailer on commit 6732e8d1f5: `check-attribution.mjs` fails on history; needs a human decision, builders do not rewrite history.
-- #11 kickoff (human).
+- **#26** (to:humans) Eren promotes our OpenAPI draft into contracts/. Waiting on the human.
+- **#23** (to:humans) commit 6732e8d (PR #19 squash) has a co-author trailer, so the doctor attribution check fails on history. Decide: rewrite and force-push, or allowlist. Waiting on the human.
+- **#8** (from client-bryan) wants our OpenAPI. Acked, and the draft is announced at 0.3.0. Close after #26.
+- **#5** (from game-engine) redemption split. Agreed: game-engine owns redemptions and verify; we own the catalog and eligibility. Ranks are 3/5/7/10/12%, game-engine is on port 8003, and badge slugs are shared (PR #31). Open point: game-engine has **no rank-4 badge**, but our seed has a rank-4 patch. Decide whether to drop it or ask them for one, then close #5.
+- **#1** (from data-platform) v0 schema. Acked. The schema exists as a draft in `data-platform/contracts-draft/db/` (migrations 0000-0006) and is not yet in contracts/ (human step, see `data-platform/contracts-draft/PUBLISH.md`).
+- **#22** (ours, to data-platform) columns and aggregates. Delivered in migrations 0005/0006. Open: the name conflict below.
+- **#11** kickoff: Eren's GitHub handle in TEAM.md and team.json is still TODO (human).
 
-## Decisions made and deviations
-- No pay-per-usage services (README "Scope for this hackathon"); LLM recommendation text left out.
-- Rolling 7/30 day windows; weeks start Monday; scores in 0-1 (neighborhood 1/rank, route 0.8x, place 0.6x) with ties broken by id and a rounded sort key.
-- `total_checkins` is also zeroed when fewer than 3 riders were active (012); previous period under 3 riders counts as no data (+100%).
-- Seed facts and URLs were written from general knowledge (URLs not fetched); trail-site and store coordinates are approximate; stop coordinates and names are verified.
-- `app.openapi()` is used to list served routes because `app.routes` holds lazy router wrappers in this FastAPI version.
-- Bash heredocs with quotes fail in this environment; use Write/Edit for files.
+## Decisions made and deviations from plan
+- Builders cannot write `contracts/`, so the spec lives in `openapi/` until a human copies it.
+- The in-memory backend comes first, so the API was demoable before the schema existed. Postgres comes after (014/016). 007 is superseded by 014.
+- No pay-per-usage this hackathon. 009 (LLM reasons) is cancelled, and recommendations stay deterministic SQL. The scope rule is at the top of ROADMAP.md.
+- Privacy: k-anonymity of 3 for city analytics (totals and baselines included), coordinates rounded to about 100 m, 90-day retention, revoke deletes visits, deletion always allowed.
+- DB ids are uuid. Seed slugs map with uuid5 (deterministic). Badge ids use the data-platform/game-engine slugs (`line-red-complete`, `freedom-trail`, `rank-3`).
+- Rank 1 discount is 3% (game-engine's call), not about 5% as in the brief.
+- From the builder: rolling 7/30-day windows; weeks start Monday; scores in 0-1 (neighborhood 1/rank, route 0.8x, place 0.6x) with ties broken by id and a rounded sort key. `app.openapi()` lists served routes, because `app.routes` holds lazy router wrappers in this FastAPI version. Bash heredocs with quotes fail in this environment, so use Write/Edit for files.
 
 ## Risks for the demo/pitch
-- No database run yet, so the Tiger Data story (compression, aggregate latency) has no numbers from this service. 016 is the prompt that produces them.
-- Recommendations and analytics depend on seed data for three or six users; the demo needs consistent seeded rider events across services.
-- Draft contract unpromoted: clients cannot generate from `contracts/` yet.
-- Auth is dev mode only (token is the user id).
+- **No Postgres has run our code yet.** No Docker was available to the builder, data-platform's migration 0006 has never run against a DB, and the latency numbers (016) don't exist yet. The Tiger Data prize story depends on 014 and 016 plus a local TimescaleDB.
+- **home_line column name conflict:** data-platform's latest #22 comment says `checkins_30d` (30-day window), while migration 0006 creates `checkins_28d`. Check the real column before 016.
+- The contract is not in contracts/ yet (#26), so clients may build against a moving draft.
+- Seed facts were written from general knowledge, and their source URLs were not fetched. Spot-check them before showing. Freedom Trail coordinates are approximate.
+- The doctor attribution check fails because of #23 until the humans decide.
+- Auth is dev mode only (the bearer token is the user id). There is no real session issuer yet.
+- Analytics and recommendations use seed data for 6 users. The demo needs rider events that are consistent across services (game-engine points vs our analytics).
 
 ## How to resume
-1. Delete the stop file: `Remove-Item .work/STOP` (from `insights-sponsors/`).
-2. From the repo root: `node scripts/duo.mjs insights-sponsors builder` (and `planner` in a second pane).
-3. First thing: `git merge wip/insights-sponsors-014`, run `python -m pytest -q` (expect 149 passed), then continue prompt 014 at Step 1 (`repo/ids.py`).
+1. Delete the stop file: `Remove-Item insights-sponsors/.work/STOP` (also `data-platform/.work/STOP` if that pair should run).
+2. From the repo root: `node scripts/duo.mjs insights-sponsors planner` and `node scripts/duo.mjs insights-sponsors builder` (or VS Code task "Duo up: eren").
+3. Say `start` to the planner and `go` to the builder.
+4. First thing for the builder: `git merge wip/insights-sponsors-014` (commit ed294ec) on main, run `python -m pytest -q` (expect 149 passed), then continue 014 at Step 1 (`repo/ids.py`) using its "Resume notes".
+5. First thing for the planner: check #26, #23 and #5 (rank-4), and confirm the home_line column name with data-platform.

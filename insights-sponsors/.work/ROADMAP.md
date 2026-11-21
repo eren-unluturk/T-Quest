@@ -7,9 +7,10 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 - **Contract promotion is a human step.** Builders cannot write `contracts/`. Draft is done (002, commit cf4e57b); Eren copies `insights-sponsors/openapi/insights-sponsors.yaml` to `contracts/api/insights-sponsors.yaml` (allowed for eren by D13) and commits it. Tracked in #26. #8 (client-bryan) waits on this.
 - **Tiger Data schema (#1, data-platform):** a v0 draft exists in `data-platform/contracts-draft/db/` (migrations 0000-0004, not yet in contracts/). Our additions arrive in data-platform prompt 010 / migration 0005. Renames from the #22 ACK: store_partners->stores, physical_rewards.kind->item_type, store_inventory.quantity->stock, rank via the `user_rank` view, badges via `user_collections`, home line via `home_line_weekly` (checkins_28d). When 0005 lands, the planner writes a fresh ready prompt (014) that supersedes 007. It must handle text session ids vs uuid `user_id`, and `home_line_weekly` exposes `rides_28d` (checkin + ride_start). 007 (Postgres backend) is blocked on it. Everything before it runs on the in-memory backend with seed JSON. Our column and aggregate needs went to data-platform as #22.
 - **History attribution:** commit 6732e8d (squash merge of PR #19) carries a co-author trailer, so doctor fails. A human decision is needed (#23). Agents do not rewrite history.
-- **Redemption split with game-engine (#5).** Game-engine owns `POST /redemptions` and `/redemptions/verify` (contracts/api/game-engine.yaml). We own the offer and physical-reward catalog and the eligibility rule (`min_rank`, `required_badge_id`). Rank discount numbers come from game-engine `x-rules.ranks`. Rank 1 is 3% there against "~5%" in the brief; flagged on #5.
-- **Badge ids** for physical rewards are owned by game-engine. Our seed uses placeholder ids (003), to be reconciled on #5.
-- **Port clash:** game-engine.yaml `servers` uses `localhost:8002`, but `.env.example` gives 8002 to insights-sponsors and 8003 to game-engine. Flagged on #5.
+- **Redemption split with game-engine (#5).** Game-engine owns `POST /redemptions` and `/redemptions/verify` (contracts/api/game-engine.yaml). We own the offer and physical-reward catalog and the eligibility rule (`min_rank`, `required_badge_id`). Rank discount numbers come from game-engine `x-rules.ranks`. AGREED on #5: game-engine keeps rank discounts at 3/5/7/10/12% (rank 1 is 3%, on purpose).
+- **Badge ids:** game-engine adopted the shared slugs (PR #31): line-<route>-complete, freedom-trail, rank-3, rank-5. **rank-4 has no badge in game-engine**, but our seed has a rank-4 patch; decide whether to drop it or ask for one. 014 renames our seed to these slugs.
+- **home_line column name conflict:** data-platform's #22 comment says `checkins_30d` (30-day window), but migration 0006 (their report 012) creates `checkins_28d`. Check the actual column before running 016.
+- **Port clash:** RESOLVED; game-engine moved to 8003 (PR #28).
 - **Auth:** dev mode treats the bearer token as the user id until a session issuer is agreed (#8).
 - Kickoff (#11) is a human task: Eren fills the GitHub handle in TEAM.md and team.json and runs setup-me.
 
@@ -26,10 +27,10 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 ## Phase 3: analytics and recommendations
 - [x] 006 Analytics and recs: SQL drafts plus in-memory (queue/006-analytics-recs-sql-draft.md, #3) verified, #3 closed
 - [-] 007 superseded by 014
-- [ ] 014 Postgres backend: catalog, content, consent, place visits (queue/014-postgres-catalog-content-consent.md, #1)
-- [ ] 015 Bus parity in seed, analytics, recs (queue/015-bus-parity-seed.md)
-- [ ] 016 Analytics, recs and Boston analytics on Postgres, plus latency bench (queue/016-postgres-analytics-recs.md, #1)
-- [ ] 017 store_id validation and demo smoke script (queue/017-store-id-validation-demo-smoke.md)
+- [ ] 014 Postgres backend: catalog, content, consent, place visits (queue/014-postgres-catalog-content-consent.md, #1) IN PROGRESS at safe stop (see HANDOFF.md)
+- [ ] 015 Bus parity in seed, analytics, recs (queue/015-bus-parity-seed.md) not started
+- [ ] 016 Analytics, recs and Boston analytics on Postgres, plus latency bench (queue/016-postgres-analytics-recs.md, #1) not started
+- [ ] 017 store_id validation and demo smoke script (queue/017-store-id-validation-demo-smoke.md) not started
 
 ## Phase 4: hardening and AI
 - [x] 008 Hardening and contract conformance test (queue/008-hardening-contract-conformance.md, #8) verified
@@ -62,3 +63,6 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 - data-platform 012 delivered migration 0006 (user_stop_daily, user_stop_hourly, stop_popularity_hourly, home_line.checkins_28d), not yet run against a DB. 016 queued and may be the first run.
 - 012 verified: 123 passed; k-anonymity (3 riders) enforced on stops, days, totals and previous-period baselines; no ids in the body; spec 0.2.0; conformance covers 12 operations. Accepted the stricter privacy deviations.
 - 013 verified: 149 passed; write never called without consent (spy plus source scan), revoke deletes visits, coordinates rounded, spec 0.3.0. store_id not validated (a 500 risk on uuid in postgres), so 017. 0.3.0 announced on #8 and #26.
+
+## SAFE STOP 2026-11-21 13:17
+Stopped on request. 014 in progress with the builder; 015-017 ready and not started. See HANDOFF.md.
