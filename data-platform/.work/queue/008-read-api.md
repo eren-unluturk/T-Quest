@@ -1,7 +1,7 @@
 ---
 id: 008
 title: Implement the read API from the data-platform OpenAPI draft
-status: ready
+status: done
 issue: 8
 depends_on: [004, 005]
 ---

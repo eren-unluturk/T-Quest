@@ -3,6 +3,7 @@ import os
 
 import psycopg
 from dotenv import load_dotenv
+from psycopg.rows import dict_row
 
 load_dotenv()
 
@@ -16,3 +17,14 @@ def database_url() -> str:
 
 def connect(**kwargs) -> psycopg.Connection:
     return psycopg.connect(database_url(), **kwargs)
+
+
+def fetch_all(sql: str, params=None) -> list[dict]:
+    """Run a read query on a short-lived connection and return rows as dicts."""
+    with connect(row_factory=dict_row) as conn:
+        return conn.execute(sql, params).fetchall()
+
+
+def fetch_one(sql: str, params=None) -> dict | None:
+    rows = fetch_all(sql, params)
+    return rows[0] if rows else None

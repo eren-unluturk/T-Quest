@@ -62,7 +62,7 @@ paths:
         - {name: lat, in: query, schema: {type: number, format: double}}
         - {name: lon, in: query, schema: {type: number, format: double}}
         - {name: radius_m, in: query, description: Requires lat and lon, schema: {type: integer, minimum: 1, default: 500}}
-        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 1000, default: 100}}
+        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 500, default: 50}}
       responses:
         '200':
           description: Stops
@@ -98,7 +98,7 @@ paths:
       parameters:
         - {name: route_id, in: query, schema: {type: string}}
         - {name: stop_id, in: query, schema: {type: string}}
-        - {name: since_s, in: query, schema: {type: integer, minimum: 1}}
+        - {name: since_s, in: query, schema: {type: integer, minimum: 1, default: 120}}
       responses:
         '200':
           description: Vehicles
