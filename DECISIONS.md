@@ -41,6 +41,18 @@ Format: decision, alternatives, why. Append new entries; do not rewrite others'.
 ## D11. Branches: commit straight to main
 - Per brief. Alternatives: PR flow. Why: 4 people, hackathon speed; ownership guard prevents collisions.
 
+## D13. Per-path ownership via team.json "paths" (weekend default)
+- Decision: each person has an optional `paths` list of globs ("dir/**" = prefix, "/*" = any root-level file, else exact path) that the pre-commit guard allows in addition to their folders, docs/ and DECISIONS.md.
+  - eren: contracts/db/**, contracts/api/data-platform.yaml, contracts/api/insights-sponsors.yaml, scripts/, .github/, .githooks/, .claude-template/, .claude/, .vscode/, tests/, team.json, TEAM.md, and all root files.
+  - tobi: contracts/api/game-engine.yaml.
+  - bryan, isabella: none beyond their folders (design/ is a shared folder for both).
+  - contracts/events/** and any other contracts/ path: ALLOW_SHARED=1 only (needs a contract-change issue acked by consumers).
+- Alternatives: everything outside own folders behind ALLOW_SHARED=1 (D6); per-agent rather than per-person paths.
+- Why: owners can edit their own specs without friction while shared infrastructure stays with Eren for the weekend. Revisit after the hackathon. Supersedes the consequence noted in D6.
+
+## D14. setup-me sets hooksPath; doctor checks setup
+- `setup-me.mjs` runs and verifies `git config core.hooksPath .githooks` (fails loudly otherwise). `doctor.mjs` prints a pass/fail checklist: hooksPath, .team/me, hooks present, gh auth, Node >= 20 (.env optional warning).
+
 ## D12. Tiger Data findings (researched 2026-11-21; verify before relying)
 - Tiger Cloud has a Free plan (Postgres + TimescaleDB + vector); pick "Free Plan" at signup rather than the 30-day trial. A third-party listing showed paid tiers starting around $30/mo, so check the pricing page for free-tier limits.
 - Fastest path: install Tiger CLI (Windows supported; install script at cli.tigerdata.com, or package managers), `tiger auth login`, `tiger service create`.

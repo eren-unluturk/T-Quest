@@ -2,10 +2,10 @@
 
 1. Install Git, Node.js LTS, and GitHub CLI (`gh`): `winget install Git.Git OpenJS.NodeJS.LTS GitHub.cli`. Reopen VS Code afterwards.
 2. `gh auth login` (GitHub.com, HTTPS, browser).
-3. `git pull` in the repo (you already have access). Then run once: `git config core.hooksPath .githooks`.
+3. `git pull` in the repo (you already have access). Hooks are configured for you by step 6.
 4. Open the workspace: `code tquest.code-workspace` (one root per agent folder), or just open the repo folder. Install the recommended Claude Code extension.
 5. Open an integrated terminal in YOUR agent's folder (right-click the folder, "Open in Integrated Terminal").
-6. Set identity: `node ../scripts/setup-me.mjs <eren|tobi|bryan|isabella>`. This writes the gitignored `.team/me` and prints your agents and folders.
+6. Set identity: `node ../scripts/setup-me.mjs <eren|tobi|bryan|isabella>`. This writes the gitignored `.team/me`, sets and verifies `git config core.hooksPath .githooks`, and prints your agents and folders. Then run `node ../scripts/doctor.mjs` for a pass/fail checklist (hooks path, identity, gh auth, Node version). Run it whenever something seems off.
 7. Run `claude` in that terminal, or use the Claude Code extension with the agent folder as the working folder. The SessionStart hook prints your inbox.
 8. Second terminal: Terminal > Run Task > "Watch inbox" (polls every 45s, prints only new/changed items).
 9. Copy `.env.example` to `.env` and fill in values (never commit `.env`).

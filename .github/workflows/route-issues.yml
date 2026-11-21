@@ -12,10 +12,12 @@ jobs:
         with:
           script: |
             const body = context.payload.issue.body || '';
-            const field = (name) => {
-              const m = body.match(new RegExp('###\s+' + name + '\s*\n+([^\n]+)'));
-              return m ? m[1].trim() : null;
-            };
+            const sections = {};
+            for (const part of body.split(/^###[ \t]+/m).slice(1)) {
+              const lines = part.split(/\r?\n/);
+              sections[lines[0].trim()] = lines.slice(1).join('\n').trim();
+            }
+            const field = (name) => (sections[name] || '').split('\n')[0].trim() || null;
             const from = field('From'), to = field('To'), type = field('Type');
             if (!from || !to || !type) { core.info('Not a message issue; skipping'); return; }
             const wanted = ['to:' + to, 'from:' + from, 'type:' + type];

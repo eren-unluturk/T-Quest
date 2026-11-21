@@ -1,22 +1,62 @@
 {
   "eren": {
     "github": "TODO",
-    "agents": ["data-platform", "insights-sponsors"],
-    "folders": ["data-platform", "insights-sponsors"]
+    "agents": [
+      "data-platform",
+      "insights-sponsors"
+    ],
+    "folders": [
+      "data-platform",
+      "insights-sponsors"
+    ],
+    "paths": [
+      "contracts/db/**",
+      "contracts/api/data-platform.yaml",
+      "contracts/api/insights-sponsors.yaml",
+      "scripts/**",
+      ".github/**",
+      ".githooks/**",
+      ".claude-template/**",
+      ".claude/**",
+      ".vscode/**",
+      "tests/**",
+      "team.json",
+      "TEAM.md",
+      "/*"
+    ]
   },
   "tobi": {
     "github": "TODO",
-    "agents": ["game-engine"],
-    "folders": ["game-engine"]
+    "agents": [
+      "game-engine"
+    ],
+    "folders": [
+      "game-engine"
+    ],
+    "paths": [
+      "contracts/api/game-engine.yaml"
+    ]
   },
   "bryan": {
     "github": "TODO",
-    "agents": ["client-bryan"],
-    "folders": ["client-bryan", "design"]
+    "agents": [
+      "client-bryan"
+    ],
+    "folders": [
+      "client-bryan",
+      "design"
+    ],
+    "paths": []
   },
   "isabella": {
     "github": "TODO",
-    "agents": ["client-isabella"],
-    "folders": ["client-isabella", "design"]
+    "agents": [
+      "client-isabella"
+    ],
+    "folders": [
+      "client-isabella",
+      "design"
+    ],
+    "paths": []
   }
 }

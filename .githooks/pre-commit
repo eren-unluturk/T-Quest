@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Ownership guard: refuse commits that stage files outside the committer's folders.
-// Allowlist: DECISIONS.md, docs/. Override: ALLOW_SHARED=1.
+// Allowlist: own folders, team.json "paths" globs, DECISIONS.md, docs/. Override: ALLOW_SHARED=1.
 const { spawnSync } = require('node:child_process');
 const { readFileSync, existsSync } = require('node:fs');
 const path = require('node:path');
@@ -27,7 +27,10 @@ if (!team[me]) {
 const staged = git(['diff', '--cached', '--name-only', '--diff-filter=ACMRD']).stdout.split('\n').map((s) => s.trim()).filter(Boolean);
 const allowedPrefixes = [...team[me].folders.map((f) => f + '/'), 'docs/'];
 const allowedFiles = ['DECISIONS.md'];
-const bad = staged.filter((f) => !allowedFiles.includes(f) && !allowedPrefixes.some((p) => f.startsWith(p)));
+// paths globs: "dir/**" = prefix, "/*" = any root-level file, otherwise exact path.
+const matches = (f, g) => (g === '/*' ? !f.includes('/') : g.endsWith('/**') ? f.startsWith(g.slice(0, -2)) : f === g);
+const extra = team[me].paths || [];
+const bad = staged.filter((f) => !allowedFiles.includes(f) && !allowedPrefixes.some((p) => f.startsWith(p)) && !extra.some((g) => matches(f, g)));
 if (bad.length) {
   console.error(`pre-commit: ${me} may only commit inside: ${team[me].folders.join(', ')}, docs/, DECISIONS.md`);
   for (const f of bad) console.error(`  not allowed: ${f}`);
