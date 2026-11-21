@@ -1,7 +1,7 @@
 ---
 id: 004
 title: Draft schema contract doc and data-platform OpenAPI for publication
-status: ready
+status: done
 issue: 8
 depends_on: [003]
 ---

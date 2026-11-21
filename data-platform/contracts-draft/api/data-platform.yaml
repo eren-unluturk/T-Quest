@@ -1,0 +1,259 @@
+openapi: 3.0.3
+info:
+  title: T-Quest data-platform API
+  version: 0.1.0
+  description: |
+    Read API for MBTA static and realtime data: routes, lines, stops, live
+    vehicles, predictions and alerts. Owner: data-platform (Eren).
+    DRAFT. All endpoints are public and need no auth: they serve no user data.
+    Ids are MBTA string ids (for example `Red`, `Green-B`, `place-pktrm`).
+servers:
+  - url: http://localhost:8001
+paths:
+  /health:
+    get:
+      summary: Liveness and database check
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service status
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, db]
+                properties:
+                  status: {type: string, example: ok}
+                  db: {type: boolean}
+  /routes:
+    get:
+      summary: List routes
+      operationId: listRoutes
+      parameters:
+        - name: mode
+          in: query
+          schema: {$ref: '#/components/schemas/Mode'}
+      responses:
+        '200':
+          description: Routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Route'}
+  /lines:
+    get:
+      summary: List lines (routes grouped by line_id; subway lines plus a bus group summary)
+      operationId: listLines
+      responses:
+        '200':
+          description: Lines
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Line'}
+  /stops:
+    get:
+      summary: List stops, optionally filtered by route or proximity
+      operationId: listStops
+      parameters:
+        - {name: route_id, in: query, schema: {type: string}}
+        - {name: lat, in: query, schema: {type: number, format: double}}
+        - {name: lon, in: query, schema: {type: number, format: double}}
+        - {name: radius_m, in: query, description: Requires lat and lon, schema: {type: integer, minimum: 1, default: 500}}
+        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 1000, default: 100}}
+      responses:
+        '200':
+          description: Stops
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Stop'}
+  /stops/{id}:
+    get:
+      summary: Stop detail with routes and facts
+      operationId: getStop
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Stop detail
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StopDetail'}
+        '404':
+          description: Unknown stop
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Error'}
+  /vehicles:
+    get:
+      summary: Latest position per vehicle
+      description: |
+        With `stop_id` and `since_s`, returns vehicles seen at that stop within
+        the last `since_s` seconds (game-engine uses 300).
+      operationId: listVehicles
+      parameters:
+        - {name: route_id, in: query, schema: {type: string}}
+        - {name: stop_id, in: query, schema: {type: string}}
+        - {name: since_s, in: query, schema: {type: integer, minimum: 1}}
+      responses:
+        '200':
+          description: Vehicles
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Vehicle'}
+  /predictions:
+    get:
+      summary: Upcoming arrivals and departures
+      operationId: listPredictions
+      parameters:
+        - {name: stop_id, in: query, schema: {type: string}}
+        - {name: route_id, in: query, schema: {type: string}}
+      responses:
+        '200':
+          description: Predictions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Prediction'}
+  /alerts:
+    get:
+      summary: Service alerts
+      operationId: listAlerts
+      parameters:
+        - {name: route_id, in: query, schema: {type: string}}
+        - {name: stop_id, in: query, schema: {type: string}}
+        - {name: active, in: query, schema: {type: boolean, default: true}}
+      responses:
+        '200':
+          description: Alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Alert'}
+components:
+  schemas:
+    Mode:
+      type: string
+      enum: [subway, light_rail, bus, commuter_rail, ferry]
+    Route:
+      type: object
+      required: [id, mode]
+      properties:
+        id: {type: string, example: Green-B}
+        short_name: {type: string, nullable: true}
+        long_name: {type: string, nullable: true}
+        mode: {$ref: '#/components/schemas/Mode'}
+        route_type: {type: integer, nullable: true}
+        color: {type: string, nullable: true, example: 00843D}
+        text_color: {type: string, nullable: true}
+        line_id: {type: string, nullable: true, example: line-Green}
+        sort_order: {type: integer, nullable: true}
+    Line:
+      type: object
+      required: [id, name, route_ids]
+      properties:
+        id: {type: string, example: line-Green}
+        name: {type: string, example: Green Line}
+        mode: {$ref: '#/components/schemas/Mode'}
+        color: {type: string, nullable: true}
+        route_ids:
+          type: array
+          items: {type: string}
+        route_count: {type: integer}
+    Stop:
+      type: object
+      required: [id, name, lat, lon]
+      properties:
+        id: {type: string, example: place-pktrm}
+        name: {type: string}
+        lat: {type: number, format: double}
+        lon: {type: number, format: double}
+        parent_station: {type: string, nullable: true}
+        municipality: {type: string, nullable: true}
+        neighborhood: {type: string, nullable: true}
+        wheelchair_boarding: {type: integer, nullable: true}
+        is_freedom_trail: {type: boolean}
+        distance_m: {type: number, nullable: true, description: Set when lat and lon were supplied}
+    StopFact:
+      type: object
+      required: [id, kind, body]
+      properties:
+        id: {type: integer}
+        kind: {type: string, enum: [fast_fact, history, freedom_trail, loading_screen]}
+        title: {type: string, nullable: true}
+        body: {type: string}
+        source_url: {type: string, nullable: true}
+    StopDetail:
+      allOf:
+        - $ref: '#/components/schemas/Stop'
+        - type: object
+          required: [routes, facts]
+          properties:
+            routes:
+              type: array
+              items: {$ref: '#/components/schemas/Route'}
+            facts:
+              type: array
+              items: {$ref: '#/components/schemas/StopFact'}
+    Vehicle:
+      type: object
+      required: [vehicle_id, time]
+      properties:
+        vehicle_id: {type: string}
+        time: {type: string, format: date-time, description: Poll time of the latest sample}
+        route_id: {type: string, nullable: true}
+        trip_id: {type: string, nullable: true}
+        stop_id: {type: string, nullable: true}
+        direction_id: {type: integer, nullable: true}
+        current_status: {type: string, nullable: true, example: STOPPED_AT}
+        lat: {type: number, format: double, nullable: true}
+        lon: {type: number, format: double, nullable: true}
+        bearing: {type: number, nullable: true}
+        speed: {type: number, nullable: true}
+        label: {type: string, nullable: true}
+        updated_at: {type: string, format: date-time, nullable: true}
+    Prediction:
+      type: object
+      required: [prediction_id]
+      properties:
+        prediction_id: {type: string}
+        stop_id: {type: string, nullable: true}
+        route_id: {type: string, nullable: true}
+        trip_id: {type: string, nullable: true}
+        direction_id: {type: integer, nullable: true}
+        arrival_time: {type: string, format: date-time, nullable: true}
+        departure_time: {type: string, format: date-time, nullable: true}
+        status: {type: string, nullable: true}
+        schedule_relationship: {type: string, nullable: true}
+    Alert:
+      type: object
+      required: [id]
+      properties:
+        id: {type: string}
+        effect: {type: string, nullable: true, example: DELAY}
+        cause: {type: string, nullable: true}
+        severity: {type: integer, nullable: true}
+        header: {type: string, nullable: true}
+        description: {type: string, nullable: true}
+        lifecycle: {type: string, nullable: true}
+        active_start: {type: string, format: date-time, nullable: true}
+        active_end: {type: string, format: date-time, nullable: true}
+        route_ids:
+          type: array
+          items: {type: string}
+        stop_ids:
+          type: array
+          items: {type: string}
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail: {type: string}

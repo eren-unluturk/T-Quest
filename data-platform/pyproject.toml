@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-asyncio"]
+dev = ["pytest", "pytest-asyncio", "openapi-spec-validator", "pyyaml"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
