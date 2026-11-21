@@ -5,6 +5,7 @@ repository this class extends. Label policy: nearby-spot labels are read ONLY fr
 `spot_labels_public` view (declared or certified), so pending labels cannot leave the database.
 """
 from datetime import datetime, timezone
+from uuid import UUID
 
 import psycopg
 from psycopg.rows import dict_row
@@ -15,6 +16,14 @@ from ..spots import CategoryRef, Spot, SpotLabel, public_labels
 from .memory import MemoryRepository
 
 EPOCH = datetime(2026, 11, 1, tzinfo=timezone.utc)
+
+
+def _is_uuid(v: str) -> bool:
+    try:
+        UUID(v)
+        return True
+    except ValueError:
+        return False
 
 
 class PostgresRepository(MemoryRepository):
@@ -30,6 +39,8 @@ class PostgresRepository(MemoryRepository):
 
     # stops
     def get_stop(self, stop_id: str) -> Stop | None:
+        if "\x00" in stop_id:
+            return None
         rows = self._q(
             "SELECT id, name, lat, lon, coalesce(neighborhood, municipality, '') AS neighborhood, mode "
             "FROM stops WHERE id = %s", (stop_id,))
@@ -42,6 +53,10 @@ class PostgresRepository(MemoryRepository):
 
     # offers
     def offers(self, stop_id=None, store_id=None, category=None) -> list[Offer]:
+        if store_id is not None and not _is_uuid(store_id):
+            return []  # an id that is not a uuid cannot match any store
+        if stop_id is not None and "\x00" in stop_id:
+            return []
         sql = """
         SELECT o.id, o.sponsor_id, o.store_id, coalesce(o.title,'') AS title,
                coalesce(o.description,'') AS description, o.kind, o.discount_pct, o.points_cost,
@@ -156,8 +171,7 @@ class PostgresRepository(MemoryRepository):
         return self._spots("l.stop_id = %(stop)s", {"stop": stop_id})
 
     def get_spot(self, spot_id: str) -> Spot | None:
-        try:
-            rows = self._spots("s.id = %(id)s::uuid", {"id": spot_id})
-        except psycopg.errors.InvalidTextRepresentation:
+        if not _is_uuid(spot_id):
             return None
+        rows = self._spots("s.id = %(id)s::uuid", {"id": spot_id})
         return rows[0] if rows else None

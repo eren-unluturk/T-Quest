@@ -8,6 +8,12 @@
       "problemMatcher": []
     },
     {
+      "label": "Demo tour",
+      "type": "shell",
+      "command": "node scripts/demo.mjs",
+      "problemMatcher": []
+    },
+    {
       "label": "Sync docs",
       "type": "shell",
       "command": "node scripts/sync-docs.mjs",

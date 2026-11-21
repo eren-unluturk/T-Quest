@@ -57,7 +57,7 @@ def analyze_boston(f: Fetcher):
         while True:
             res = f.get_json(base, {"resource_id": rid, "limit": 500, "offset": offset})["result"]
             for r in res["records"]:
-                name = r.get("Common_Name") or r.get("Name") or r.get("District_Name")
+                name = (r.get("Common_Name") or r.get("Name") or r.get("District_Name") or "").strip()
                 c = centroid(r.get("shape_wkt"))
                 if not name or c is None or str(r.get("Demolished", "")).lower() == "yes":
                     continue
@@ -82,7 +82,7 @@ def mhc(f: Fetcher, stops, per_stop: int = 25):
             "resultRecordCount": per_stop, "f": "json"})
         for ft in data.get("features", []):
             a, g = ft["attributes"], ft.get("geometry") or {}
-            name = a.get("COMMON_NAM") or a.get("HISTORIC_N")
+            name = (a.get("COMMON_NAM") or "").strip() or (a.get("HISTORIC_N") or "").strip()
             if not name or "y" not in g or str(a.get("DEMOLISHED") or "").strip().lower() in ("y", "yes"):
                 continue
             year = f", built {a['CONSTRUCTI']}" if a.get("CONSTRUCTI") else ""

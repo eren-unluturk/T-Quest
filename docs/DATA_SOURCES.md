@@ -8,10 +8,10 @@ Counts below are from the run on 2026-11-21 against the live Tiger Data database
 |---|---|---|---|
 | Freedom Trail (hand-written seed, `needs_verify`) | 16 | 16 | true (our own wording) |
 | Analyze Boston: landmarks and historic districts | 102 | 102 | true (PDDL) |
-| MHC historic inventory (MACRIS data) | 476 | 476 | false until terms are confirmed |
+| MHC historic inventory (MACRIS data) | 111 | 111 | false until terms are confirmed |
 | Digital Commonwealth (open-rights items only) | 101 | 0 (items have no coordinates) | true for the kept items |
 
-Total `stop_content` links: 9,818 (stops include bus stops). Loading-screen facts: 25 hand-written facts copied from the seed into `loading_facts` (`needs_verify`).
+Total `stop_content` links: 4,085 (stops include bus stops). Loading-screen facts: 25 hand-written facts copied from the seed into `loading_facts` (`needs_verify`).
 
 ## Analyze Boston (data.boston.gov)
 - Used: CKAN API `https://data.boston.gov/api/3` (`package_search`, `package_show`, `datastore_search`). Datasets: Boston Landmarks Commission landmarks (196 records) and historic districts. Only records with usable geometry are stored (centroid of the shape, approximate); demolished landmarks are skipped.
@@ -20,7 +20,7 @@ Total `stop_content` links: 9,818 (stops include bus stops). Loading-screen fact
 - Nearby-spots check: `certified-business-directory` (PDDL, 982 rows) is an official City of Boston directory of certified businesses with `mbe_wbe_cert`, `small_local_cert` and `veteran_cert` columns. It is a procurement directory (mostly contractors and services, not storefronts near stops), and `mbe_wbe_cert` merges minority-owned and woman-owned, so it cannot support our separate labels. NOT used. A business that appears there could be offered a label only if it asks us and the directory entry supports exactly that label. `active-food-establishment-licenses` is a licensing list with no ownership data; not used.
 
 ## MHC historic inventory (MACRIS data)
-- We did NOT scrape mhc-macris.net (its site requires accepting terms). Access: the MAPC-hosted ArcGIS feature service "MHC Historic Inventory Group Layer (from MACRIS)" (`.../MHC_Inventory_GDB/FeatureServer/0`, about 227,573 points), queried per stop with a 500 m spatial filter and only designated resources (`DESIGNATIO` set). Stored: MHC number, name, resource type, designation, construction year if present, coordinates, a link back to the MACRIS record.
+- We did NOT scrape mhc-macris.net (its site requires accepting terms). Access: the MAPC-hosted ArcGIS feature service "MHC Historic Inventory Group Layer (from MACRIS)" (`.../MHC_Inventory_GDB/FeatureServer/0`, about 227,573 points), queried per stop with a 500 m spatial filter and only designated resources (`DESIGNATIO` set). Records with no name are skipped (a first run stored 365 blank-title rows, since removed). Stored: MHC number, name, resource type, designation, construction year if present, coordinates, a link back to the MACRIS record.
 - Terms: TODO: confirm the terms with MHC and MAPC. Until then `commercial_ok = false` and it is shown only with attribution "Massachusetts Historical Commission (MACRIS), via MAPC ArcGIS feature service."
 - Not yet used: the MassGIS bulk download of the MHC inventory.
 

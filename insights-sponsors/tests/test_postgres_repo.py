@@ -133,3 +133,14 @@ def test_rank_tiers_follow_the_ranks_table(client):
     tiers = client.get("/rank-tiers", headers=AUTH).json()
     assert [(t["rank"], t["name"], t["discount_pct"]) for t in tiers] == [tuple(r) for r in db]
     assert tiers[-1]["free_item"] is True
+
+
+def test_no_blank_content_titles():
+    with psycopg.connect(settings.database_url) as c:
+        assert c.execute("SELECT count(*) FROM content_items WHERE btrim(title) = ''").fetchone()[0] == 0
+
+
+def test_bad_ids_do_not_500(client):
+    assert client.get("/offers", params={"store_id": "abc"}, headers=AUTH).json() == []
+    assert client.get("/spots/%00", headers=AUTH).status_code == 404
+    assert client.get("/stops/%00/nearby", headers=AUTH).status_code == 404
