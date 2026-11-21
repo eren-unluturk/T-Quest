@@ -6,7 +6,7 @@ Source of truth for scripts: `team.json`. Keep this table in sync. GitHub handle
 |---|---|---|---|
 | Eren | TODO | data-platform, insights-sponsors | data-platform/, insights-sponsors/ |
 | Tobi | tobiolawale | game-engine | game-engine/ |
-| Bryan | TODO | client-bryan | client-bryan/, design/ (shared) |
+| Bryan | bryanmartinezzz | client-bryan | client-bryan/, design/ (shared) |
 | Isabella | TODO | client-isabella | client-isabella/, design/ (shared) |
 
 Everyone may edit `docs/` and `DECISIONS.md`. `contracts/` changes go through a `contract-change` issue.
