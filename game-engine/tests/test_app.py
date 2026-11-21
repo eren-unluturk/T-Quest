@@ -33,7 +33,8 @@ class AppTests(unittest.TestCase):
         self.assertEqual(r.json()["points_awarded"], 20)
         self.assertTrue(r.json()["first_visit"])
         self.assertEqual(self.c.get("/me/points", headers=H("ann")).json()["balance"], 20)
-        self.assertEqual(self.c.get("/me/rank", headers=H("ann")).json()["rank"], 1)
+        rk = self.c.get("/me/rank", headers=H("ann")).json()
+        self.assertEqual((rk["rank"], rk["name"], rk["points_to_next"]), (1, "Harbor Seal", 480))
         self.assertEqual(self.c.get("/me/collection", headers=H("ann")).json()["stops"], ["park"])
 
     def test_cooldown_too_far_unknown_consent(self):

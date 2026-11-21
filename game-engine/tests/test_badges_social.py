@@ -31,7 +31,7 @@ class BadgeTests(unittest.TestCase):
         self.assertEqual(unlocked_badges(visited_stops=set(), rank=2, already_have=set()), set())
         self.assertEqual(unlocked_badges(visited_stops=set(), rank=3, already_have=set()), {"rank-3"})
         self.assertEqual(unlocked_badges(visited_stops=set(), rank=5, already_have={"rank-3"}),
-                         {"rank-5"})
+                         {"rank-4", "rank-5"})
 
     def test_no_repeat(self):
         got = unlocked_badges(visited_stops=badges.LINES["Red"], rank=1, already_have={"line-red-complete"})
