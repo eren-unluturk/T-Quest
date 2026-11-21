@@ -11,5 +11,6 @@
 
 - Cycle 1 (2026-11-21 ~12:55): queued 001-009, wrote ROADMAP, acked #4 #6 #8 #11, raised attribution-history issue to humans.
 - Waiting on: builder reports for 001+. Eren to publish contracts-draft/ after 004.
-- Reviewed reports: 001 (code OK; DB checks unverified, no docker/postgres). Opened #25 to:humans for a DB.
-- Next: review 002+ as they land; once a DB exists, ask builder for a verification prompt re-running all DB tests.
+- Reviewed reports: 001, 002, 003 (code OK; all DB checks unverified, no docker/postgres, #25).
+- Cycle 2: acked #22; amended 006 (checkins_28d, user_stop_daily, stop_popularity_hourly); queued 010 (schema v0.1 for #22 + user_rank fix).
+- Next: review 004 report; when a DB exists, queue a verification prompt re-running all DB tests.
