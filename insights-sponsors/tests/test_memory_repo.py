@@ -113,9 +113,9 @@ def test_consent_round_trip(repo):
 def test_user_profile_defaults_and_override(repo):
     assert repo.user_rank("u1") == 1
     assert repo.user_badges("u1") == set()
-    repo.set_user_profile("u1", rank=4, badges={"badge.rank.3"})
+    repo.set_user_profile("u1", rank=4, badges={"rank-3"})
     assert repo.user_rank("u1") == 4
-    assert repo.user_badges("u1") == {"badge.rank.3"}
+    assert repo.user_badges("u1") == {"rank-3"}
     assert repo.user_rank("u2") == 1
 
 

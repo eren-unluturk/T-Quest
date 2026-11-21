@@ -137,7 +137,7 @@
     "discount_pct": 10,
     "points_cost": null,
     "min_rank": 4,
-    "required_badge_id": "badge.freedom-trail.complete",
+    "required_badge_id": "freedom-trail",
     "per_user_limit": 1,
     "starts_at": "2026-11-01T00:00:00Z",
     "ends_at": null,

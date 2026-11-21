@@ -91,11 +91,11 @@ def test_offers_badge_gated(client, repo, auth_headers):
     gated = "off.sports-kenmore-quest"
     r = client.get("/offers", params={"eligible_only": "true"}, headers=auth_headers).json()
     assert gated not in ids(r)
-    repo.set_user_profile("user-1", rank=5, badges={"badge.freedom-trail.complete"})
+    repo.set_user_profile("user-1", rank=5, badges={"freedom-trail"})
     r = client.get("/offers", params={"eligible_only": "true"}, headers=auth_headers).json()
     assert gated in ids(r)
     # rank too low even with the badge
-    repo.set_user_profile("user-1", rank=3, badges={"badge.freedom-trail.complete"})
+    repo.set_user_profile("user-1", rank=3, badges={"freedom-trail"})
     r = client.get("/offers", params={"eligible_only": "true"}, headers=auth_headers).json()
     assert gated not in ids(r)
 
@@ -116,5 +116,5 @@ def test_is_eligible_pure(repo):
     assert not is_eligible(plain, 1, [])
     assert is_eligible(plain, 2, [])
     assert not is_eligible(gated, 5, [])
-    assert is_eligible(gated, 4, ["badge.freedom-trail.complete"])
-    assert not is_eligible(gated, 3, {"badge.freedom-trail.complete"})
+    assert is_eligible(gated, 4, ["freedom-trail"])
+    assert not is_eligible(gated, 3, {"freedom-trail"})
