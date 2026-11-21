@@ -1,7 +1,7 @@
 ---
 id: 002
 title: Core schema - transit, users, consent, friends, rider_events, points_ledger, ranks
-status: ready
+status: done
 issue: 4
 depends_on: [001]
 ---
