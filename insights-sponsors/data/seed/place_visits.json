@@ -1,0 +1,74 @@
+[
+ {
+  "user_id": "user-1",
+  "days_ago": 2,
+  "hour": 12,
+  "lat": 42.3562,
+  "lon": -71.063,
+  "place_category": "food",
+  "store_id": "st.cafe-parkst"
+ },
+ {
+  "user_id": "user-1",
+  "days_ago": 5,
+  "hour": 12,
+  "lat": 42.3562,
+  "lon": -71.063,
+  "place_category": "food",
+  "store_id": "st.cafe-parkst"
+ },
+ {
+  "user_id": "user-1",
+  "days_ago": 9,
+  "hour": 12,
+  "lat": 42.3562,
+  "lon": -71.063,
+  "place_category": "food",
+  "store_id": "st.cafe-parkst"
+ },
+ {
+  "user_id": "user-1",
+  "days_ago": 14,
+  "hour": 12,
+  "lat": 42.3562,
+  "lon": -71.063,
+  "place_category": "food",
+  "store_id": "st.cafe-parkst"
+ },
+ {
+  "user_id": "user-1",
+  "days_ago": 3,
+  "hour": 12,
+  "lat": 42.3552,
+  "lon": -71.0606,
+  "place_category": "clothing",
+  "store_id": "st.threads-dtx"
+ },
+ {
+  "user_id": "user-1",
+  "days_ago": 20,
+  "hour": 12,
+  "lat": 42.3552,
+  "lon": -71.0606,
+  "place_category": "clothing",
+  "store_id": "st.threads-dtx"
+ },
+ {
+  "user_id": "user-2",
+  "days_ago": 4,
+  "hour": 12,
+  "lat": 42.3655,
+  "lon": -71.0618,
+  "place_category": "sports",
+  "store_id": "st.sports-north"
+ },
+ {
+  "user_id": "user-2",
+  "days_ago": 11,
+  "hour": 12,
+  "lat": 42.3655,
+  "lon": -71.0618,
+  "place_category": "sports",
+  "store_id": "st.sports-north"
+ }
+]

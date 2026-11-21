@@ -1,7 +1,7 @@
 ---
 id: 006
 title: Analytics and recommendations, SQL drafts plus in-memory implementation
-status: ready
+status: done
 issue: 3
 depends_on: [004, 005]
 ---

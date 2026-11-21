@@ -163,3 +163,25 @@ class Consent(BaseModel):
 class ConsentRequest(BaseModel):
     scope: ConsentScope
     policy_version: str
+
+
+class RiderEvent(BaseModel):
+    """Internal: one row of rider_events (read side)."""
+
+    time: datetime
+    user_id: str
+    event_type: str
+    stop_id: str | None = None
+    route_id: str | None = None
+    mode: str | None = None
+
+
+class PlaceVisit(BaseModel):
+    """Internal: one row of place_visits. Only readable with place_visits consent."""
+
+    time: datetime
+    user_id: str
+    lat: float
+    lon: float
+    place_category: str
+    store_id: str | None = None

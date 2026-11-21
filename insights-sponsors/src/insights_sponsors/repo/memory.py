@@ -1,5 +1,6 @@
 import json
-from datetime import datetime, timezone
+from collections import Counter
+from datetime import datetime, timedelta, timezone
 from math import asin, cos, radians, sin, sqrt
 from pathlib import Path
 
@@ -11,6 +12,8 @@ from ..models import (
     FunFact,
     Offer,
     PhysicalReward,
+    PlaceVisit,
+    RiderEvent,
     Sponsor,
     Stop,
     StopFacts,
@@ -31,8 +34,17 @@ def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 class MemoryRepository:
-    def __init__(self, seed_dir: Path | str | None = None):
+    def __init__(
+        self, seed_dir: Path | str | None = None, now: datetime | None = None
+    ):
         d = Path(seed_dir) if seed_dir else DEFAULT_SEED_DIR
+        # Seed events store days_ago + hour so the demo data never goes stale.
+        today = (now or datetime.now(timezone.utc)).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+
+        def at(rec: dict) -> datetime:
+            return today - timedelta(days=rec["days_ago"]) + timedelta(hours=rec["hour"])
 
         def load(name: str):
             return json.loads((d / name).read_text(encoding="utf-8"))
@@ -50,6 +62,35 @@ class MemoryRepository:
         self._stores = {s["id"]: StorePartner(**s) for s in load("stores.json")}
         self._offers = [Offer(**o) for o in load("offers.json")]
         self._rewards = [PhysicalReward(**r) for r in load("physical_rewards.json")]
+        self._route_stops = load("route_stops.json")
+        self._events = sorted(
+            (
+                RiderEvent(
+                    time=at(e),
+                    user_id=e["user_id"],
+                    event_type=e["event_type"],
+                    stop_id=e.get("stop_id"),
+                    route_id=e.get("route_id"),
+                    mode=e.get("mode"),
+                )
+                for e in load("rider_events.json")
+            ),
+            key=lambda e: e.time,
+        )
+        self._place_visits = sorted(
+            (
+                PlaceVisit(
+                    time=at(v),
+                    user_id=v["user_id"],
+                    lat=v["lat"],
+                    lon=v["lon"],
+                    place_category=v["place_category"],
+                    store_id=v.get("store_id"),
+                )
+                for v in load("place_visits.json")
+            ),
+            key=lambda v: v.time,
+        )
         self._consents: dict[tuple[str, str], Consent] = {}
         self._profiles: dict[str, tuple[int, set[str]]] = {}
 
@@ -115,6 +156,36 @@ class MemoryRepository:
 
     def stops(self) -> list[Stop]:
         return list(self._stops.values())
+
+    def route_stops(self) -> dict[str, list[str]]:
+        return {r: list(s) for r, s in self._route_stops.items()}
+
+    # rider data
+    def rider_events(
+        self, user_id: str, since: datetime | None = None
+    ) -> list[RiderEvent]:
+        return [
+            e
+            for e in self._events
+            if e.user_id == user_id and (since is None or e.time >= since)
+        ]
+
+    def stop_popularity(self, since: datetime) -> dict[str, int]:
+        counts = Counter(
+            e.stop_id
+            for e in self._events
+            if e.event_type == "checkin" and e.stop_id and e.time >= since
+        )
+        return dict(counts)
+
+    def place_visits(
+        self, user_id: str, since: datetime | None = None
+    ) -> list[PlaceVisit]:
+        return [
+            v
+            for v in self._place_visits
+            if v.user_id == user_id and (since is None or v.time >= since)
+        ]
 
     # consent
     def get_consents(self, user_id: str) -> list[Consent]:

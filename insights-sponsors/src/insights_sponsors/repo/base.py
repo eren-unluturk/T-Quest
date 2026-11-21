@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Protocol
 
 from ..models import (
@@ -7,6 +8,8 @@ from ..models import (
     FunFact,
     Offer,
     PhysicalReward,
+    PlaceVisit,
+    RiderEvent,
     Stop,
     StopFacts,
     StorePartner,
@@ -45,3 +48,25 @@ class Repository(Protocol):
     def user_rank(self, user_id: str) -> int: ...
 
     def user_badges(self, user_id: str) -> set[str]: ...
+
+    # reference data used by analytics and recommendations
+    def stops(self) -> list[Stop]: ...
+
+    def stores(self) -> list[StorePartner]: ...
+
+    def route_stops(self) -> dict[str, list[str]]: ...
+
+    # rider data
+    def rider_events(
+        self, user_id: str, since: datetime | None = None
+    ) -> list[RiderEvent]: ...
+
+    def stop_popularity(self, since: datetime) -> dict[str, int]:
+        """Check-ins per stop across all riders since `since` (aggregate only)."""
+        ...
+
+    def place_visits(
+        self, user_id: str, since: datetime | None = None
+    ) -> list[PlaceVisit]:
+        """Consent-gated: callers must pass has_consent(user, "place_visits") first."""
+        ...

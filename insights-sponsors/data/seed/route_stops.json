@@ -1,0 +1,29 @@
+{
+ "Red": [
+  "place-pktrm",
+  "place-dwnxg",
+  "place-sstat",
+  "place-harsq"
+ ],
+ "Orange": [
+  "place-north",
+  "place-haecl",
+  "place-state",
+  "place-dwnxg",
+  "place-bbsta",
+  "place-ccmnl"
+ ],
+ "Green": [
+  "place-north",
+  "place-haecl",
+  "place-gover",
+  "place-pktrm",
+  "place-coecl",
+  "place-kencl"
+ ],
+ "Blue": [
+  "place-gover",
+  "place-state",
+  "place-aqucl"
+ ]
+}
