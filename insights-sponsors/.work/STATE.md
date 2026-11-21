@@ -11,3 +11,4 @@
 - GitHub: ACKed #1 #3 #5 #8 #11. Replied on #5 (catalog vs redemption split, rank 1 3% vs 5%, badge ids, port 8002 clash) and #8 (auth assumptions, ETA ~2h). Sent #22 (schema needs, to data-platform). Opened #23 (to:humans, history co-author trailer on 6732e8d).
 - Waiting on: builder reports 001+; data-platform schema (#1/#22); game-engine reply on #5; human decision on #23; Eren promoting openapi draft to contracts/api after 002.
 - Next: review reports; when 002 is done, ping #8 with the draft path; write 008+ (AI rec text, demo latency) when the queue runs low.
+- Cycle 2: reviewed report 001 (verified, ticked). Queue: 002 in-progress, 003-006 ready, 007 blocked. Inbox unchanged (all acked). Builder notes pull friction from data-platform/.work/STATE.md in the shared checkout; that belongs to the data-platform duo, so I am not touching it.

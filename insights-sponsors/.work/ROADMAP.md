@@ -11,7 +11,7 @@
 - Kickoff (#11) is a human task: Eren fills the GitHub handle in TEAM.md and team.json and runs setup-me.
 
 ## Phase 1: service and contract
-- [ ] 001 Scaffold FastAPI service (queue/001-scaffold-service.md)
+- [x] 001 Scaffold FastAPI service (queue/001-scaffold-service.md) verified
 - [ ] 002 Draft OpenAPI v0 (queue/002-openapi-draft.md, #8)
 - [ ] HUMAN: promote the OpenAPI draft to contracts/api/insights-sponsors.yaml (#8)
 
@@ -27,3 +27,6 @@
 ## Later
 - AI-assisted recommendation text (ANTHROPIC_API_KEY optional)
 - Demo numbers: aggregate latency vs raw (with data-platform)
+
+## Review notes
+- 001 verified: 6 tests pass, /health on :8002. Nit for a later hardening prompt: `config.py` reads `../.env` relative to cwd; resolve it from the package path instead.
