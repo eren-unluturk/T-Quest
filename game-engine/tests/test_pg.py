@@ -58,6 +58,31 @@ class PgTests(unittest.TestCase):
                               "(select id from users where username=%s)", (self.stop["stop_id"], u)).fetchone()[0]
         self.assertEqual(n, 1)
 
+    def test_catalog_real_lines(self):
+        cat = self.store.catalog()
+        self.assertEqual(set(cat.lines), {"line-blue-complete", "line-green-complete", "line-mattapan-complete",
+                                          "line-orange-complete", "line-red-complete"})
+        self.assertEqual(len(cat.lines["line-green-complete"]), 4)
+        self.assertEqual(len(cat.lines["line-red-complete"][0]), 22)
+
+    def test_complete_blue_line_unlocks_badge(self):
+        u = "pytest-blue"
+        stations = sorted(self.store.catalog().lines["line-blue-complete"][0])
+        last = None
+        for i, sid in enumerate(stations):
+            lat, lon = self.conn.execute("select lat, lon from stops where id=%s", (sid,)).fetchone()
+            body = {"stop_id": sid, "lat": lat, "lon": lon, "client_time": "2026-11-21T12:00:00"}
+            r = self.c.post("/checkins", json=body, headers=H(u))
+            self.assertEqual(r.status_code, 201, r.text)
+            if i < len(stations) - 1:
+                self.assertNotIn("line-blue-complete", r.json()["badges_unlocked"])
+            last = r.json()
+        self.assertIn("line-blue-complete", last["badges_unlocked"])
+        coll = self.c.get("/me/collection", headers=H(u)).json()
+        self.assertIn("line-blue-complete", coll["badges"])
+        pts = self.c.get("/me/points", headers=H(u)).json()
+        self.assertTrue(any(e["reason"].startswith("complete_line:line-blue") for e in pts["recent"]))
+
     def test_unknown_stop_and_far(self):
         self.assertEqual(self.c.post("/checkins", json=dict(self.stop, stop_id="nope-nope"),
                                      headers=H("pytest-bob")).status_code, 404)

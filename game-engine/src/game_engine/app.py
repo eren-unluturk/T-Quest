@@ -142,7 +142,7 @@ def post_checkin(body: CheckinRequest, user: str = Depends(current_user)):
             if q.reward_badge_id and q.reward_badge_id not in owned:
                 new_badges.add(q.reward_badge_id)
         rank_now = rank_for(lifetime_of(st.ledger_entries(user)))[0]
-        new_badges |= badges.unlocked_badges(visited_stops=visited, rank=rank_now, already_have=owned | new_badges)
+        new_badges |= badges.unlocked_badges(visited_stops=visited, rank=rank_now, already_have=owned | new_badges, catalog=st.catalog())
         for b in sorted(new_badges):
             st.add_badge(user, b, t, "checkin")
             if b.startswith("line-"):
