@@ -34,7 +34,7 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 - [x] 008 Hardening and contract conformance test (queue/008-hardening-contract-conformance.md, #8) verified
 - [-] 009 CANCELLED: AI reasons (AGENTS.md Billing: no API keys)
 - [x] 011 Document consent error responses in OpenAPI (queue/011-openapi-error-responses.md, #8) verified
-- [ ] 012 Boston analytics GET /analytics/boston, k-anonymous (queue/012-boston-analytics.md, #3)
+- [x] 012 Boston analytics GET /analytics/boston, k-anonymous (queue/012-boston-analytics.md, #3) verified
 - [ ] 013 Consented place-visit ingest and delete-on-revoke (queue/013-place-visit-ingest.md)
 - [x] 010 Seed coverage (neighborhoods, bus) and MBTA API verification (queue/010-seed-coverage-and-verification.md) verified
 
@@ -59,3 +59,4 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 - 011 verified: 108 passed, spec 0.1.1 with PolicyMismatch 409 and ConsentRequired. #8 updated.
 - 0005 landed (data-platform): ids are uuid for sponsors, stores, offers and physical_rewards, so 014 maps slugs with uuid5. Badge slugs follow `line-red-complete` (posted on #5). Our aggregates come in data-platform 012 (home_line becomes checkins_30d), so 016 comes later.
 - data-platform 012 delivered migration 0006 (user_stop_daily, user_stop_hourly, stop_popularity_hourly, home_line.checkins_28d), not yet run against a DB. 016 queued and may be the first run.
+- 012 verified: 123 passed; k-anonymity (3 riders) enforced on stops, days, totals and previous-period baselines; no ids in the body; spec 0.2.0; conformance covers 12 operations. Accepted the stricter privacy deviations.
