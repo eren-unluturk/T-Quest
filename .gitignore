@@ -13,3 +13,8 @@ __pycache__/
 
 # Duo scratch
 **/.work/tmp/
+
+# Local-only agent stop flags and scratch space
+STOP
+**/.work/STOP
+**/.work/tmp/
