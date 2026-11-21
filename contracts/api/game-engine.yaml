@@ -9,7 +9,7 @@ info:
     Auth: bearer token on every route except POST /redemptions/verify (store key).
     Location is accepted only when the user has given consent.
 servers:
-  - url: http://localhost:8002
+  - url: http://localhost:8003
 security:
   - bearerAuth: []
 x-rules:
