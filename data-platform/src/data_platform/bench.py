@@ -54,6 +54,8 @@ def compression_stats(tables: tuple[str, ...] = HYPERTABLES, url: str | None = N
 def cleanup(conn: psycopg.Connection) -> None:
     """Remove every synthetic row and user. conn must be in autocommit mode."""
     ex = conn.execute
+    # Deleting from compressed chunks decompresses rows; lift the per-transaction cap for this session.
+    ex("SET timescaledb.max_tuples_decompressed_per_dml_transaction = 0")
     ex("DELETE FROM vehicles WHERE starts_with(vehicle_id, 'synthetic-')")
     ex("DELETE FROM predictions WHERE starts_with(prediction_id, 'synthetic-')")
     ex("DELETE FROM rider_events WHERE user_id IN (SELECT id FROM users WHERE starts_with(username, 'bench_'))")

@@ -87,11 +87,11 @@ def test_expire_redemptions_only_past_due_issued(conn, world):
     now = datetime.now(timezone.utc)
     _redeem(conn, world, "PASTDUE223", expires=now - timedelta(hours=1))
     _redeem(conn, world, "FUTURE2233", expires=now + timedelta(hours=1))
-    _redeem(conn, world, "CLAIMED223", expires=now - timedelta(hours=1), status="claimed")
+    _redeem(conn, world, "CLAMED2233", expires=now - timedelta(hours=1), status="claimed")
     conn.execute("SELECT expire_redemptions()")
     rows = dict(
         conn.execute(
             "SELECT code, status FROM redemptions WHERE user_id = %s", (world["user"],)
         ).fetchall()
     )
-    assert rows == {"PASTDUE223": "expired", "FUTURE2233": "issued", "CLAIMED223": "claimed"}
+    assert rows == {"PASTDUE223": "expired", "FUTURE2233": "issued", "CLAMED2233": "claimed"}

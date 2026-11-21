@@ -34,8 +34,8 @@ def test_old_chunk_compresses_with_ratio_above_one(conn):
     conn.execute(
         "INSERT INTO vehicles (time, vehicle_id, route_id, stop_id, lat, lon, current_status)"
         " SELECT %s::timestamptz + (g * interval '1 second'),"
-        "        'v-' || %s || '-' || (g % 20), 'Red', 'place-pktrm',"
-        "        42.35 + (g % 100) / 10000.0, -71.06 - (g % 100) / 10000.0, 'IN_TRANSIT_TO'"
+        "        'v-' || %s || '-' || (g %% 20), 'Red', 'place-pktrm',"
+        "        42.35 + (g %% 100) / 10000.0, -71.06 - (g %% 100) / 10000.0, 'IN_TRANSIT_TO'"
         " FROM generate_series(1, 5000) g",
         (base, run),
     )
