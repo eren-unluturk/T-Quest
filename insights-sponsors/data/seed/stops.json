@@ -1,0 +1,93 @@
+[
+  {
+    "id": "place-pktrm",
+    "name": "Park Street",
+    "lat": 42.35639,
+    "lon": -71.06242,
+    "neighborhood": "Downtown"
+  },
+  {
+    "id": "place-dwnxg",
+    "name": "Downtown Crossing",
+    "lat": 42.35555,
+    "lon": -71.06026,
+    "neighborhood": "Downtown"
+  },
+  {
+    "id": "place-gover",
+    "name": "Government Center",
+    "lat": 42.3597,
+    "lon": -71.0594,
+    "neighborhood": "Downtown"
+  },
+  {
+    "id": "place-state",
+    "name": "State",
+    "lat": 42.35888,
+    "lon": -71.05781,
+    "neighborhood": "Downtown"
+  },
+  {
+    "id": "place-haecl",
+    "name": "Haymarket",
+    "lat": 42.36302,
+    "lon": -71.05829,
+    "neighborhood": "North End"
+  },
+  {
+    "id": "place-north",
+    "name": "North Station",
+    "lat": 42.36528,
+    "lon": -71.06129,
+    "neighborhood": "West End"
+  },
+  {
+    "id": "place-coecl",
+    "name": "Copley",
+    "lat": 42.34998,
+    "lon": -71.07733,
+    "neighborhood": "Back Bay"
+  },
+  {
+    "id": "place-harsq",
+    "name": "Harvard",
+    "lat": 42.37336,
+    "lon": -71.11893,
+    "neighborhood": "Cambridge"
+  },
+  {
+    "id": "place-kencl",
+    "name": "Kenmore",
+    "lat": 42.34885,
+    "lon": -71.09737,
+    "neighborhood": "Fenway-Kenmore"
+  },
+  {
+    "id": "place-sstat",
+    "name": "South Station",
+    "lat": 42.35224,
+    "lon": -71.0552,
+    "neighborhood": "Downtown"
+  },
+  {
+    "id": "place-bbsta",
+    "name": "Back Bay",
+    "lat": 42.34735,
+    "lon": -71.07529,
+    "neighborhood": "Back Bay"
+  },
+  {
+    "id": "place-aqucl",
+    "name": "Aquarium",
+    "lat": 42.3598,
+    "lon": -71.05165,
+    "neighborhood": "Waterfront"
+  },
+  {
+    "id": "place-ccmnl",
+    "name": "Community College",
+    "lat": 42.37363,
+    "lon": -71.06947,
+    "neighborhood": "Charlestown"
+  }
+]

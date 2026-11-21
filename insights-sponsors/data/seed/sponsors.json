@@ -1,0 +1,18 @@
+[
+  {
+    "id": "sp.demo-cafe",
+    "name": "Demo Cafe Group"
+  },
+  {
+    "id": "sp.demo-bakery",
+    "name": "Demo Bakery Collective"
+  },
+  {
+    "id": "sp.demo-threads",
+    "name": "Demo Threads"
+  },
+  {
+    "id": "sp.demo-sports",
+    "name": "Demo Sports Co"
+  }
+]

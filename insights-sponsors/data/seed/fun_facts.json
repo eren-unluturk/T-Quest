@@ -1,0 +1,200 @@
+[
+  {
+    "id": "fun.01",
+    "body": "The Tremont Street Subway opened on September 1, 1897 as the first subway in the United States.",
+    "tags": [
+      "mbta",
+      "history"
+    ]
+  },
+  {
+    "id": "fun.02",
+    "body": "The Green Line trunk under Tremont Street is the oldest subway tunnel in North America.",
+    "tags": [
+      "mbta",
+      "history"
+    ]
+  },
+  {
+    "id": "fun.03",
+    "body": "Boston Common, established in 1634, is generally regarded as the oldest city park in the United States.",
+    "tags": [
+      "history",
+      "parks"
+    ]
+  },
+  {
+    "id": "fun.04",
+    "body": "The Boston Marathon, first run in 1897, is the world's oldest annual marathon.",
+    "tags": [
+      "sports",
+      "history"
+    ]
+  },
+  {
+    "id": "fun.05",
+    "body": "Fenway Park opened in 1912 and is the oldest ballpark still used in Major League Baseball.",
+    "tags": [
+      "sports",
+      "history"
+    ]
+  },
+  {
+    "id": "fun.06",
+    "body": "Union Oyster House has served customers since 1826 and calls itself America's oldest continuously operating restaurant.",
+    "tags": [
+      "food",
+      "history"
+    ]
+  },
+  {
+    "id": "fun.07",
+    "body": "The Boston Public Library, founded in 1848, was the first large free municipal library in the United States.",
+    "tags": [
+      "history",
+      "culture"
+    ]
+  },
+  {
+    "id": "fun.08",
+    "body": "The Blue Line crosses under Boston Harbor through the East Boston Tunnel, which opened in 1904 as one of the first underwater transit tunnels in North America.",
+    "tags": [
+      "mbta",
+      "history"
+    ]
+  },
+  {
+    "id": "fun.09",
+    "body": "The Red Line reached Harvard Square in 1912.",
+    "tags": [
+      "mbta",
+      "history"
+    ]
+  },
+  {
+    "id": "fun.10",
+    "body": "The Public Garden, opened in 1837, is home to the Swan Boats, which have paddled its pond since 1877.",
+    "tags": [
+      "parks",
+      "history"
+    ]
+  },
+  {
+    "id": "fun.11",
+    "body": "The Make Way for Ducklings statues in the Public Garden honor Robert McCloskey's 1941 children's book.",
+    "tags": [
+      "culture",
+      "parks"
+    ]
+  },
+  {
+    "id": "fun.12",
+    "body": "Two lanterns hung in the steeple of Old North Church on April 18, 1775 to signal the British route.",
+    "tags": [
+      "history",
+      "freedom-trail"
+    ]
+  },
+  {
+    "id": "fun.13",
+    "body": "The USS Constitution was launched in 1797 and is the oldest commissioned warship still afloat.",
+    "tags": [
+      "history",
+      "freedom-trail"
+    ]
+  },
+  {
+    "id": "fun.14",
+    "body": "The Bunker Hill Monument is 221 feet tall and has 294 steps to the top.",
+    "tags": [
+      "history",
+      "freedom-trail"
+    ]
+  },
+  {
+    "id": "fun.15",
+    "body": "The Boston Tea Party took place on December 16, 1773.",
+    "tags": [
+      "history"
+    ]
+  },
+  {
+    "id": "fun.16",
+    "body": "Faneuil Hall opened in 1742 and is nicknamed the Cradle of Liberty.",
+    "tags": [
+      "history",
+      "freedom-trail"
+    ]
+  },
+  {
+    "id": "fun.17",
+    "body": "The Massachusetts State House dome is covered in 23-karat gold leaf.",
+    "tags": [
+      "history",
+      "architecture"
+    ]
+  },
+  {
+    "id": "fun.18",
+    "body": "The Orange Line ran on the elevated Washington Street structure until it closed in 1987.",
+    "tags": [
+      "mbta",
+      "history"
+    ]
+  },
+  {
+    "id": "fun.19",
+    "body": "Back Bay was filled in from tidal flats starting in 1857.",
+    "tags": [
+      "history",
+      "neighborhoods"
+    ]
+  },
+  {
+    "id": "fun.20",
+    "body": "The Paul Revere House, built around 1680, is the oldest remaining building in downtown Boston.",
+    "tags": [
+      "history",
+      "freedom-trail"
+    ]
+  },
+  {
+    "id": "fun.21",
+    "body": "The Granary Burying Ground is the resting place of Paul Revere, Samuel Adams and John Hancock.",
+    "tags": [
+      "history",
+      "freedom-trail"
+    ]
+  },
+  {
+    "id": "fun.22",
+    "body": "Copp's Hill Burying Ground, established in 1659, is the second oldest burying ground in Boston.",
+    "tags": [
+      "history",
+      "freedom-trail"
+    ]
+  },
+  {
+    "id": "fun.23",
+    "body": "Boston City Hall opened in 1968 and is one of the best-known examples of Brutalist architecture in the country.",
+    "tags": [
+      "architecture"
+    ]
+  },
+  {
+    "id": "fun.24",
+    "body": "South Station opened in 1899 and was once the busiest railroad terminal in the world.",
+    "tags": [
+      "mbta",
+      "history"
+    ]
+  },
+  {
+    "id": "fun.25",
+    "body": "Boston Latin School, founded in 1635, is the oldest public school in the United States.",
+    "tags": [
+      "history",
+      "education"
+    ]
+  }
+]

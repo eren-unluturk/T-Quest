@@ -1,7 +1,7 @@
 ---
 id: 003
 title: Pydantic models, repository interface, in-memory backend and seed content
-status: ready
+status: done
 issue:
 depends_on: [002]
 ---

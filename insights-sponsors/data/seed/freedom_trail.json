@@ -1,0 +1,146 @@
+[
+  {
+    "id": "trail.01",
+    "order": 1,
+    "name": "Boston Common",
+    "lat": 42.355,
+    "lon": -71.0656,
+    "nearest_stop_id": "place-pktrm",
+    "blurb": "The oldest city park in the United States and the start of the Freedom Trail."
+  },
+  {
+    "id": "trail.02",
+    "order": 2,
+    "name": "Massachusetts State House",
+    "lat": 42.3588,
+    "lon": -71.0638,
+    "nearest_stop_id": "place-pktrm",
+    "blurb": "Seat of state government since 1798, topped with a gilded dome."
+  },
+  {
+    "id": "trail.03",
+    "order": 3,
+    "name": "Park Street Church",
+    "lat": 42.3566,
+    "lon": -71.0619,
+    "nearest_stop_id": "place-pktrm",
+    "blurb": "Founded in 1809, its steeple is a landmark on Tremont Street."
+  },
+  {
+    "id": "trail.04",
+    "order": 4,
+    "name": "Granary Burying Ground",
+    "lat": 42.3574,
+    "lon": -71.0618,
+    "nearest_stop_id": "place-pktrm",
+    "blurb": "Resting place of Paul Revere, Samuel Adams and John Hancock."
+  },
+  {
+    "id": "trail.05",
+    "order": 5,
+    "name": "King's Chapel and Burying Ground",
+    "lat": 42.3581,
+    "lon": -71.0601,
+    "nearest_stop_id": "place-gover",
+    "blurb": "An Anglican church founded in 1686 beside Boston's oldest burying ground."
+  },
+  {
+    "id": "trail.06",
+    "order": 6,
+    "name": "Boston Latin School Site / Benjamin Franklin Statue",
+    "lat": 42.358,
+    "lon": -71.0597,
+    "nearest_stop_id": "place-gover",
+    "blurb": "Site of the first public school in America, founded in 1635."
+  },
+  {
+    "id": "trail.07",
+    "order": 7,
+    "name": "Old Corner Bookstore",
+    "lat": 42.3573,
+    "lon": -71.0596,
+    "nearest_stop_id": "place-dwnxg",
+    "blurb": "A 19th-century publishing house for authors like Hawthorne and Emerson."
+  },
+  {
+    "id": "trail.08",
+    "order": 8,
+    "name": "Old South Meeting House",
+    "lat": 42.3571,
+    "lon": -71.0588,
+    "nearest_stop_id": "place-dwnxg",
+    "blurb": "Where colonists gathered before the Boston Tea Party in 1773."
+  },
+  {
+    "id": "trail.09",
+    "order": 9,
+    "name": "Old State House",
+    "lat": 42.3588,
+    "lon": -71.0576,
+    "nearest_stop_id": "place-state",
+    "blurb": "Built in 1713, the seat of colonial government in Boston."
+  },
+  {
+    "id": "trail.10",
+    "order": 10,
+    "name": "Boston Massacre Site",
+    "lat": 42.3588,
+    "lon": -71.0575,
+    "nearest_stop_id": "place-state",
+    "blurb": "Where British soldiers fired on a crowd on March 5, 1770."
+  },
+  {
+    "id": "trail.11",
+    "order": 11,
+    "name": "Faneuil Hall",
+    "lat": 42.36,
+    "lon": -71.0568,
+    "nearest_stop_id": "place-state",
+    "blurb": "A market and meeting hall since 1742, known as the Cradle of Liberty."
+  },
+  {
+    "id": "trail.12",
+    "order": 12,
+    "name": "Paul Revere House",
+    "lat": 42.3637,
+    "lon": -71.0536,
+    "nearest_stop_id": "place-haecl",
+    "blurb": "The home of Paul Revere, built around 1680."
+  },
+  {
+    "id": "trail.13",
+    "order": 13,
+    "name": "Old North Church",
+    "lat": 42.3664,
+    "lon": -71.0544,
+    "nearest_stop_id": "place-haecl",
+    "blurb": "Two lanterns hung in its steeple on April 18, 1775."
+  },
+  {
+    "id": "trail.14",
+    "order": 14,
+    "name": "Copp's Hill Burying Ground",
+    "lat": 42.369,
+    "lon": -71.0556,
+    "nearest_stop_id": "place-north",
+    "blurb": "Established in 1659 and the second oldest burying ground in Boston."
+  },
+  {
+    "id": "trail.15",
+    "order": 15,
+    "name": "USS Constitution",
+    "lat": 42.3725,
+    "lon": -71.0566,
+    "nearest_stop_id": "place-north",
+    "blurb": "Launched in 1797, the oldest commissioned warship afloat."
+  },
+  {
+    "id": "trail.16",
+    "order": 16,
+    "name": "Bunker Hill Monument",
+    "lat": 42.3763,
+    "lon": -71.0608,
+    "nearest_stop_id": "place-ccmnl",
+    "blurb": "A 221-foot obelisk marking the 1775 Battle of Bunker Hill."
+  }
+]

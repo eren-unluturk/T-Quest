@@ -1,0 +1,165 @@
+"""Pydantic models. Names and fields match openapi/insights-sponsors.yaml.
+
+Internal models (Stop, Sponsor, RewardStore, WeekBucket, TopStop) back inline
+or non-API shapes.
+"""
+
+from datetime import date, datetime
+from typing import Literal
+
+from pydantic import BaseModel
+
+Category = Literal["food", "clothing", "sports", "other"]
+ConsentScope = Literal["location", "place_visits"]
+
+
+class Error(BaseModel):
+    detail: str
+
+
+class Stop(BaseModel):
+    """Internal: a seeded MBTA stop."""
+
+    id: str
+    name: str
+    lat: float
+    lon: float
+    neighborhood: str
+
+
+class Sponsor(BaseModel):
+    """Internal: a (fictional demo) sponsor."""
+
+    id: str
+    name: str
+
+
+class Fact(BaseModel):
+    id: str
+    kind: Literal["fast_fact", "history", "freedom_trail"]
+    title: str
+    body: str
+    source_url: str | None = None
+
+
+class StopFacts(BaseModel):
+    stop_id: str
+    stop_name: str
+    facts: list[Fact]
+
+
+class StorePartner(BaseModel):
+    id: str
+    name: str
+    category: Category
+    lat: float
+    lon: float
+    nearest_stop_id: str
+    address: str
+
+
+class Offer(BaseModel):
+    id: str
+    sponsor_id: str
+    store_id: str
+    title: str
+    description: str
+    kind: Literal["discount", "free_item", "points_item"]
+    discount_pct: int | None = None
+    points_cost: int | None = None
+    min_rank: int
+    required_badge_id: str | None = None
+    per_user_limit: int
+    starts_at: datetime
+    ends_at: datetime | None = None
+    placement: Literal["local_pick", "sponsored_quest"]
+
+
+class LocalPick(BaseModel):
+    store: StorePartner
+    offers: list[Offer]
+    distance_m: float
+
+
+class TrailSite(BaseModel):
+    id: str
+    order: int
+    name: str
+    lat: float
+    lon: float
+    nearest_stop_id: str
+    blurb: str
+
+
+class FunFact(BaseModel):
+    id: str
+    body: str
+    tags: list[str]
+
+
+class RewardStore(BaseModel):
+    store_id: str
+    in_stock: bool
+
+
+class PhysicalReward(BaseModel):
+    id: str
+    kind: Literal["sticker", "patch"]
+    name: str
+    description: str
+    badge_id: str
+    min_rank: int
+    per_user_limit: int
+    image_url: str | None = None
+    stores: list[RewardStore]
+
+
+class Recommendation(BaseModel):
+    kind: Literal["route", "neighborhood", "stop"]
+    id: str
+    title: str
+    reason: str
+    score: float
+    sponsored: bool
+    sponsor_id: str | None = None
+
+
+class Recommendations(BaseModel):
+    generated_at: datetime
+    items: list[Recommendation]
+
+
+class WeekBucket(BaseModel):
+    week_start: date
+    checkins: int
+    unique_stops: int
+
+
+class TopStop(BaseModel):
+    stop_id: str
+    visits: int
+
+
+class MyAnalytics(BaseModel):
+    user_id: str
+    period: Literal["week", "month", "all"]
+    stops_visited: int
+    unique_stops: int
+    lines_ridden: list[str]
+    home_line: str | None = None
+    by_week: list[WeekBucket]
+    top_stops: list[TopStop]
+    neighborhoods_explored: list[str]
+
+
+class Consent(BaseModel):
+    scope: ConsentScope
+    granted: bool
+    granted_at: datetime | None = None
+    revoked_at: datetime | None = None
+    policy_version: str
+
+
+class ConsentRequest(BaseModel):
+    scope: ConsentScope
+    policy_version: str

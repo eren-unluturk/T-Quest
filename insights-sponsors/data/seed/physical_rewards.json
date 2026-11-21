@@ -1,0 +1,130 @@
+[
+  {
+    "id": "pr.patch-green-complete",
+    "kind": "patch",
+    "name": "Green Line completion patch",
+    "description": "Iron-on patch for riders who complete the Green Line.",
+    "badge_id": "badge.line.green.complete",
+    "min_rank": 2,
+    "per_user_limit": 1,
+    "image_url": null,
+    "stores": [
+      {
+        "store_id": "st.cafe-parkst",
+        "in_stock": true
+      },
+      {
+        "store_id": "st.bakery-dtx",
+        "in_stock": true
+      },
+      {
+        "store_id": "st.threads-dtx",
+        "in_stock": true
+      },
+      {
+        "store_id": "st.sports-north",
+        "in_stock": true
+      }
+    ]
+  },
+  {
+    "id": "pr.sticker-freedom-trail",
+    "kind": "sticker",
+    "name": "Freedom Trail sticker",
+    "description": "Bag sticker for riders who visit all 16 Freedom Trail sites.",
+    "badge_id": "badge.freedom-trail.complete",
+    "min_rank": 1,
+    "per_user_limit": 1,
+    "image_url": null,
+    "stores": [
+      {
+        "store_id": "st.cafe-parkst",
+        "in_stock": true
+      },
+      {
+        "store_id": "st.deli-haymarket",
+        "in_stock": true
+      },
+      {
+        "store_id": "st.sports-north",
+        "in_stock": true
+      }
+    ]
+  },
+  {
+    "id": "pr.patch-rank-3",
+    "kind": "patch",
+    "name": "Rank 3 patch",
+    "description": "Patch awarded on reaching travel rank 3.",
+    "badge_id": "badge.rank.3",
+    "min_rank": 3,
+    "per_user_limit": 1,
+    "image_url": null,
+    "stores": [
+      {
+        "store_id": "st.threads-dtx",
+        "in_stock": true
+      },
+      {
+        "store_id": "st.threads-copley",
+        "in_stock": false
+      }
+    ]
+  },
+  {
+    "id": "pr.patch-rank-4",
+    "kind": "patch",
+    "name": "Rank 4 patch",
+    "description": "Patch awarded on reaching travel rank 4.",
+    "badge_id": "badge.rank.4",
+    "min_rank": 4,
+    "per_user_limit": 1,
+    "image_url": null,
+    "stores": [
+      {
+        "store_id": "st.threads-dtx",
+        "in_stock": true
+      },
+      {
+        "store_id": "st.sports-kenmore",
+        "in_stock": true
+      }
+    ]
+  },
+  {
+    "id": "pr.patch-rank-5",
+    "kind": "patch",
+    "name": "Rank 5 patch",
+    "description": "Patch awarded on reaching travel rank 5.",
+    "badge_id": "badge.rank.5",
+    "min_rank": 5,
+    "per_user_limit": 1,
+    "image_url": null,
+    "stores": [
+      {
+        "store_id": "st.threads-copley",
+        "in_stock": true
+      }
+    ]
+  },
+  {
+    "id": "pr.sticker-red-line",
+    "kind": "sticker",
+    "name": "Red Line sticker",
+    "description": "Bag sticker for riders who complete the Red Line.",
+    "badge_id": "badge.line.red.complete",
+    "min_rank": 1,
+    "per_user_limit": 1,
+    "image_url": null,
+    "stores": [
+      {
+        "store_id": "st.bakery-dtx",
+        "in_stock": true
+      },
+      {
+        "store_id": "st.cafe-harvard",
+        "in_stock": true
+      }
+    ]
+  }
+]

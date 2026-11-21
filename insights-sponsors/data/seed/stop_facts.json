@@ -1,0 +1,259 @@
+{
+  "place-pktrm": [
+    {
+      "id": "fact.pktrm.1",
+      "kind": "history",
+      "title": "Where the subway began",
+      "body": "Park Street opened on September 1, 1897 as part of the Tremont Street Subway, the first subway in the United States.",
+      "source_url": "https://en.wikipedia.org/wiki/Tremont_Street_Subway"
+    },
+    {
+      "id": "fact.pktrm.2",
+      "kind": "fast_fact",
+      "title": "Boston Common",
+      "body": "The station sits beneath Boston Common, established in 1634 and generally regarded as the oldest city park in the United States.",
+      "source_url": "https://en.wikipedia.org/wiki/Boston_Common"
+    },
+    {
+      "id": "fact.pktrm.3",
+      "kind": "freedom_trail",
+      "title": "Freedom Trail starts here",
+      "body": "The 2.5-mile Freedom Trail begins at Boston Common and passes the State House, Park Street Church and the Granary Burying Ground within a few blocks.",
+      "source_url": "https://www.nps.gov/bost/planyourvisit/freedom-trail.htm"
+    }
+  ],
+  "place-dwnxg": [
+    {
+      "id": "fact.dwnxg.1",
+      "kind": "history",
+      "title": "Old South Meeting House",
+      "body": "The meeting that led to the Boston Tea Party began at Old South Meeting House on December 16, 1773, a short walk from this station.",
+      "source_url": "https://en.wikipedia.org/wiki/Old_South_Meeting_House"
+    },
+    {
+      "id": "fact.dwnxg.2",
+      "kind": "fast_fact",
+      "title": "A shopping crossroads",
+      "body": "Downtown Crossing is a pedestrian shopping district where the Red and Orange lines cross.",
+      "source_url": "https://en.wikipedia.org/wiki/Downtown_Crossing"
+    },
+    {
+      "id": "fact.dwnxg.3",
+      "kind": "freedom_trail",
+      "title": "Old Corner Bookstore",
+      "body": "The Old Corner Bookstore, a Freedom Trail stop, was a 19th-century publishing house for authors like Hawthorne and Emerson.",
+      "source_url": "https://en.wikipedia.org/wiki/Old_Corner_Bookstore"
+    }
+  ],
+  "place-gover": [
+    {
+      "id": "fact.gover.1",
+      "kind": "fast_fact",
+      "title": "Boston City Hall",
+      "body": "Boston City Hall, a landmark of Brutalist architecture, opened in 1968 on the site of the former Scollay Square.",
+      "source_url": "https://en.wikipedia.org/wiki/Boston_City_Hall"
+    },
+    {
+      "id": "fact.gover.2",
+      "kind": "history",
+      "title": "King's Chapel",
+      "body": "King's Chapel, a few steps away, was founded in 1686 as the first Anglican church in New England; its granite building dates to the 1750s.",
+      "source_url": "https://en.wikipedia.org/wiki/King%27s_Chapel"
+    },
+    {
+      "id": "fact.gover.3",
+      "kind": "freedom_trail",
+      "title": "Boston Latin School site",
+      "body": "A plaque and a statue of Benjamin Franklin outside Old City Hall mark the site of Boston Latin School, founded in 1635 and the oldest public school in the United States.",
+      "source_url": "https://en.wikipedia.org/wiki/Boston_Latin_School"
+    }
+  ],
+  "place-state": [
+    {
+      "id": "fact.state.1",
+      "kind": "history",
+      "title": "Old State House",
+      "body": "Built in 1713, the Old State House is one of the oldest surviving public buildings in Boston. The Declaration of Independence was read from its balcony on July 18, 1776.",
+      "source_url": "https://en.wikipedia.org/wiki/Old_State_House_(Boston)"
+    },
+    {
+      "id": "fact.state.2",
+      "kind": "history",
+      "title": "Boston Massacre",
+      "body": "The Boston Massacre took place on March 5, 1770 at the spot now marked by a ring of cobblestones outside the Old State House.",
+      "source_url": "https://en.wikipedia.org/wiki/Boston_Massacre"
+    },
+    {
+      "id": "fact.state.3",
+      "kind": "freedom_trail",
+      "title": "Faneuil Hall",
+      "body": "Faneuil Hall, opened in 1742, earned the nickname Cradle of Liberty as a meeting place for colonial protest.",
+      "source_url": "https://en.wikipedia.org/wiki/Faneuil_Hall"
+    }
+  ],
+  "place-haecl": [
+    {
+      "id": "fact.haecl.1",
+      "kind": "fast_fact",
+      "title": "Haymarket produce market",
+      "body": "An open-air produce market sets up near the station on Fridays and Saturdays.",
+      "source_url": "https://en.wikipedia.org/wiki/Haymarket_(Boston)"
+    },
+    {
+      "id": "fact.haecl.2",
+      "kind": "history",
+      "title": "Union Oyster House",
+      "body": "Union Oyster House, a few blocks away, has operated since 1826 and calls itself America's oldest continuously operating restaurant.",
+      "source_url": "https://en.wikipedia.org/wiki/Union_Oyster_House"
+    },
+    {
+      "id": "fact.haecl.3",
+      "kind": "freedom_trail",
+      "title": "Paul Revere House",
+      "body": "Built around 1680, the Paul Revere House is the oldest remaining building in downtown Boston.",
+      "source_url": "https://en.wikipedia.org/wiki/Paul_Revere_House"
+    }
+  ],
+  "place-north": [
+    {
+      "id": "fact.north.1",
+      "kind": "fast_fact",
+      "title": "TD Garden",
+      "body": "TD Garden, home of the Bruins and the Celtics, sits directly above North Station.",
+      "source_url": "https://en.wikipedia.org/wiki/TD_Garden"
+    },
+    {
+      "id": "fact.north.2",
+      "kind": "history",
+      "title": "Copp's Hill",
+      "body": "Copp's Hill Burying Ground, established in 1659, is the second oldest burying ground in Boston.",
+      "source_url": "https://en.wikipedia.org/wiki/Copp%27s_Hill_Burying_Ground"
+    },
+    {
+      "id": "fact.north.3",
+      "kind": "freedom_trail",
+      "title": "USS Constitution",
+      "body": "The USS Constitution, launched in 1797, is the oldest commissioned warship still afloat.",
+      "source_url": "https://en.wikipedia.org/wiki/USS_Constitution"
+    }
+  ],
+  "place-coecl": [
+    {
+      "id": "fact.coecl.1",
+      "kind": "fast_fact",
+      "title": "Boston Public Library",
+      "body": "The Boston Public Library, founded in 1848, was the first large free municipal library in the United States. Its McKim Building faces Copley Square.",
+      "source_url": "https://en.wikipedia.org/wiki/Boston_Public_Library"
+    },
+    {
+      "id": "fact.coecl.2",
+      "kind": "history",
+      "title": "Trinity Church",
+      "body": "Trinity Church, completed in 1877 and designed by H. H. Richardson, anchors Copley Square.",
+      "source_url": "https://en.wikipedia.org/wiki/Trinity_Church_(Boston)"
+    },
+    {
+      "id": "fact.coecl.3",
+      "kind": "fast_fact",
+      "title": "Marathon finish line",
+      "body": "The Boston Marathon finishes on Boylston Street beside Copley Square.",
+      "source_url": "https://en.wikipedia.org/wiki/Boston_Marathon"
+    }
+  ],
+  "place-harsq": [
+    {
+      "id": "fact.harsq.1",
+      "kind": "history",
+      "title": "Red Line to Cambridge",
+      "body": "The Red Line reached Harvard Square in 1912 through a subway built under Massachusetts Avenue.",
+      "source_url": "https://en.wikipedia.org/wiki/Harvard_station"
+    },
+    {
+      "id": "fact.harsq.2",
+      "kind": "fast_fact",
+      "title": "Oldest university",
+      "body": "Harvard was founded in 1636 and is the oldest institution of higher learning in the United States.",
+      "source_url": "https://en.wikipedia.org/wiki/Harvard_University"
+    }
+  ],
+  "place-kencl": [
+    {
+      "id": "fact.kencl.1",
+      "kind": "fast_fact",
+      "title": "Fenway Park",
+      "body": "Fenway Park opened in 1912 and is the oldest ballpark still in use in Major League Baseball. It is a short walk from Kenmore.",
+      "source_url": "https://en.wikipedia.org/wiki/Fenway_Park"
+    },
+    {
+      "id": "fact.kencl.2",
+      "kind": "fast_fact",
+      "title": "Three branches",
+      "body": "The Green Line B, C and D branches all pass through Kenmore.",
+      "source_url": "https://en.wikipedia.org/wiki/Kenmore_station"
+    }
+  ],
+  "place-sstat": [
+    {
+      "id": "fact.sstat.1",
+      "kind": "history",
+      "title": "A grand terminal",
+      "body": "South Station opened in 1899 and was once the busiest railroad terminal in the world.",
+      "source_url": "https://en.wikipedia.org/wiki/South_Station"
+    },
+    {
+      "id": "fact.sstat.2",
+      "kind": "fast_fact",
+      "title": "Red Line and rail hub",
+      "body": "Today South Station connects the Red Line, the Silver Line, commuter rail and Amtrak.",
+      "source_url": "https://en.wikipedia.org/wiki/South_Station"
+    }
+  ],
+  "place-bbsta": [
+    {
+      "id": "fact.bbsta.1",
+      "kind": "history",
+      "title": "Land made from a bay",
+      "body": "Back Bay was filled in from tidal flats starting in 1857; the neighborhood is known for its preserved Victorian brownstones.",
+      "source_url": "https://en.wikipedia.org/wiki/Back_Bay,_Boston"
+    },
+    {
+      "id": "fact.bbsta.2",
+      "kind": "fast_fact",
+      "title": "Orange Line and Amtrak",
+      "body": "Back Bay station serves the Orange Line, commuter rail and Amtrak.",
+      "source_url": "https://en.wikipedia.org/wiki/Back_Bay_station"
+    }
+  ],
+  "place-aqucl": [
+    {
+      "id": "fact.aqucl.1",
+      "kind": "fast_fact",
+      "title": "New England Aquarium",
+      "body": "The New England Aquarium opened in 1969 next to the station on Central Wharf.",
+      "source_url": "https://en.wikipedia.org/wiki/New_England_Aquarium"
+    },
+    {
+      "id": "fact.aqucl.2",
+      "kind": "history",
+      "title": "Long Wharf",
+      "body": "Nearby Long Wharf was built starting in 1710 and once reached a third of a mile into Boston Harbor.",
+      "source_url": "https://en.wikipedia.org/wiki/Long_Wharf_(Boston)"
+    }
+  ],
+  "place-ccmnl": [
+    {
+      "id": "fact.ccmnl.1",
+      "kind": "history",
+      "title": "Battle of Bunker Hill",
+      "body": "The Battle of Bunker Hill was fought on June 17, 1775 in Charlestown.",
+      "source_url": "https://en.wikipedia.org/wiki/Battle_of_Bunker_Hill"
+    },
+    {
+      "id": "fact.ccmnl.2",
+      "kind": "freedom_trail",
+      "title": "Bunker Hill Monument",
+      "body": "The Bunker Hill Monument is a 221-foot granite obelisk with 294 steps to the top.",
+      "source_url": "https://en.wikipedia.org/wiki/Bunker_Hill_Monument"
+    }
+  ]
+}

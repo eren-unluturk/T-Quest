@@ -1,0 +1,74 @@
+[
+  {
+    "id": "st.cafe-parkst",
+    "name": "Demo Cafe Park St",
+    "category": "food",
+    "lat": 42.3562,
+    "lon": -71.063,
+    "nearest_stop_id": "place-pktrm",
+    "address": "Demo address near Park Street"
+  },
+  {
+    "id": "st.bakery-dtx",
+    "name": "Demo Bakery Downtown",
+    "category": "food",
+    "lat": 42.3558,
+    "lon": -71.06,
+    "nearest_stop_id": "place-dwnxg",
+    "address": "Demo address near Downtown Crossing"
+  },
+  {
+    "id": "st.threads-dtx",
+    "name": "Demo Threads Downtown",
+    "category": "clothing",
+    "lat": 42.3552,
+    "lon": -71.0606,
+    "nearest_stop_id": "place-dwnxg",
+    "address": "Demo address near Downtown Crossing"
+  },
+  {
+    "id": "st.sports-north",
+    "name": "Demo Sports North Station",
+    "category": "sports",
+    "lat": 42.3655,
+    "lon": -71.0618,
+    "nearest_stop_id": "place-north",
+    "address": "Demo address near North Station"
+  },
+  {
+    "id": "st.deli-haymarket",
+    "name": "Demo Deli Haymarket",
+    "category": "food",
+    "lat": 42.3628,
+    "lon": -71.058,
+    "nearest_stop_id": "place-haecl",
+    "address": "Demo address near Haymarket"
+  },
+  {
+    "id": "st.threads-copley",
+    "name": "Demo Threads Copley",
+    "category": "clothing",
+    "lat": 42.3503,
+    "lon": -71.0768,
+    "nearest_stop_id": "place-coecl",
+    "address": "Demo address near Copley"
+  },
+  {
+    "id": "st.sports-kenmore",
+    "name": "Demo Fan Shop Kenmore",
+    "category": "sports",
+    "lat": 42.3486,
+    "lon": -71.0971,
+    "nearest_stop_id": "place-kencl",
+    "address": "Demo address near Kenmore"
+  },
+  {
+    "id": "st.cafe-harvard",
+    "name": "Demo Cafe Harvard Sq",
+    "category": "food",
+    "lat": 42.3733,
+    "lon": -71.1186,
+    "nearest_stop_id": "place-harsq",
+    "address": "Demo address near Harvard"
+  }
+]
