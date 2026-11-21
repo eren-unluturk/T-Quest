@@ -3,13 +3,13 @@
 /insights-sponsors/                     @TODO-eren
 /game-engine/                           @tobiolawale
 /client-bryan/                          @TODO-bryan
-/client-isabella/                       @TODO-isabella
-/design/                                @TODO-bryan @TODO-isabella
+/client-isabella/                       @isardzmrt
+/design/                                @TODO-bryan @isardzmrt
 /contracts/db/                          @TODO-eren
 /contracts/api/data-platform.yaml       @TODO-eren
 /contracts/api/insights-sponsors.yaml   @TODO-eren
 /contracts/api/game-engine.yaml         @tobiolawale
-/contracts/events/                      @TODO-eren @tobiolawale @TODO-bryan @TODO-isabella
+/contracts/events/                      @TODO-eren @tobiolawale @TODO-bryan @isardzmrt
 /scripts/                               @TODO-eren
 /.githooks/                              @TODO-eren
 /.claude-template/                       @TODO-eren
