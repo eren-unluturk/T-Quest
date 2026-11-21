@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 try:
     from fastapi.testclient import TestClient
     from game_engine import app as appmod
+    from game_engine.store import MemoryStore
     HAVE_WEB = True
 except ImportError:  # web libraries not installed: skip these tests
     HAVE_WEB = False
@@ -21,7 +22,7 @@ def H(user):
 @unittest.skipUnless(HAVE_WEB, "fastapi not installed")
 class AppTests(unittest.TestCase):
     def setUp(self):
-        appmod.reset()
+        appmod.set_store(MemoryStore())
         self.c = TestClient(appmod.app)
 
     def test_needs_token(self):
