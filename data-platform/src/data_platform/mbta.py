@@ -54,6 +54,10 @@ class MbtaClient:
                     return resp.json()
                 if attempt == self._retries:
                     resp.raise_for_status()
+                retry_after = resp.headers.get("retry-after", "")
+                if retry_after.isdigit():
+                    await asyncio.sleep(min(float(retry_after), 60.0))
+                    continue
             await asyncio.sleep(self._backoff_s * (2 ** attempt))
         raise RuntimeError("unreachable")
 
@@ -89,6 +93,18 @@ def parse_route(res: dict) -> dict:
         "color": a.get("color"),
         "text_color": a.get("text_color"),
         "line_id": _rel_id(res, "line"),
+        "sort_order": a.get("sort_order"),
+    }
+
+
+def parse_line(res: dict) -> dict:
+    a = res["attributes"]
+    return {
+        "id": res["id"],
+        "short_name": a.get("short_name") or None,
+        "long_name": a.get("long_name") or None,
+        "color": a.get("color"),
+        "text_color": a.get("text_color"),
         "sort_order": a.get("sort_order"),
     }
 

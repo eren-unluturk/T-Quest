@@ -8,10 +8,12 @@ ROUTE_TYPES = "0,1,3"  # light rail, subway, bus
 CONCURRENCY = 10
 
 
-async def fetch_static(client: mbta.MbtaClient) -> tuple[list[dict], list[dict], list[dict]]:
-    """Return (routes, stops, route_stops) parsed from the MBTA API."""
+async def fetch_static(client: mbta.MbtaClient) -> tuple[list[dict], list[dict], list[dict], list[dict]]:
+    """Return (routes, stops, route_stops, lines) parsed from the MBTA API."""
     route_res = await client.get_all("/routes", {"filter[type]": ROUTE_TYPES})
     routes = [mbta.parse_route(r) for r in route_res]
+    line_ids = {r["line_id"] for r in routes if r["line_id"]}
+    lines = [mbta.parse_line(x) for x in await client.get_all("/lines") if x["id"] in line_ids]
 
     sem = asyncio.Semaphore(CONCURRENCY)
     stops: dict[str, dict] = {}
@@ -40,7 +42,7 @@ async def fetch_static(client: mbta.MbtaClient) -> tuple[list[dict], list[dict],
             }
 
     await asyncio.gather(*(one(r, d) for r in routes for d in (0, 1)))
-    return routes, list(stops.values()), list(route_stops.values())
+    return routes, list(stops.values()), list(route_stops.values()), lines
 
 
 UPSERT_ROUTE = """
@@ -54,6 +56,21 @@ ON CONFLICT (id) DO UPDATE SET
 """
 
 # is_freedom_trail and neighborhood are curated, so the loader never overwrites them.
+UPSERT_LINE = """
+INSERT INTO lines (id, short_name, long_name, color, text_color, sort_order)
+VALUES (%(id)s, %(short_name)s, %(long_name)s, %(color)s, %(text_color)s, %(sort_order)s)
+ON CONFLICT (id) DO UPDATE SET
+    short_name = EXCLUDED.short_name, long_name = EXCLUDED.long_name, color = EXCLUDED.color,
+    text_color = EXCLUDED.text_color, sort_order = EXCLUDED.sort_order
+"""
+
+UPSERT_SCHEDULE_HOURLY = """
+INSERT INTO route_schedule_hourly (route_id, direction_id, hour_of_day, trips, service_date)
+VALUES (%(route_id)s, %(direction_id)s, %(hour_of_day)s, %(trips)s, %(service_date)s)
+ON CONFLICT (route_id, direction_id, hour_of_day) DO UPDATE SET
+    trips = EXCLUDED.trips, service_date = EXCLUDED.service_date
+"""
+
 UPSERT_STOP = """
 INSERT INTO stops (id, name, lat, lon, parent_station, location_type, municipality, wheelchair_boarding)
 VALUES (%(id)s, %(name)s, %(lat)s, %(lon)s, %(parent_station)s, %(location_type)s,
@@ -87,10 +104,49 @@ UPDATE stops s
 """
 
 
-def write_static(conn, routes: list[dict], stops: list[dict], route_stops: list[dict]) -> None:
+async def fetch_schedule_hourly(client: mbta.MbtaClient, routes: list[dict]) -> list[dict]:
+    """Scheduled trips per route/direction/local hour, using each trip's first stop."""
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("America/New_York")
+    # Next Tuesday (or today if Tuesday): a typical weekday service date.
+    today = datetime.now(tz).date()
+    service_date = today.fromordinal(today.toordinal() + (1 - today.weekday()) % 7)
+    sem = asyncio.Semaphore(CONCURRENCY)
+    rows: list[dict] = []
+
+    async def one(route: dict) -> None:
+        params = {"filter[route]": route["id"], "filter[date]": service_date.isoformat(),
+                  "filter[stop_sequence]": "first"}
+        async with sem:
+            try:
+                res = await client.get_all("/schedules", params)
+            except Exception:  # one route failing must not stop the load
+                return
+        counts: dict[tuple, int] = {}
+        for r in res:
+            t = r["attributes"].get("departure_time") or r["attributes"].get("arrival_time")
+            d = r["attributes"].get("direction_id")
+            if not t or d is None:
+                continue
+            key = (d, datetime.fromisoformat(t).astimezone(tz).hour)
+            counts[key] = counts.get(key, 0) + 1
+        for (d, h), n in counts.items():
+            rows.append({"route_id": route["id"], "direction_id": d, "hour_of_day": h,
+                         "trips": n, "service_date": service_date})
+
+    await asyncio.gather(*(one(r) for r in routes))
+    return rows
+
+
+def write_static(conn, routes: list[dict], stops: list[dict], route_stops: list[dict],
+                 lines: list[dict] | None = None, schedule: list[dict] | None = None) -> None:
     with conn.transaction():
         with conn.cursor() as cur:
+            cur.executemany(UPSERT_LINE, lines or [])
             cur.executemany(UPSERT_ROUTE, routes)
+            cur.executemany(UPSERT_SCHEDULE_HOURLY, schedule or [])
             cur.executemany(UPSERT_STOP, stops)
             cur.executemany(UPSERT_ROUTE_STOP, route_stops)
             cur.execute(BACKFILL_STOP_MODE)
@@ -98,10 +154,12 @@ def write_static(conn, routes: list[dict], stops: list[dict], route_stops: list[
 
 async def run() -> dict:
     async with mbta.MbtaClient() as client:
-        routes, stops, route_stops = await fetch_static(client)
+        routes, stops, route_stops, lines = await fetch_static(client)
+        schedule = await fetch_schedule_hourly(client, routes)
     with db.connect() as conn:
-        write_static(conn, routes, stops, route_stops)
-    counts = {"routes": len(routes), "stops": len(stops), "route_stops": len(route_stops)}
+        write_static(conn, routes, stops, route_stops, lines, schedule)
+    counts = {"routes": len(routes), "lines": len(lines), "stops": len(stops),
+              "route_stops": len(route_stops), "schedule_hour_rows": len(schedule)}
     print(counts)
     return counts
 

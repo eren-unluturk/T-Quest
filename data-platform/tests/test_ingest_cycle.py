@@ -23,6 +23,8 @@ def handler(request: httpx.Request) -> httpx.Response:
     q = request.url.params
     if path == "/routes":
         return httpx.Response(200, json=_body("routes"))
+    if path == "/lines":
+        return httpx.Response(200, json={"data": []})
     if path == "/stops":
         route = q.get("filter[route]")
         body = _body("route_stops") if route == "Red" else {"data": []}
@@ -86,7 +88,7 @@ def test_fetch_static_without_db():
         async with make_client() as c:
             return await load_static.fetch_static(c)
 
-    routes, stops, route_stops = asyncio.run(go())
+    routes, stops, route_stops, _lines = asyncio.run(go())
     assert {r["id"] for r in routes} >= {"Red"}
     assert stops and route_stops
     red0 = sorted(rs["stop_sequence"] for rs in route_stops if rs["route_id"] == "Red" and rs["direction_id"] == 0)
@@ -104,7 +106,7 @@ def test_one_cycle_writes_rows_and_load_static_is_idempotent(conn):
         async with make_client() as c:
             return await load_static.fetch_static(c)
 
-    routes, stops, route_stops = asyncio.run(static())
+    routes, stops, route_stops, _lines = asyncio.run(static())
     load_static.write_static(conn, routes, stops, route_stops)
     conn.commit()
     n1 = conn.execute("SELECT count(*) FROM stops").fetchone()[0]

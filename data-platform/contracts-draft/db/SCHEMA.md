@@ -71,7 +71,7 @@ Notes: game-engine owns unlock and rank rules, so `badges` and `ranks` are its t
 
 ## Events and points (0001)
 ### rider_events (hypertable on `time`, chunk 7 days)
-`id uuid`, `time not null`, `user_id uuid not null`, `event_type` in (`checkin`,`ride_start`,`ride_end`,`route_segment`,`visit`), `stop_id`, `route_id`, `mode`, `lat`, `lon`, `client_time`, `points_awarded`, `payload jsonb default '{}'`. pk `(id, time)`. Indexes `(user_id, time desc)`, `(stop_id, time desc)`, `(user_id, stop_id, time desc)`. No foreign keys; the writer validates ids.
+`id uuid`, `time not null`, `user_id uuid not null`, `event_type` in (`checkin`,`ride_start`,`ride_end`,`route_segment`,`visit`), `stop_id`, `route_id`, `mode`, `lat`, `lon`, `client_time`, `points_awarded`, `payload jsonb default '{}'`, `is_synthetic boolean not null default false` (0009: true for generated demo rows; real riders are false, so analytics must filter `NOT is_synthetic`). pk `(id, time)`. Compressed after 7 days (0008). Indexes `(user_id, time desc)`, `(stop_id, time desc)`, `(user_id, stop_id, time desc)`. No foreign keys; the writer validates ids.
 
 ### points_ledger (hypertable on `at`, default chunk interval)
 `id uuid`, `at default now()`, `user_id uuid not null`, `delta int not null`, `reason not null`, `ref_type`, `ref_id`, `route_id`. pk `(id, at)`. Index `(user_id, at desc)`. No foreign keys.
@@ -79,6 +79,12 @@ Notes: game-engine owns unlock and rank rules, so `badges` and `ranks` are its t
 
 ### place_visits (hypertable on `time`, chunk 7 days; 0005)
 Written by insights-sponsors only after `place_visits` consent. `id uuid`, `time not null`, `user_id not null`, `lat`, `lon`, `place_category`, `store_id uuid null`. pk `(id, time)`, index `(user_id, time desc)`. Retention policy: raw rows dropped after 90 days (privacy). No foreign keys.
+
+### lines (0009)
+MBTA lines: `id text pk` (e.g. `line-Red`), `short_name`, `long_name`, `color`, `text_color`, `sort_order`. Joined from `routes.line_id`. Loaded by `load_static`.
+
+### route_schedule_hourly (0009)
+Scheduled trips per `(route_id fk, direction_id, hour_of_day 0-23, America/New_York)`: `trips`, `service_date`. From MBTA `/schedules` (first stop of each trip) on one weekday. Anchor for the synthetic generator.
 
 ## Sponsors and rewards (0002, 0005)
 ### sponsors
@@ -125,6 +131,7 @@ Written by insights-sponsors only after `place_visits` consent. `id uuid`, `time
 `alert_id fk alerts on delete cascade`, `route_id`, `stop_id`, `route_type int`, `direction_id smallint`. Indexes on `alert_id`, `route_id`, `stop_id`.
 
 ## Continuous aggregates, views, functions
+- `vehicles_route_5m` (0009, CAGG on `vehicles`, 5 minutes, real-time): `bucket, route_id, reports, avg_speed`. Refresh every 5 minutes (3 day window). Live MBTA data only.
 - `leaderboard_daily` (CAGG on `points_ledger`, 1 day): `day, user_id, route_id, points_earned, entries`. Refresh every 5 minutes (30 day window). Real-time aggregation on.
 - `leaderboard(p_scope, p_period, p_user, p_route, p_limit)`: scope `global|friends|line`, period `week|month|all`; returns `position, user_id, username, points`; ties share a position.
 - `home_line_weekly` (CAGG on `rider_events`, 7 days, checkin and ride_start with a route): `week, user_id, route_id, rides`. Refresh every 15 minutes (90 day window).
