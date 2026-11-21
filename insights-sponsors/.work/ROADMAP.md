@@ -28,7 +28,7 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 - [-] 007 superseded by 014
 - [ ] 014 Postgres backend: catalog, content, consent, place visits (queue/014-postgres-catalog-content-consent.md, #1)
 - [ ] 015 Bus parity in seed, analytics, recs (queue/015-bus-parity-seed.md)
-- [ ] 016 (to write) Analytics and recs on Postgres, after data-platform prompt 012 adds user_stop_daily / stop_popularity_hourly / home_line checkins_30d
+- [ ] 016 Analytics, recs and Boston analytics on Postgres, plus latency bench (queue/016-postgres-analytics-recs.md, #1)
 
 ## Phase 4: hardening and AI
 - [x] 008 Hardening and contract conformance test (queue/008-hardening-contract-conformance.md, #8) verified
@@ -58,3 +58,4 @@ Nothing we build may depend on usage-based billing: no LLM API keys or per-token
 - 010 verified: 29 stops all match the MBTA API (verify_stops exit 0), 19 neighborhoods, 5 bus-mode stops, 103 passed. Bus stops have no events, so 015 follows up.
 - 011 verified: 108 passed, spec 0.1.1 with PolicyMismatch 409 and ConsentRequired. #8 updated.
 - 0005 landed (data-platform): ids are uuid for sponsors, stores, offers and physical_rewards, so 014 maps slugs with uuid5. Badge slugs follow `line-red-complete` (posted on #5). Our aggregates come in data-platform 012 (home_line becomes checkins_30d), so 016 comes later.
+- data-platform 012 delivered migration 0006 (user_stop_daily, user_stop_hourly, stop_popularity_hourly, home_line.checkins_28d), not yet run against a DB. 016 queued and may be the first run.
