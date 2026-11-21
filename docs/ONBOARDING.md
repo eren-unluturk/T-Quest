@@ -34,3 +34,14 @@ Everyone uses their OWN Claude plan. There is never per-token API billing for th
 5. Never add an Anthropic key or token to `.env`, `.env.example`, code, issues or docs.
 
 `node scripts/doctor.mjs` FAILS if either variable is set in the process, Windows User or Windows Machine environment (it prints the exact fix, never the value). `scripts/duo.mjs` strips both variables from the child environment and refuses to launch if they are set at the User or Machine level. Its `--allow-api-key` override exists for emergencies only and is not used by any VS Code task. Do not use it.
+
+## Live MBTA collector (data-platform)
+Needs `MBTA_API_KEY` and `DATABASE_URL` in `.env`. Plain Python program, no LLM, no per-token billing. If your shell has a stale `DATABASE_URL`, clear it first (PowerShell: `$env:DATABASE_URL = $null`).
+
+```powershell
+cd data-platform
+python -m data_platform.migrate
+python -m data_platform.load_static
+python -m data_platform.collector
+```
+Stop with Ctrl+C. Add `--duration 120` for a timed run. Benchmarks: `python -m data_platform.bench_real` (real data) and `python -m data_platform.demo_measure` (synthetic).

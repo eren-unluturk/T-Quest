@@ -38,11 +38,24 @@ Run tests with `pytest -q`. Tests that need a database skip when it is unreachab
 Set `MBTA_API_KEY` in `.env` (free key from api-v3.mbta.com; without a key the API allows only about 20 requests/min, which is not enough for the static load).
 
 ```powershell
-python -m data_platform.load_static          # routes, stops, route_stops (upsert, safe to re-run)
+python -m data_platform.load_static          # routes, lines, stops, route_stops, scheduled trips per hour (upsert, safe to re-run)
 python -m data_platform.ingest --once        # one cycle: vehicles, predictions, alerts
 python -m data_platform.ingest --interval 15 # poll every 15 seconds until stopped
 ```
 Predictions are polled for subway and light-rail routes only (the MBTA API requires a route filter), so run `load_static` first. A failed cycle is logged and the loop continues.
+
+### Live collector (long-running, stateless, no LLM)
+```powershell
+cd data-platform
+$env:DATABASE_URL = $null   # a stale shell value overrides ../.env
+python -m data_platform.migrate
+python -m data_platform.load_static
+python -m data_platform.collector
+```
+Polls `/vehicles` every 15 s, `/predictions` every 30 s and `/alerts` every 2 min (`--interval`, `--prediction-every`, `--alert-every`, `--duration SECONDS`), batch-writes to `vehicles`, `predictions`, `alerts`, backs off on errors and 429s, logs one line per minute with row counts only, and stops cleanly on Ctrl+C. Safe to restart at any time (idempotent inserts). Compression (1 day) and retention (30 days) policies are in migration 0003.
+
+### Real vs synthetic and benchmarks
+`python -m data_platform.demo_measure` loads about 250,000 synthetic `rider_events` (`is_synthetic = true`) anchored to the real stops, routes and schedule hours (needs `load_static` first); `--cleanup` removes them. `python -m data_platform.bench_real` benchmarks the real collected MBTA data. Both write their own section of `docs/TIGER_DATA_RESULTS.md`.
 
 
 ## Benchmark (demo numbers)
