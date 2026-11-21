@@ -1,7 +1,7 @@
 ---
 id: 004
 title: Implement content and catalog endpoints
-status: ready
+status: done
 issue: 5
 depends_on: [003]
 ---

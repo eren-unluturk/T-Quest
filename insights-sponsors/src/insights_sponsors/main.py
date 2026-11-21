@@ -1,10 +1,13 @@
 from fastapi import FastAPI
 
 from .config import settings
+from .routes import catalog, content
 
 
 def create_app() -> FastAPI:
     app = FastAPI(title="T-Quest insights-sponsors", version="0.1.0")
+    app.include_router(content.router)
+    app.include_router(catalog.router)
 
     @app.get("/health")
     def health() -> dict:
