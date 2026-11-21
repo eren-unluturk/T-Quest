@@ -1,5 +1,8 @@
 # ROADMAP: insights-sponsors
 
+## Scope rule: no pay-per-usage this hackathon
+Nothing we build may depend on usage-based billing: no LLM API keys or per-token calls, no paid Tiger Cloud tier (local docker TimescaleDB or the Tiger Cloud Free plan only), no paid map or geocoding APIs. The MBTA V3 key is free and optional. Every prompt must stay within this; deferred items are listed under "Out of scope: do later".
+
 ## Risks and cross-agent dependencies
 - **Contract promotion is a human step.** Builders cannot write `contracts/`. Draft is done (002, commit cf4e57b); Eren copies `insights-sponsors/openapi/insights-sponsors.yaml` to `contracts/api/insights-sponsors.yaml` (allowed for eren by D13) and commits it. Tracked in #26. #8 (client-bryan) waits on this.
 - **Tiger Data schema (#1, data-platform):** a v0 draft exists in `data-platform/contracts-draft/db/` (migrations 0000-0004, not yet in contracts/). Our additions arrive in data-platform prompt 010 / migration 0005. Renames from the #22 ACK: store_partners->stores, physical_rewards.kind->item_type, store_inventory.quantity->stock, rank via the `user_rank` view, badges via `user_collections`, home line via `home_line_weekly` (checkins_28d). When 0005 lands, the planner writes a fresh ready prompt (014) that supersedes 007. It must handle text session ids vs uuid `user_id`, and `home_line_weekly` exposes `rides_28d` (checkin + ride_start). 007 (Postgres backend) is blocked on it. Everything before it runs on the in-memory backend with seed JSON. Our column and aggregate needs went to data-platform as #22.
@@ -32,8 +35,13 @@
 - [ ] 013 Consented place-visit ingest and delete-on-revoke (queue/013-place-visit-ingest.md)
 - [ ] 010 Seed coverage (neighborhoods, bus) and MBTA API verification (queue/010-seed-coverage-and-verification.md)
 
-## Later
-- AI text for recommendations: future only (no API billing this hackathon)
+## Out of scope: do later (needs pay-per-usage, not this hackathon)
+- 009 AI-written recommendation reasons (LLM API, per-token). Prompt kept as a cancelled reference.
+- AI-generated or AI-ranked recommendations in general; recommendations stay deterministic SQL.
+- Paid Tiger Cloud tiers or extra compute; the demo runs on local TimescaleDB or the Free plan.
+- Paid geocoding or places APIs for matching place visits to stores.
+
+## Later (free)
 - Demo numbers: aggregate latency vs raw (with data-platform)
 
 ## Review notes
