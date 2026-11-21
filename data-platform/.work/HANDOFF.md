@@ -19,3 +19,7 @@
 ## Remaining
 - Prompt 015 (Dockerfile and compose services) still queued.
 - schema.sql is a concatenation of migrations, not a pg_dump (no pg_dump binary here).
+
+## Update 2026-11-21 (migrations 0010, 0011)
+- 0010: spot_categories, label_types, nearby_spots, spot_stop_links, spot_labels, view spot_labels_public, sponsors/stores.demo_placeholder. 0011: content_sources, content_items, stop_content, loading_facts. Both applied and verified on the live database; used by insights-sponsors. See DECISIONS D17 and docs/DATA_SOURCES.md.
+- Pending: Dockerfile and compose (015). Roadmap checkboxes for 002-012 and 016 still read "DB-unverified" although the live run passed; tick them when convenient.

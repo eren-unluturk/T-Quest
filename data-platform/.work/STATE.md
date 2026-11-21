@@ -35,3 +35,7 @@ STOPPED SAFELY at 2026-11-21 13:20 (planner). See .work/HANDOFF.md.
 - DATABASE_URL was set in the process env (overrides ../.env); ran with it unset. MBTA key HTTP 200.
 - Done: migration 0009 (is_synthetic, lines, route_schedule_hourly, vehicles_route_5m), load_static (lines + schedule), collector, bench_real, synthetic generator anchored to real data (250k events, is_synthetic), docs/contracts updated. 124 tests pass.
 - Smoke test 2 min: vehicles +3778, predictions +5922, alerts +58 upserts (60 polled). Nothing left running.
+
+# STATE (unattended run, 2026-11-21)
+- Added migrations 0010 (nearby spots, identity labels, demo_placeholder flags) and 0011 (tourist content tables), applied to the live database. contracts/db and contracts-draft schema regenerated. 130 data-platform tests pass.
+- Collector and collected MBTA data were not touched.
