@@ -25,7 +25,7 @@
 - [ ] 007 Postgres (Tiger Data) backend (queue/007-postgres-backend.md, #1) [blocked on schema]
 
 ## Phase 4: hardening and AI
-- [ ] 008 Hardening and contract conformance test (queue/008-hardening-contract-conformance.md, #8)
+- [x] 008 Hardening and contract conformance test (queue/008-hardening-contract-conformance.md, #8) verified
 - [-] 009 CANCELLED: AI reasons (AGENTS.md Billing: no API keys)
 - [ ] 011 Document consent error responses in OpenAPI (queue/011-openapi-error-responses.md, #8)
 - [ ] 012 Boston analytics GET /analytics/boston, k-anonymous (queue/012-boston-analytics.md, #3)
@@ -43,3 +43,4 @@
 - 004 verified: 41 tests pass; facts, trail, fun-facts (no auth), local picks, offers filters and eligibility, catalog, shape checks against OpenAPI. 008 now reuses tests/openapi_shape.py instead of jsonschema. Eligibility rule posted on #5.
 - 005 verified: 52 tests pass; single gate has_consent, require_consent 401/403/200, policy 409, idempotent revoke. Undocumented 409/403 led to 011 (draft not promoted yet, so it can still change). #26 updated.
 - 006 verified: 76 tests pass, hand-checked user-1 numbers, consent gate proven by spy and source scan, sponsorship order-neutral, 4 parameterized SQL files. 009 cancelled by the billing rule. Added 012 (Boston analytics) and 013 (place-visit ingest).
+- 008 verified: 100 passed, 1 intentional skip; every YAML operation validated against the live app; no extra routes; .env resolved from the package path. Later spec changes (011-013) are covered automatically.
