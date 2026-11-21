@@ -7,6 +7,7 @@ import hashlib
 import os
 import sys
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -30,6 +31,8 @@ class PgTests(unittest.TestCase):
     def setUp(self):
         self.conn = psycopg.connect(URL, autocommit=False, connect_timeout=15)
         self.conn.execute("set timezone = 'UTC'")
+        self.env = patch.dict(os.environ, {"VEHICLE_CHECK": "off"})
+        self.env.start()
         self.store = PgStore(self.conn)
         appmod.set_store(self.store)
         self.c = TestClient(appmod.app)
@@ -38,6 +41,7 @@ class PgTests(unittest.TestCase):
         self.stop = {"stop_id": row[0], "lat": row[1], "lon": row[2], "client_time": "2026-11-21T12:00:00"}
 
     def tearDown(self):
+        self.env.stop()
         self.conn.rollback()
         self.conn.close()
         appmod.set_store(None)
@@ -105,6 +109,26 @@ class PgTests(unittest.TestCase):
         second = delay_job.run(self.conn)
         self.assertEqual(second["paid"], 0)               # nothing new on a second run
         self.assertEqual(paid("pytest-alert"), (1, 50))
+    def test_live_vehicle_check(self):
+        """Default mode needs a live vehicle near the stop; a stop with none is refused."""
+        near = self.conn.execute(
+            "select s.id, s.lat, s.lon from stops s join vehicles v on abs(v.lat - s.lat) < 0.001 "
+            "and abs(v.lon - s.lon) < 0.001 where v.time > now() - interval '2 minutes' limit 1").fetchone()
+        far = self.conn.execute(
+            "select s.id, s.lat, s.lon from stops s where not exists (select 1 from vehicles v "
+            "where v.time > now() - interval '15 minutes' and abs(v.lat - s.lat) < 0.02 "
+            "and abs(v.lon - s.lon) < 0.02) limit 1").fetchone()
+        with patch.dict(os.environ, {"VEHICLE_CHECK": "strict"}):
+            if near:
+                body = {"stop_id": near[0], "lat": near[1], "lon": near[2], "client_time": "2026-11-21T12:00:00"}
+                self.assertEqual(self.c.post("/checkins", json=body, headers=H("pytest-v1")).status_code, 201)
+            if far:
+                body = {"stop_id": far[0], "lat": far[1], "lon": far[2], "client_time": "2026-11-21T12:00:00"}
+                r = self.c.post("/checkins", json=body, headers=H("pytest-v2"))
+                self.assertEqual((r.status_code, r.json()["detail"]), (422, "no_vehicle"))
+        if not near and not far:
+            self.skipTest("no live vehicle data")
+
     def test_unknown_stop_and_far(self):
         self.assertEqual(self.c.post("/checkins", json=dict(self.stop, stop_id="nope-nope"),
                                      headers=H("pytest-bob")).status_code, 404)

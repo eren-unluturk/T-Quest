@@ -51,7 +51,7 @@ class MemoryStore:
     def stop(self, stop_id):
         return DEMO_STOPS.get(stop_id)
 
-    def vehicle_seen_at(self, stop_id, now):
+    def vehicle_seen_at(self, stop_id, now, lat=None, lon=None):
         return now  # demo: a vehicle is always nearby
 
     def quests(self):

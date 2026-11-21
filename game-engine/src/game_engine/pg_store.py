@@ -84,11 +84,21 @@ class PgStore:
         row = self._q("select lat, lon, coalesce(mode,'subway') from stops where id=%s", (stop_id,), one=True)
         return {"lat": row[0], "lon": row[1], "mode": row[2]} if row else None
 
-    def vehicle_seen_at(self, stop_id, now):
+    def vehicle_seen_at(self, stop_id, now, lat=None, lon=None):
+        """Latest time a live vehicle was within VEHICLE_RADIUS_M of the stop (last 15 min).
+
+        Matches by position, not by id: subway vehicles report platform ids
+        that are not in the stops table.
+        """
+        if lat is None or lon is None:
+            return None
+        import math
+        dlat = config.VEHICLE_RADIUS_M / 111000.0
+        dlon = config.VEHICLE_RADIUS_M / (111000.0 * math.cos(math.radians(lat)))
         row = self._q(
-            "select max(time) from vehicles where time > now() - interval '1 hour' "
-            "and (stop_id = %s or stop_id in (select id from stops where parent_station = %s))",
-            (stop_id, stop_id), one=True)
+            "select max(time) from vehicles where time > now() - interval '15 minutes' "
+            "and lat between %s and %s and lon between %s and %s",
+            (lat - dlat, lat + dlat, lon - dlon, lon + dlon), one=True)
         t = row[0] if row else None
         return _naive(t) if t else None
 

@@ -8,8 +8,9 @@ Without it the service keeps everything in memory (demo mode, MemoryStore).
 Auth (demo): "Authorization: Bearer <username>" -- the token IS the username.
 Store verify: header "X-Store-Key". Accepted if it equals env STORE_KEY
 (default "dev-store-key", memory mode only) or matches the store's sha256 hash.
-VEHICLE_CHECK=strict makes check-ins need a live vehicle at the stop (needs the
-MBTA ingest running); any other value skips that check.
+Live vehicle check: ON by default with the database (a vehicle must be within
+VEHICLE_RADIUS_M of the stop in the last 5 minutes; needs the MBTA ingest running).
+Set VEHICLE_CHECK=off to skip it. Memory mode skips it.
 """
 import os
 import threading
@@ -107,8 +108,9 @@ def post_checkin(body: CheckinRequest, user: str = Depends(current_user)):
         t = now()
         history = st.checkins_at_stop(user, body.stop_id)
         last = history[-1] if history else None
-        if os.environ.get("VEHICLE_CHECK") == "strict" or st.name == "memory":
-            seen = st.vehicle_seen_at(body.stop_id, t)
+        default_mode = "strict" if st.name == "postgres" else "off"
+        if os.environ.get("VEHICLE_CHECK", default_mode) == "strict":
+            seen = st.vehicle_seen_at(body.stop_id, t, stop["lat"], stop["lon"])
         else:
             seen = t
         res = validate_checkin(
