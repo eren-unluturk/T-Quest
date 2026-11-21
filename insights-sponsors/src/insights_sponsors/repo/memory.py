@@ -219,6 +219,11 @@ class MemoryRepository:
                 return self._build_spot(raw, min(dists) if dists else None)
         return None
 
+    def rank_tiers(self) -> list[dict]:
+        from ..ranks import RANKS
+
+        return [dict(r) for r in RANKS]
+
     def physical_rewards(self) -> list[PhysicalReward]:
         return list(self._rewards)
 

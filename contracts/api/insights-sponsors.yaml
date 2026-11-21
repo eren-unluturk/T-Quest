@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
   title: T-Quest insights-sponsors API
-  version: 0.5.0
+  version: 0.6.0
   x-changelog:
+    - '0.6.0: rank tiers follow game-engine 8 named ranks; RankTier gains name, avatar_key, min_lifetime_points; min_rank maximum is 8'
     - '0.5.0: add GET /stops/{stop_id}/content and GET /loading-facts (open-source content with source_url, license, attribution); TrailSite gains source_url and attribution'
     - '0.4.0: add GET /stops/{stop_id}/nearby, /categories, /labels, /spots/{spot_id}, /rank-tiers; /offers gains rank and placement filters; Offer.store_id nullable and Offer.demo added'
     - '0.3.0: add POST and DELETE /place-visits (consent-gated ingest); revoking place_visits deletes stored visits'
@@ -141,7 +142,7 @@ paths:
         - name: rank
           in: query
           description: Offers available at this rank tier (min_rank <= rank).
-          schema: {type: integer, minimum: 1, maximum: 5}
+          schema: {type: integer, minimum: 1, maximum: 8}
         - name: placement
           in: query
           description: local_pick or sponsored_quest (native placements, never pop-ups).
@@ -387,7 +388,7 @@ paths:
   /rank-tiers:
     get:
       summary: Placeholder rank-tier discounts and the offers available at each tier
-      description: Percentages mirror game-engine's rank table (3/5/7/10/12); the top tier unlocks a free item. Demo placeholders.
+      description: Names and discounts mirror game-engine's 8-rank table (read from the shared ranks table in Postgres mode); the top tier unlocks a placeholder free item. Demo placeholders.
       responses:
         '200':
           description: Tiers
@@ -514,9 +515,12 @@ components:
               items: {$ref: '#/components/schemas/FacetCount'}
     RankTier:
       type: object
-      required: [rank, discount_pct, free_item, offers]
+      required: [rank, name, avatar_key, min_lifetime_points, discount_pct, free_item, offers]
       properties:
         rank: {type: integer}
+        name: {type: string}
+        avatar_key: {type: string}
+        min_lifetime_points: {type: integer}
         discount_pct: {type: integer}
         free_item: {type: boolean}
         demo: {type: boolean}
@@ -575,7 +579,7 @@ components:
         kind: {type: string, enum: [discount, free_item, points_item]}
         discount_pct: {type: integer, nullable: true}
         points_cost: {type: integer, nullable: true}
-        min_rank: {type: integer, minimum: 1, maximum: 5}
+        min_rank: {type: integer, minimum: 1, maximum: 8}
         required_badge_id: {type: string, nullable: true}
         per_user_limit: {type: integer}
         starts_at: {type: string, format: date-time}
@@ -622,7 +626,7 @@ components:
         name: {type: string}
         description: {type: string}
         badge_id: {type: string}
-        min_rank: {type: integer, minimum: 1, maximum: 5}
+        min_rank: {type: integer, minimum: 1, maximum: 8}
         per_user_limit: {type: integer}
         image_url: {type: string, nullable: true}
         stores:

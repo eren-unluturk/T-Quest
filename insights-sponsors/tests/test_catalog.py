@@ -80,9 +80,9 @@ def test_offers_requires_auth(client):
 def test_offers_eligible_only_by_rank(client, repo, auth_headers):
     rank1 = client.get("/offers", params={"eligible_only": "true"}, headers=auth_headers).json()
     assert rank1 and all(o["min_rank"] == 1 for o in rank1)
-    repo.set_user_profile("user-1", rank=5)
+    repo.set_user_profile("user-1", rank=8)
     rank5 = client.get("/offers", params={"eligible_only": "true"}, headers=auth_headers).json()
-    # rank 5 qualifies for everything except the badge-gated quest
+    # the top rank (8) qualifies for everything except the badge-gated quest
     assert ids(rank5) == ids(client.get("/offers", headers=auth_headers).json()) - {"off.sports-kenmore-quest"}
 
 

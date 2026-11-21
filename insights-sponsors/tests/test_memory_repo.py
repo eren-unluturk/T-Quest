@@ -57,7 +57,7 @@ def test_stores_offers_rewards_integrity(repo):
     for o in repo.offers():
         assert o.store_id is None or o.store_id in store_ids
         assert o.sponsor_id in sponsor_ids
-        assert 1 <= o.min_rank <= 5
+        assert 1 <= o.min_rank <= 8
     for r in repo.physical_rewards():
         assert all(x.store_id in store_ids for x in r.stores)
 
@@ -66,7 +66,7 @@ def test_offer_coverage(repo):
     offers = repo.offers()
     assert {o.kind for o in offers} == {"discount", "free_item", "points_item"}
     assert {o.placement for o in offers} == {"local_pick", "sponsored_quest"}
-    assert {o.min_rank for o in offers} == {1, 2, 3, 4, 5}
+    assert {o.min_rank for o in offers} == {1, 2, 3, 4, 5, 8}
     assert any(o.required_badge_id for o in offers)
     assert {s.category for s in repo.stores()} == {"food", "clothing", "sports"}
 

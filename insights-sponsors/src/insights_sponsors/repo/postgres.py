@@ -66,7 +66,7 @@ class PostgresRepository(MemoryRepository):
                 id=str(r["id"]), sponsor_id=str(r["sponsor_id"]),
                 store_id=str(r["store_id"]) if r["store_id"] else None, title=r["title"],
                 description=r["description"], kind=kind, discount_pct=r["discount_pct"],
-                points_cost=r["points_cost"] or None, min_rank=min(max(r["min_rank"], 1), 5),
+                points_cost=r["points_cost"] or None, min_rank=min(max(r["min_rank"], 1), 8),
                 required_badge_id=r["required_badge_id"], per_user_limit=r["per_user_limit"],
                 starts_at=r["starts_at"] or EPOCH, ends_at=r["ends_at"], placement=r["placement"],
                 demo=r["demo"]))
@@ -87,6 +87,10 @@ class PostgresRepository(MemoryRepository):
                                min_rank=r["min_rank"], per_user_limit=r["per_user_limit"],
                                image_url=r["image_url"], stores=inv.get(r["id"], []))
                 for r in rows]
+
+    def rank_tiers(self) -> list[dict]:
+        rows = self._q("SELECT rank, name, avatar_key, min_lifetime_points, discount_pct FROM ranks ORDER BY rank")
+        return [dict(r) for r in rows] or super().rank_tiers()
 
     # tourist content
     def stop_content(self, stop_id: str) -> list[ContentItem]:

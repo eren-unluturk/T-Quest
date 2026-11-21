@@ -74,13 +74,11 @@ def physical_rewards_catalog(
     return repo.physical_rewards()
 
 
-# Placeholder tiers mirror game-engine's rank table (3/5/7/10/12). The top tier unlocks a free item.
-RANK_DISCOUNTS = {1: 3, 2: 5, 3: 7, 4: 10, 5: 12}
-TOP_RANK = 5
-
-
 class RankTier(BaseModel):
     rank: int
+    name: str
+    avatar_key: str
+    min_lifetime_points: int
     discount_pct: int
     free_item: bool
     demo: bool = True
@@ -92,13 +90,10 @@ def rank_tiers(
     _user: Annotated[str, Depends(current_user_id)],
     repo: Annotated[Repository, Depends(get_repository)],
 ):
+    tiers = repo.rank_tiers()
+    top = max(t["rank"] for t in tiers)
     all_offers = repo.offers()
     return [
-        RankTier(
-            rank=r,
-            discount_pct=pct,
-            free_item=r == TOP_RANK,
-            offers=[o for o in all_offers if o.min_rank == r],
-        )
-        for r, pct in RANK_DISCOUNTS.items()
+        RankTier(**t, free_item=t["rank"] == top, offers=[o for o in all_offers if o.min_rank == t["rank"]])
+        for t in tiers
     ]

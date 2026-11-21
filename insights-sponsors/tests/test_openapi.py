@@ -56,7 +56,7 @@ def test_query_params_present():
 
 def test_version_and_changelog():
     info = load()["info"]
-    assert info["version"] == "0.5.0"
+    assert info["version"] == "0.6.0"
     log = info["x-changelog"]
     assert any(e.startswith("0.3.0:") and "/place-visits" in e for e in log)
     assert any(e.startswith("0.2.0:") and "/analytics/boston" in e for e in log)

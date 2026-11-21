@@ -125,3 +125,11 @@ def test_tourist_content_on_postgres(client):
     for i in r.json():
         assert i["attribution"] and i["source_url"] and i["license"] and i["distance_m"] <= 500
     assert len(client.get("/loading-facts", params={"limit": 50}).json()) >= 20
+
+
+def test_rank_tiers_follow_the_ranks_table(client):
+    with psycopg.connect(settings.database_url) as c:
+        db = c.execute("SELECT rank, name, discount_pct FROM ranks ORDER BY rank").fetchall()
+    tiers = client.get("/rank-tiers", headers=AUTH).json()
+    assert [(t["rank"], t["name"], t["discount_pct"]) for t in tiers] == [tuple(r) for r in db]
+    assert tiers[-1]["free_item"] is True

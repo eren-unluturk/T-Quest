@@ -212,8 +212,9 @@ def test_three_demo_sponsors_are_labeled_placeholders(client, auth_headers):
 
 def test_rank_tiers_and_offer_filters(client, auth_headers):
     tiers = client.get("/rank-tiers", headers=auth_headers).json()
-    assert [t["discount_pct"] for t in tiers] == [3, 5, 7, 10, 12]
-    assert [t["free_item"] for t in tiers] == [False, False, False, False, True]
+    assert [t["discount_pct"] for t in tiers] == [3, 4, 5, 7, 8, 10, 11, 12]
+    assert tiers[0]["name"] == "Harbor Seal" and tiers[-1]["name"] == "Patriot"
+    assert [t["free_item"] for t in tiers] == [False] * 7 + [True]
     r1 = client.get("/offers", params={"rank": 1}, headers=auth_headers).json()
     assert r1 and all(o["min_rank"] <= 1 for o in r1)
     q = client.get("/offers", params={"placement": "sponsored_quest", "stop_id": DAVIS}, headers=auth_headers).json()
