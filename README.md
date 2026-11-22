@@ -140,6 +140,22 @@ All of this exists in `data-platform/migrations/`.
 | game-engine | Rules, in-memory and Postgres stores, contract published, shared auth and hardening (optional prod mode) | | Delay and cancellation notifications |
 | Front end | Approved design canvas in `design/canvas/`; `web/` React + Vite app with six designed screens and stubs for the rest | Designs for the stub screens | Public hosting (future, untested) |
 
+## Screenshots
+Taken from the local demo app (`node scripts/screenshots-demo.mjs`). The check-in screen has no approved design yet (the tap-in sheet and ride stamp are a proposal), and friends, leaderboard, quests and redemptions have no screens.
+
+| | |
+|---|---|
+| ![Loading](docs/screenshots/01-loading.png) | Loading: a Boston fun fact with its source |
+| ![Home map](docs/screenshots/02-home-map.png) | Home: live MBTA stations and trains from Tiger Data on a Boston map |
+| ![Home 3D](docs/screenshots/03-home-3d.png) | Home in 3D with landmark buildings from Boston open data |
+| ![Tap in](docs/screenshots/04-tap-in-sheet.png) | Tap in at a station and choose where you get off (proposal, not in the canvas) |
+| ![Ride verified](docs/screenshots/05-ride-verified.png) | A ride verified against the real MBTA schedule, with demo points |
+| ![Traveled](docs/screenshots/06-traveled.png) | Traveled: verified rides and unlocked spots |
+| ![Explore](docs/screenshots/07-explore.png) | Explore: nearby spots and perks from fictional demo businesses |
+| ![Filters](docs/screenshots/08-explore-filters.png) | Explore filters by line and ownership label (demo data) |
+| ![Faves](docs/screenshots/09-faves.png) | Faves: facts you starred |
+| ![User page](docs/screenshots/10-user-page.png) | User page: rank, points and demo perks |
+
 ## Future work: public hosting
 We have **not** deployed the demo publicly. It runs locally on a laptop (see [docs/DEMO.md](docs/DEMO.md)).
 
@@ -176,11 +192,12 @@ We have **not** deployed the demo publicly. It runs locally on a laptop (see [do
 | `scripts/`, `tests/` | Node tooling for the team workflow |
 
 ## How to run
-- Setup: [docs/ONBOARDING.md](docs/ONBOARDING.md).
+- Run the demo on your own machine (database, data load, one command): [docs/RUN_LOCALLY.md](docs/RUN_LOCALLY.md).
+- Setup for contributors: [docs/ONBOARDING.md](docs/ONBOARDING.md).
 - Collector (from `data-platform/`, needs `.env` with the database URL and MBTA key): `python -m data_platform.migrate`, `python -m data_platform.load_static`, `python -m data_platform.collector`.
 - Tests: `node --test tests/` (repo tooling), `pytest -q` inside `data-platform/` and `insights-sponsors/`.
 - Front-end wiring: [docs/FRONTEND_INTEGRATION.md](docs/FRONTEND_INTEGRATION.md) and `node scripts/connect-check.mjs`.
-- Demo: `node scripts/demo.mjs` (see [docs/DEMO.md](docs/DEMO.md)).
+- Demo: `node scripts/preflight.mjs` then `node scripts/demo-up.mjs`, open http://localhost:4321 (see [docs/DEMO.md](docs/DEMO.md)); backend tour: `node scripts/demo.mjs`.
 - Docs refresh: `node scripts/sync-docs.mjs` (also the VS Code task "Sync docs").
 
 ## Team
