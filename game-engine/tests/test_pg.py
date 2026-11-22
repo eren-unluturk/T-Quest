@@ -33,7 +33,7 @@ class PgTests(unittest.TestCase):
         self.conn.execute("set timezone = 'UTC'")
         self.env = patch.dict(os.environ, {"VEHICLE_CHECK": "off"})
         self.env.start()
-        self.store = PgStore(self.conn)
+        self.store = PgStore(self.conn, allow_writes=True)
         appmod.set_store(self.store)
         self.c = TestClient(appmod.app)
         row = self.conn.execute("select id, lat, lon from stops where location_type = 1 or parent_station is null "
@@ -47,7 +47,7 @@ class PgTests(unittest.TestCase):
         appmod.set_store(None)
 
     def test_healthz(self):
-        self.assertEqual(self.c.get("/healthz").json(), {"ok": True, "store": "postgres"})
+        self.assertEqual(self.c.get("/healthz").json(), {"ok": True, "store": "postgres", "writes": True})
 
     def test_checkin_points_rank_collection(self):
         u = "pytest-ann"
@@ -59,7 +59,7 @@ class PgTests(unittest.TestCase):
         self.assertEqual(self.c.get("/me/rank", headers=H(u)).json()["name"], "Harbor Seal")
         self.assertEqual(self.c.get("/me/collection", headers=H(u)).json()["stops"], [self.stop["stop_id"]])
         n = self.conn.execute("select count(*) from rider_events where stop_id=%s and user_id="
-                              "(select id from users where username=%s)", (self.stop["stop_id"], u)).fetchone()[0]
+                              "(select id from users where username=%s)", (self.stop["stop_id"], "demo_" + u)).fetchone()[0]
         self.assertEqual(n, 1)
 
     def test_catalog_real_lines(self):
@@ -89,15 +89,15 @@ class PgTests(unittest.TestCase):
 
     def test_delay_job_pays_once(self):
         from game_engine import delay_job
-        self.conn.execute("insert into users (username, home_line_override) values ('pytest-rider', 'Red')")
-        self.conn.execute("insert into users (username, home_line_override) values ('pytest-green', 'Green-B')")
+        self.conn.execute("insert into users (username, home_line_override) values ('demo_pytest-rider', 'Red')")
+        self.conn.execute("insert into users (username, home_line_override) values ('demo_pytest-green', 'Green-B')")
         self.conn.execute("insert into alerts (id, effect, active_start) values ('pytest-alert', 'NO_SERVICE', now() - interval '1 hour')")
         self.conn.execute("insert into alerts (id, effect, active_start) values ('pytest-minor', 'DELAY', now() - interval '1 hour')")
         self.conn.execute("insert into alert_entities (alert_id, route_id) values ('pytest-alert', 'Red')")
         self.conn.execute("insert into alert_entities (alert_id, route_id) values ('pytest-minor', 'Green-B')")
-        before = delay_job.run(self.conn, dry_run=True)
+        before = delay_job.run(self.conn, dry_run=True, allow_writes=False)
         self.assertGreaterEqual(before["paid"], 1)
-        first = delay_job.run(self.conn)
+        first = delay_job.run(self.conn, allow_writes=True)
         self.assertGreaterEqual(first["paid"], 1)
         def paid(alert_id):
             return self.conn.execute(
@@ -106,7 +106,7 @@ class PgTests(unittest.TestCase):
 
         self.assertEqual(paid("pytest-alert"), (1, 50))   # Red home-line rider, once
         self.assertEqual(paid("pytest-minor"), (0, 0))    # a plain DELAY pays nothing
-        second = delay_job.run(self.conn)
+        second = delay_job.run(self.conn, allow_writes=True)
         self.assertEqual(second["paid"], 0)               # nothing new on a second run
         self.assertEqual(paid("pytest-alert"), (1, 50))
     def test_live_vehicle_check(self):
@@ -190,6 +190,46 @@ class PgTests(unittest.TestCase):
         self.assertIn("freedom-trail", last["badges_unlocked"])
         rewards = self.c.get("/me/collection", headers=H(u)).json()["physical_rewards"]
         self.assertIn("Freedom Trail sticker", rewards)
+
+    def test_read_only_by_default(self):
+        """No GE_ALLOW_DB_WRITES: GET works, every write is refused, no user row is created."""
+        appmod.set_store(PgStore(self.conn))   # allow_writes defaults to False
+        self.assertEqual(self.c.get("/healthz").json()["writes"], False)
+        self.assertEqual(self.c.get("/me/points", headers=H("pytest-ro")).json()["balance"], 0)
+        self.assertEqual(self.c.get("/me/rank", headers=H("pytest-ro")).json()["name"], "Harbor Seal")
+        for method, path, body in [("post", "/checkins", self.stop), ("post", "/friends", {"username": "x"}),
+                                   ("post", "/redemptions", {"offer_id": "o"}),
+                                   ("post", "/redemptions/verify", {"code": "c", "store_id": "s"})]:
+            r = getattr(self.c, method)(path, json=body, headers=H("pytest-ro"))
+            self.assertEqual((r.status_code, r.json()["detail"]), (503, "db_writes_disabled"), path)
+        n = self.conn.execute("select count(*) from users where username like 'demo_pytest-ro%'").fetchone()[0]
+        self.assertEqual(n, 0)
+
+    def test_demo_rows_are_flagged_and_reset_removes_them(self):
+        from game_engine import demo_reset
+        u = "pytest-flag"
+        self.assertEqual(self.c.post("/checkins", json=self.stop, headers=H(u)).status_code, 201)
+        self.c.post("/friends", json={"username": "pytest-flag2"}, headers=H(u))
+        # flags: demo username, synthetic rider event
+        self.assertEqual(self.conn.execute("select count(*) from users where username = 'demo_pytest-flag'").fetchone()[0], 1)
+        self.assertEqual(self.conn.execute(
+            "select bool_and(is_synthetic), count(*) from rider_events where user_id = "
+            "(select id from users where username = 'demo_pytest-flag')").fetchone(), (True, 1))
+        # real users are not shown on the demo leaderboard
+        names = {r["username"] for r in self.c.get("/leaderboards", headers=H(u)).json()}
+        self.assertIn("pytest-flag", names)
+        self.assertFalse(any(n.startswith("demo_") for n in names))
+        dry = demo_reset.run(self.conn, dry_run=True)
+        self.assertGreaterEqual(dry["rider_events"], 1)
+        self.assertGreaterEqual(dry["points_ledger"], 1)
+        with self.assertRaises(PermissionError):
+            demo_reset.run(self.conn, allow_writes=False)
+        done = demo_reset.run(self.conn, allow_writes=True)
+        self.assertEqual(done, dry)
+        after = demo_reset.run(self.conn, dry_run=True)
+        self.assertEqual(sum(after.values()), 0)
+        self.assertEqual(self.conn.execute(
+            "select count(*) from pg_trigger where tgname = 'points_ledger_no_mutation' and tgenabled <> 'O'").fetchone()[0], 0)
 
     def test_unknown_stop_and_far(self):
         self.assertEqual(self.c.post("/checkins", json=dict(self.stop, stop_id="nope-nope"),

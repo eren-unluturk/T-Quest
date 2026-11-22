@@ -25,7 +25,12 @@ cd game-engine/src
 uvicorn game_engine.app:app --port 8003
 ```
 
-**Real mode (Tiger Data database).** Put the database link in `DATABASE_URL`. Never commit it.
++
+
++```powershell+
++$env:DATABASE_URL = "postgres://USER:PASSWORD@HOST:PORT/tsdb?sslmode=require"+
++uvicorn game_engine.app:app --port 8003+
++```
 
 ```powershell
 $env:DATABASE_URL = "postgres://USER:PASSWORD@HOST:PORT/tsdb?sslmode=require"
@@ -46,7 +51,7 @@ curl -H "Authorization: Bearer ann" http://127.0.0.1:8003/me/rank
 
 | Variable | Meaning |
 |---|---|
-| `DATABASE_URL` | Set: use the database. Not set: in-memory demo. |
+| `DATABASE_URL` | Set: use the database (read-only unless the next line is set). Not set: in-memory demo. |
 | `VEHICLE_CHECK` | `off` skips the live vehicle check. Default: on with the database, off in memory mode. |
 | `STORE_KEY` | Store key accepted by `POST /redemptions/verify` (memory-mode default: `dev-store-key`). With the database, a store's `X-Store-Key` must match its sha256 hash in `stores.store_key_hash`. |
 
@@ -60,14 +65,16 @@ python game-engine/demo/demo.py
 
 To try calls by hand: start the server in demo mode (no `DATABASE_URL`), open `http://127.0.0.1:8003/docs`, and put `Bearer ann` in the `authorization` box of any call. Fake stops: `park`, `downtown`, `harvard`, `alewife`, `south-station`. Offers `o1` and `o2`. Store key `dev-store-key`.
 
-## Delay bonus job
++
+
++Pays 50 points once per alert to riders whose home line has an outage. It does not run by itself. Run it on a schedule:
 
 Pays 50 points once per alert to riders whose home line has an outage. It does not run by itself. Run it on a schedule:
 
 ```powershell
 cd game-engine/src
 python -m game_engine.delay_job --dry-run   # count only, writes nothing
-python -m game_engine.delay_job             # pay
+$env:GE_ALLOW_DB_WRITES = "1"; python -m game_engine.delay_job   # pay
 ```
 
 ## Tests
@@ -76,7 +83,7 @@ python -m game_engine.delay_job             # pay
 python -m unittest discover -s game-engine/tests
 ```
 
-The database tests are skipped unless `GE_TEST_DATABASE_URL` is set. They run inside a transaction that is rolled back, so the database is left unchanged.
+The database tests are skipped unless `GE_TEST_DATABASE_URL` is set. They run inside a transaction that is rolled back, so the database is left unchanged. They briefly lock `points_ledger` while testing the reset.
 
 ## Numbers you can tune
 

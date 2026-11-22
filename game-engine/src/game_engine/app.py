@@ -4,6 +4,10 @@ Run (from game-engine/src):  uvicorn game_engine.app:app --port 8003
 
 Storage: set DATABASE_URL to use the shared Tiger Data database (PgStore).
 Without it the service keeps everything in memory (demo mode, MemoryStore).
+DATABASE MODE IS READ-ONLY BY DEFAULT: writes (POST routes) answer 503
+db_writes_disabled unless GE_ALLOW_DB_WRITES=1. With writes on, every user is a
+demo user ("demo_" + name) and check-ins are written with is_synthetic = true;
+remove it all with `python -m game_engine.demo_reset`. See README.
 
 Auth (demo): "Authorization: Bearer <username>" -- the token IS the username.
 Store verify: header "X-Store-Key". Accepted if it equals env STORE_KEY
@@ -38,7 +42,7 @@ def get_store():
     if _store is None:
         if os.environ.get("DATABASE_URL"):
             from .pg_store import PgStore, connect
-            _store = PgStore(connect())
+            _store = PgStore(connect(), allow_writes=os.environ.get("GE_ALLOW_DB_WRITES") == "1")
         else:
             _store = MemoryStore()
     return _store
@@ -95,12 +99,20 @@ def redemption_json(r):
 
 @app.get("/healthz")
 def healthz():
-    return {"ok": True, "store": get_store().name}
+    st = get_store()
+    return {"ok": True, "store": st.name, "writes": bool(getattr(st, "can_write", True))}
+
+
+def require_write(st):
+    """Database mode is read-only unless GE_ALLOW_DB_WRITES=1 (demo-safe default)."""
+    if not getattr(st, "can_write", True):
+        raise HTTPException(503, "db_writes_disabled")
 
 
 @app.post("/checkins", status_code=201)
 def post_checkin(body: CheckinRequest, user: str = Depends(current_user)):
     st = get_store()
+    require_write(st)
     stop = st.stop(body.stop_id)
     if stop is None:
         raise HTTPException(404, "unknown stop")
@@ -212,6 +224,7 @@ def get_friends(user: str = Depends(current_user)):
 @app.post("/friends", status_code=201)
 def post_friend(body: FriendRequest, user: str = Depends(current_user)):
     st = get_store()
+    require_write(st)
     with LOCK:
         if body.username != user:
             st.ensure_user(body.username)
@@ -226,6 +239,7 @@ def post_friend(body: FriendRequest, user: str = Depends(current_user)):
 @app.post("/redemptions", status_code=201)
 def post_redemption(body: RedeemRequest, user: str = Depends(current_user)):
     st = get_store()
+    require_write(st)
     offer = st.offer(body.offer_id)
     if offer is None:
         raise HTTPException(404, "unknown offer")
@@ -243,6 +257,7 @@ def post_redemption(body: RedeemRequest, user: str = Depends(current_user)):
 @app.post("/redemptions/verify")
 def verify_redemption(body: VerifyRequest, x_store_key: str = Header(default="")):
     st = get_store()
+    require_write(st)
     demo_key = os.environ.get("STORE_KEY", "dev-store-key" if st.name == "memory" else "")
     key_ok = bool(demo_key) and x_store_key == demo_key
     if not key_ok and not (hasattr(st, "store_key_ok") and st.store_key_ok(body.store_id, x_store_key)):

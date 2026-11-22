@@ -36,6 +36,7 @@ def encode_reason(reason, ref_id=None):
 
 class MemoryStore:
     name = "memory"
+    can_write = True
 
     def __init__(self):
         self.reset()
