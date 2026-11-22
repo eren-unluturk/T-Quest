@@ -593,7 +593,10 @@ function openRide(from) {
 const bostonTime = (t) => new Date(t).toLocaleTimeString('en-GB', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
 // real MBTA schedule: trips that stop at A and later at B (any platform of either station)
 async function scheduledTrips(a, b, line, from, to) {
-  const res = await mbta(`/schedules?filter[stop]=${a.id},${b.id}&filter[route]=${routesOf(line).join(',')}&filter[min_time]=${bostonTime(from - 20 * 60000)}&filter[max_time]=${bostonTime(to + 10 * 60000)}&include=stop&fields[schedule]=arrival_time,departure_time,stop_sequence`);
+  // the API's time filter does not wrap past midnight (a window ending after 00:00 returns nothing), so cap at 23:59
+  const minT = bostonTime(from - 20 * 60000);
+  const maxT = bostonTime(to + 10 * 60000) < minT ? '23:59' : bostonTime(to + 10 * 60000);
+  const res = await mbta(`/schedules?filter[stop]=${a.id},${b.id}&filter[route]=${routesOf(line).join(',')}&filter[min_time]=${minT}&filter[max_time]=${maxT}&include=stop&fields[schedule]=arrival_time,departure_time,stop_sequence`);
   const parent = {};
   for (const s of res.included || []) parent[s.id] = s.relationships?.parent_station?.data?.id || s.id;
   const trips = {};

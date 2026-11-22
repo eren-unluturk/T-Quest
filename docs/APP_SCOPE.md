@@ -2,6 +2,8 @@
 
 > Demo placeholder. No partnership, endorsement or real discount is implied. UI comes only from `design/`.
 
+> **Two clients.** This page describes the React port in `web/`. The app we demo is `client-bryan/demo` (vanilla JS + MapLibre, Boston GIS maps, ride verification), documented in `client-bryan/demo/README.md` and `docs/DEMO.md`. The maps listed as placeholders below are real maps in the demo app.
+
 ## What exists in `design/`
 | File | Contents |
 |---|---|

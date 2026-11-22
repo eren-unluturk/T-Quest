@@ -81,7 +81,7 @@ if (out.startsWith('FRESH')) {
 } else fail(`database not reachable (${out.replace(/^ERR\s*/, '') || 'no answer'}). Check the network and DATABASE_URL in .env.`);
 
 // 4 services and web
-const probes = [['data-platform', 8001, '/health'], ['insights-sponsors', 8002, '/health'], ['game-engine', 8003, '/healthz'], ['web app', 5173, '/']];
+const probes = [['data-platform', 8001, '/health'], ['insights-sponsors', 8002, '/health'], ['game-engine', 8003, '/healthz'], ['demo client (maps)', 4321, '/'], ['web app', 5173, '/']];
 for (const [name, port, p] of probes) {
   let up = false;
   try { up = (await fetch(`http://127.0.0.1:${port}${p}`, { signal: AbortSignal.timeout(2000) })).ok; } catch { /* down */ }

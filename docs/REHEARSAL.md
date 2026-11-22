@@ -2,15 +2,15 @@
 
 > Demo placeholder. No partnership, endorsement or real discount is implied. Sponsors, offers and labels are placeholders. Rider data is synthetic; MBTA data is real.
 
-Built from the demo script in [PITCH.md](../PITCH.md) and the runbook in [DEMO.md](DEMO.md). Moments that come from the approved design are marked **[UI]**; screens without a design are **[STUB]** (plain pages).
+Built from the demo script in [PITCH.md](../PITCH.md) and the runbook in [DEMO.md](DEMO.md). The demo app is `client-bryan/demo` (http://localhost:4321). A captioned recording (`node scripts/record-demo.mjs`, see DEMO.md) is the backup if the live demo fails.
 
 ## Before every rehearsal
 ```powershell
 Remove-Item Env:DATABASE_URL -ErrorAction SilentlyContinue
 node scripts/preflight.mjs          # must end with "Preflight passed."
-node scripts/demo-up.mjs            # starts the 3 backends and the web app, prints the URLs
+node scripts/demo-up.mjs            # starts the 3 backends, the demo app and the React app, prints the URLs
 ```
-Open http://127.0.0.1:5173 and sign in with a sandbox username. Ctrl+C in the demo-up terminal stops everything. Afterwards, `node scripts/reset-demo.mjs` (dry run) shows what the demo wrote; add `--yes` to delete it.
+Open http://localhost:4321 (the demo app with the maps; needs internet). Restart `demo-up` before each full run so game-engine starts with no collected stops (otherwise a repeat ride earns no points). Ctrl+C in the demo-up terminal stops everything. Afterwards `node scripts/reset-demo.mjs` (dry run) shows what the demo wrote to the database (normally nothing: faves and rides stay in the browser).
 
 ## Who says what (TODO: assign)
 | Part | Speaker |
@@ -24,18 +24,19 @@ Open http://127.0.0.1:5173 and sign in with a sandbox username. Ctrl+C in the de
 | Time | Click | Say | Notes |
 |---|---|---|---|
 | 0:00 | Title slide | The 30-second hook from PITCH.md. | Say once that this is a demo with placeholders. |
-| 0:30 | **[UI] Home** (sign in first) | Park Street scene: a real fact with its source, the rider's rank and points. | Check-in is a **[STUB]** plain page; do not click it live (see fallback). |
-| 1:00 | **[UI] Explore** | Nearby spots at a stop. Open the owner filter and pick a label: only the fictional "Sample ... (demo)" spots show labels. Real businesses show none. | Pending labels are never shown. Sponsors and offers are demo placeholders. |
-| 1:30 | **Live data moment:** `http://127.0.0.1:8001/vehicles?route_id=Red` in a browser tab, or `node scripts/demo.mjs` step 1 | Vehicles on the Red Line right now, from the MBTA live feed our collector stores in Tiger Data. | Check `last_vehicle_at` at `http://127.0.0.1:8001/health` is under 5 minutes old. There is no map screen (maps are placeholders). |
+| 0:30 | **Loading, then Home** | Boston fun facts load first; Home is a Boston map with live MBTA stations and trains from Tiger Data. Toggle 3D for the landmark buildings. | Map tiles need internet. |
+| 1:00 | **Tap in at Park Street, Ride there** | The ride is checked against the real MBTA schedule and earns points from game-engine (demo mode). Then tap in again and **Tap out now**: it is rejected as a spoof. | The tap-in sheet and ride stamp are a proposal, not in the approved canvas. Only Park Street, Downtown Crossing, Harvard, Alewife and South Station score points. |
+| 1:30 | **Live data moment:** the trains on the Home map, or `http://127.0.0.1:8001/vehicles?route_id=Red` in a tab | Vehicles on the line right now come from the MBTA feed our collector stores in Tiger Data. | Check `last_vehicle_at` at `http://127.0.0.1:8001/health` is under 5 minutes old. |
 | 2:00 | Slide: Tiger Data numbers | Read only the figures in the generated block in PITCH.md / `docs/TIGER_DATA_RESULTS.md`. | If a figure says "TODO: measure", say it is still being measured. Do not add numbers. |
-| 2:30 | **[UI] Profile** | Rank tiers and demo offers. Redemption has no design yet (**[STUB]**). | Say clearly that offers are demo placeholders and the rank percentages are placeholders. |
-| 2:50 | Close | What we would do next: more lines, the tourist layer, a possible sponsor program (not pursued now). | Public hosting is future work; do not imply a public URL. |
+| 2:20 | **Explore** | Nearby spots and perks from fictional demo businesses; filter by category, line and ownership label. | Everything shown is a demo placeholder. |
+| 2:40 | **User page** | Rank and points from game-engine; demo perks. No real partnerships. | Friends, leaderboard, quests and redemptions have no screens yet. |
+| 2:50 | Close | What we would do next: more lines, the tourist layer, a possible sponsor program (not pursued now). | Public hosting is future work; do not imply a public URL. Do not present Ethnic Boston as verified (wording unconfirmed). |
 
 ## 60-second version
 1. (0:00) One sentence of hook and "this is a demo with placeholders".
-2. (0:10) **Home**: real fact with source, rank and points.
-3. (0:25) **Explore**: one label filter on a Sample spot.
-4. (0:40) Live vehicles tab, `last_vehicle_at` fresh.
+2. (0:10) **Home**: the live map, a fact with its source.
+3. (0:25) **Tap in, Ride there**: verified against the real schedule, points.
+4. (0:40) Live vehicles, `last_vehicle_at` fresh.
 5. (0:55) Close: "real MBTA data, synthetic riders, demo sponsors".
 
 ## If something fails
@@ -43,10 +44,10 @@ Open http://127.0.0.1:5173 and sign in with a sandbox username. Ctrl+C in the de
 |---|---|
 | Collector stale (preflight says "N min old", or `last_vehicle_at` is old) | Restart it from `data-platform/`: `python -m data_platform.collector`; vehicles reappear within about a minute. If it cannot be fixed, say the feed is paused and show the numbers slide instead; do not call old data live. |
 | A service is down / a screen shows errors | Check `http://127.0.0.1:8001/health` (`"db": false` = database unreachable). Stop with Ctrl+C and run `node scripts/demo-up.mjs` again; it names any port still in use. |
-| No wifi | Switch to the phone hotspot (the database is in the cloud). If there is still no connection, show screenshots or the recording and say so. |
+| No wifi | Switch to the phone hotspot (the database, map tiles and MBTA schedule are all online). If there is still no connection, show the recording and say so. |
 | Wrong database / old data | A stale `DATABASE_URL` in the shell overrides `.env`: `Remove-Item Env:DATABASE_URL`, open a new terminal, rerun preflight. |
-| Check-in screen is a **[STUB]** | Skip it in the app. To show check-in, run `node scripts/demo.mjs`: its game-engine step does two check-ins and shows rank and quests (game-engine runs in memory mode). A repeat within the cooldown returns HTTP 409; restart game-engine to reset. |
-| Any other stub (sign in, friends, leaderboard, quests, redemptions) | Say "no approved design yet, so it is a plain page" and move on. |
+| Ride says no scheduled train, or points are missing | No internet or the MBTA API is rate limited, it is after midnight, or the stop was already collected in the last 30 min. Restart `demo-up` to reset game-engine, or show the earlier recording. The check-in screen design is still pending; fallback: `node scripts/demo.mjs` does two check-ins against game-engine and shows rank and quests. |
+| Friends, leaderboard, quests, redemptions | They have no screens in the demo app; say "no approved design yet" and move on. |
 
 ## Judge questions (from PITCH.md Q&A)
 - **Is the rider data real?** No. There are no users yet. Stops, routes, schedules, live vehicles, predictions and alerts are real MBTA data. Rider events are synthetic, flagged `is_synthetic`, and we say so.

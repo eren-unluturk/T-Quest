@@ -131,15 +131,16 @@ Subway and bus share the same model (a stop is a stop). Start with a handful of 
 
 ## 3-minute demo script
 
-What is live in the demo build: a web app with six screens built from the approved design, backed by real MBTA data and demo placeholders (sponsors, offers, labels). What is stubbed: sign in, check in, friends, leaderboard, quests and redemptions have no design yet and are plain pages. Rider data is synthetic. Nothing is deployed until the team does it by hand (docs/DEPLOY.md).
+What is live in the demo build: the demo app (`client-bryan/demo`, Isabella's screens with Boston GIS maps) running locally against real MBTA stations and live trains from Tiger Data, with demo placeholders (sponsors, offers, labels). A rider can tap in, ride and have the ride verified against the real MBTA schedule (a spoofed tap-out is rejected); points come from game-engine in demo mode. What is not built: the check-in screen has no approved design, and friends, leaderboard, quests and redemptions have no screens. Rider data is synthetic. See docs/REHEARSAL.md for the timed run sheet.
+
 | Time | Beat | Notes |
 |---|---|---|
 | 0:00 | Hook and problem | Use the 30-second hook above |
-| 0:30 | **[Web app: Home]** the Park Street scene with a real fact and rank (sign in with a sandbox name first); check-in is a plain stub with no design | Built from `design/canvas`; say it is a demo |
-| 1:00 | **[Web app: Explore]** demo spots, owner filter sheet (Sample spots show the labels) | UI from `design/`; data from the nearby endpoint; use the fictional "Sample ... (demo)" spots for label filters |
-| 1:30 | **[PLACEHOLDER: live data moment]** vehicles on a line right now | Real MBTA feed via the collector; TODO: pick the line and screen when the UI exists |
+| 0:30 | **[Demo app: Loading, Home]** fun facts, then the live Boston map with stations and trains; 3D toggle | Needs internet for map tiles; say it is a demo |
+| 1:00 | **[Demo app: tap in, Ride there]** verified against the real schedule, points; then a spoofed tap-out rejected | The tap-in sheet and stamp are a proposal, not in the approved canvas |
+| 1:30 | **Live data moment:** trains on the Home map, vehicles from the MBTA feed our collector stores in Tiger Data | Check `last_vehicle_at` on data-platform `/health` first |
 | 2:00 | Tiger Data: compression and continuous aggregate numbers | Read from the generated block above |
-| 2:30 | **[Web app: Profile]** real rank and demo offers; redemption has no design yet (stub) | UI from `design/`; say clearly that offers are demo placeholders |
+| 2:30 | **[Demo app: Explore, user page]** fictional demo businesses and perks, rank and points | Say clearly that offers are demo placeholders |
 | 2:50 | Close: what we would do next | More lines, tourist layer, a possible sponsor program (not pursued now) |
 
 ## Q&A prep
