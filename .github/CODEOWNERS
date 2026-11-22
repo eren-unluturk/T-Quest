@@ -1,21 +1,21 @@
 # Handles are placeholders until team.json is filled in. Mirrors team.json "paths".
-/data-platform/                         @TODO-eren
-/insights-sponsors/                     @TODO-eren
+/data-platform/                         @eren-unluturk
+/insights-sponsors/                     @eren-unluturk
 /game-engine/                           @tobiolawale
-/client-bryan/                          @TODO-bryan
+/client-bryan/                          @bryanmartinezzz
 /client-isabella/                       @isardzmrt
-/design/                                @TODO-bryan @isardzmrt
-/contracts/db/                          @TODO-eren
-/contracts/api/data-platform.yaml       @TODO-eren
-/contracts/api/insights-sponsors.yaml   @TODO-eren
+/design/                                @bryanmartinezzz @isardzmrt
+/contracts/db/                          @eren-unluturk
+/contracts/api/data-platform.yaml       @eren-unluturk
+/contracts/api/insights-sponsors.yaml   @eren-unluturk
 /contracts/api/game-engine.yaml         @tobiolawale
-/contracts/events/                      @TODO-eren @tobiolawale @TODO-bryan @isardzmrt
-/scripts/                               @TODO-eren
-/.githooks/                              @TODO-eren
-/.claude-template/                       @TODO-eren
-/.vscode/                                @TODO-eren
-/tests/                                  @TODO-eren
-/.github/                               @TODO-eren
-/team.json                              @TODO-eren
-/TEAM.md                                @TODO-eren
-/*                                      @TODO-eren
+/contracts/events/                      @eren-unluturk @tobiolawale @bryanmartinezzz @isardzmrt
+/scripts/                               @eren-unluturk
+/.githooks/                              @eren-unluturk
+/.claude-template/                       @eren-unluturk
+/.vscode/                                @eren-unluturk
+/tests/                                  @eren-unluturk
+/.github/                               @eren-unluturk
+/team.json                              @eren-unluturk
+/TEAM.md                                @eren-unluturk
+/*                                      @eren-unluturk
