@@ -139,7 +139,7 @@ All of this exists in `data-platform/migrations/`.
 | data-platform API | Read API for stops, routes, lines, vehicles, predictions, alerts, travel and `/analytics/system` (live subway snapshot from the continuous aggregate); contract published | | |
 | insights-sponsors | Content, offers, rank tiers, physical-reward catalog, nearby spots, tourist content on Postgres; faves endpoints; contract published | Consent, place visits, analytics, recommendations still on the in-memory backend | Move those to Postgres; community quests |
 | game-engine | Rules, in-memory and Postgres stores, contract published, shared auth and hardening (optional prod mode) | | Delay and cancellation notifications |
-| Front end | Approved design canvas in `design/canvas/`; `web/` React + Vite app with the designed screens, the GIS maps and the Analytics tab, and stubs for the rest | Designs for the stub screens; Isabella to review the Analytics tab | Public hosting (future, untested) |
+| Front end | Approved design canvas in `design/canvas/`; `web/` React + Vite app with the designed screens, the GIS maps and the Analytics tab, and stubs for the rest | Designs for the stub screens | Public hosting (future, untested) |
 
 ## Screenshots
 Taken from the React app (`node scripts/shoot-web.mjs`) running locally against our Tiger Data database, with a sandbox username. The check-in screen has no approved design yet (Home has a tap-in button that is a proposal), and friends, leaderboard, quests and redemptions have no screens. The Analytics tab was designed by the admin to match the canvas (see [docs/APP_SCOPE.md](docs/APP_SCOPE.md)).

@@ -33,7 +33,7 @@ No Figma export, no login, check-in, friends, leaderboard, quests, redemption or
 | Profile | game-engine `GET /me/rank`, `GET /me/points`; insights `GET /rank-tiers`, `GET /offers?rank=`, `/stops/{id}/nearby` (sponsor names) |
 
 ## Analytics tab (authored by the admin, not drawn by Isabella)
-Added 2026-11-22 as a fourth tab. `design/canvas/Analytics.dc.html` and `design/icons/nav-analytics.svg` were authored by the admin to match the approved canvas: same tokens (`design/tokens/colors.json`), fonts (Space Grotesk, Inter, Caveat, Fredoka), card radius and offset shadow, pill style and bubble nav icon. The nav in Home, Explore, Traveled and Profile was changed from three to four columns (`design/canvas/*.dc.html`), then `web/scripts/port-design.mjs` regenerated the components. Isabella should review it.
+Added 2026-11-22 as a fourth tab. `design/canvas/Analytics.dc.html` and `design/icons/nav-analytics.svg` were authored by the admin to match the approved canvas: same tokens (`design/tokens/colors.json`), fonts (Space Grotesk, Inter, Caveat, Fredoka), card radius and offset shadow, pill style and bubble nav icon. The nav in Home, Explore, Traveled and Profile was changed from three to four columns (`design/canvas/*.dc.html`), then `web/scripts/port-design.mjs` regenerated the components. Isabella reviewed and approved it.
 
 | Block | Label on screen | Data |
 |---|---|---|

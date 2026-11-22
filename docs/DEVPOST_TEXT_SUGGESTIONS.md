@@ -16,11 +16,11 @@ Add after "Explore":
 - The same continuous aggregate that gave the 57.6x speedup in our benchmark now powers the live Analytics tab, so the number is not just a benchmark: the app reads from it.
 
 ## "Challenges" (optional bullet)
-- Designing a screen with no existing design: the admin authored the Analytics tab and its nav icon from the approved canvas tokens and verified with a before/after screenshot diff that no existing screen changed except the nav. It still needs Isabella's review.
+- Designing a screen with no existing design: the admin authored the Analytics tab and its nav icon from the approved canvas tokens and verified with a before/after screenshot diff that no existing screen changed except the nav. Isabella reviewed and approved it.
 - The hour-of-day chart is thin until the collector has run for more days; the screen says how many hours and days it covers.
 
 ## "What's next" (add)
-- Review of the Analytics tab by the designer, more days of collected data for the hour-of-day view, and rider insights computed from real rides once there are real riders.
+- More days of collected data for the hour-of-day view, and rider insights computed from real rides once there are real riders.
 
 ## Image gallery
 Upload the new screenshots from `docs/screenshots/` (all eight). Suggested order: `07-analytics.png`, `02-home.png`, `08-analytics-insights.png`, `03-traveled.png`, `04-explore.png`, `06-profile.png`, `05-faves.png`, `01-loading.png`. Suggested captions:

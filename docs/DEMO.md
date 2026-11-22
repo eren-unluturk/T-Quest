@@ -34,7 +34,7 @@ The services run in dev mode (the sandbox username is the bearer token; no `TOKE
 | Profile | Rank, points and demo perks | game-engine, insights-sponsors |
 | **Analytics** | **Live MBTA data:** vehicles per subway line right now, active alerts and lines affected, feed freshness; vehicle reports per hour per line over the last hours; busiest and quietest hour and line. **Demo rider data:** stops collected, home line, points, leaderboard place | data-platform `GET /analytics/system` (from `vehicles` and the `vehicles_route_5m` aggregate); insights-sponsors `/analytics/me`; game-engine `/me/collection`, `/me/rank`, `/leaderboards` |
 
-**Stubs (no approved design yet):** sign in, check in, friends, leaderboard, quests, redemptions. **Analytics** was designed by the admin to match the canvas and still needs Isabella's review. The tap-in sheet, ride stamp and Ethnic Boston sheet are proposals; the Ethnic Boston wording is unconfirmed (issue #45), so do not present it as verified.
+**Stubs (no approved design yet):** sign in, check in, friends, leaderboard, quests, redemptions. **Analytics** was designed by the admin to match the canvas and was reviewed and approved by Isabella. The tap-in sheet, ride stamp and Ethnic Boston sheet are proposals; the Ethnic Boston wording is unconfirmed (issue #45), so do not present it as verified.
 
 ## Known limits
 - game-engine runs in its in-memory mode: points and ranks live in the process, reset when it restarts, and nothing is written to the database. In that mode it only scores Park Street, Downtown Crossing, Harvard, Alewife and South Station; a verified ride to any other station earns no points. A repeat ride to a stop within 30 minutes also earns none. Restart the demo (or just game-engine) to reset.

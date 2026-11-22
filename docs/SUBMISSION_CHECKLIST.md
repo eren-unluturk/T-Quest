@@ -21,7 +21,7 @@
 - [ ] Stop the collector only when you decide to (you do this)
 - [ ] Watch the new video, then upload it to YouTube (unlisted) if the agent did not, and put the link on Devpost (you do this; see docs/DEVPOST_TEXT_SUGGESTIONS.md)
 - [ ] Approve and apply the Devpost text suggestions in `docs/DEVPOST_TEXT_SUGGESTIONS.md` (you do this)
-- [ ] Ask Isabella to review the Analytics tab design (you do this)
+- [x] Isabella reviewed and approved the Analytics tab design
 - [ ] Rehearse the 3-minute demo end to end with preflight green (you do this)
 - [ ] Confirm every teammate has pulled main and can run `node scripts/demo-up.mjs` (you do this)
 - [ ] Get the check-in screen design from Bryan and Isabella (currently a stub), or decide to demo without it (you do this)
