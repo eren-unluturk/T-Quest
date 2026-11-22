@@ -38,6 +38,7 @@ const SCREENS = {
     ['GET', 'is', '/recommendations'], ['GET', 'is', '/offers?stop_id=place-harsq']],
   Faves: [['GET', 'is', '/me/faves'], ['POST', 'is', '/me/faves/fact.pktrm.1', 204], ['DELETE', 'is', '/me/faves/fact.pktrm.1', 204]],
   Profile: [['GET', 'ge', '/me/rank'], ['GET', 'is', '/rank-tiers'], ['GET', 'is', '/offers?rank=3']],
+  Analytics: [['GET', 'dp', '/analytics/system?hours=6'], ['GET', 'is', '/analytics/me'], ['GET', 'ge', '/me/collection'], ['GET', 'ge', '/leaderboards']],
 };
 
 const AUTH = { Authorization: 'Bearer connect-check-user' };

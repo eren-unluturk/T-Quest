@@ -10,7 +10,7 @@ Add after "Explore":
 - **Analytics (live MBTA data):** a tab that shows what the T is doing right now, computed from the data we collect: vehicles per subway line, active alerts and which lines they affect, vehicle reports per hour for each line over the last hours, and the busiest and quietest hours and lines. These come from a continuous aggregate in Tiger Data. A separate block shows demo rider insights (stops collected, home line, points, leaderboard place), clearly labeled as demo data from synthetic riders, not real people.
 
 ## "How we built it" (add to the Tiger Data bullet)
-- The Analytics tab reads one new endpoint, `GET /analytics/system`, which runs a handful of read-only queries against the `vehicles_route_5m` continuous aggregate and the live `vehicles` table in a single database round trip (about 225 ms warm from a laptop to Tiger Cloud).
+- The Analytics tab reads one new endpoint, `GET /analytics/system`, which runs a handful of read-only queries against the `vehicles_route_5m` continuous aggregate and the live `vehicles` table in a single database round trip.
 
 ## "Tiger Data results" (keep as is; optional sentence)
 - The same continuous aggregate that gave the 84.2x speedup in our benchmark now powers the live Analytics tab, so the number is not just a benchmark: the app reads from it.

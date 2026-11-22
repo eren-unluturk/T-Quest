@@ -44,7 +44,7 @@ Added 2026-11-22 as a fourth tab. `design/canvas/Analytics.dc.html` and `design/
 
 If the rider services fail, the live blocks still show and the rider block says it is unavailable. All numbers come from API responses; none is hard-coded.
 
-**Visual-diff check (2026-11-22).** `node scripts/shoot-web.mjs` took 390x844 screenshots of every existing screen before and after the change and `python scripts/visual-diff.py` compared them. Everything above the bottom nav matched (0.00% of pixels differ on Loading, Traveled, Explore, Faves and Profile; 0.01% on Home, one moving train dot on the live map). The only changes are in the nav region (18% to 27% of pixels there). Analytics was compared side by side with Explore and Profile for header, margins, card and pill style.
+**Visual-diff check (2026-11-22).** `node scripts/shoot-web.mjs` took 390x844 screenshots of every existing screen before and after the change and `python scripts/visual-diff.py` compared them. Everything above the bottom nav matched (no pixel differences on Loading, Traveled, Explore, Faves and Profile; on Home only a moving train dot on the live map). The only changes are in the nav region. Analytics was compared side by side with Explore and Profile for header, margins, card and pill style.
 
 ## Stubs (no design yet; plain page that says "No design yet" and lists endpoints)
 | Screen | Endpoints it will use |
