@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>T-Quest demo</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23FFC93C' stroke='%231D3557' stroke-width='2'/%3E%3Ctext x='12' y='17' font-size='13' font-family='Arial' font-weight='700' fill='%231D3557' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@600;700&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="device">
+    <main id="screen"></main>
+    <nav id="nav" class="tq-nav" aria-label="Main">
+      <a href="#/home" data-tab="home" aria-label="Home"><span class="blob" style="background:#D3EDCB"></span><svg class="tq-spark" width="16" height="16" viewBox="0 0 34 34" fill="none" aria-hidden="true"><path d="M17 2l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#FFC93C" stroke="#1D3557" stroke-width="3" stroke-linejoin="round"/></svg><span class="tq-ic" data-icon="nav-home"></span></a>
+      <a href="#/explore" data-tab="explore" aria-label="Explore"><span class="blob" style="background:#FFE7A0"></span><svg class="tq-spark" width="16" height="16" viewBox="0 0 34 34" fill="none" aria-hidden="true"><path d="M17 2l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#FFC93C" stroke="#1D3557" stroke-width="3" stroke-linejoin="round"/></svg><span class="tq-ic" data-icon="nav-explore"></span></a>
+      <a href="#/traveled" data-tab="traveled" aria-label="Traveled"><span class="blob" style="background:#CFE8F0"></span><svg class="tq-spark" width="16" height="16" viewBox="0 0 34 34" fill="none" aria-hidden="true"><path d="M17 2l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#FFC93C" stroke="#1D3557" stroke-width="3" stroke-linejoin="round"/></svg><span class="tq-ic" data-icon="nav-traveled"></span></a>
+    </nav>
+  </div>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
