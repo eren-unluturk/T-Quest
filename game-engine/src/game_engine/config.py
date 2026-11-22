@@ -5,6 +5,8 @@ VEHICLE_SEEN_WITHIN_S = 300
 VEHICLE_RADIUS_M = 300  # a live vehicle must be this close to the stop
 MAX_SPEED_KMH = 80   # two check-ins farther apart than this speed allows are refused (too_fast)
 SPEED_SLACK_M = 150  # GPS slack added to the allowed distance
+MAX_GPS_ACCURACY_M = 50  # a reported accuracy worse than this is refused (poor_gps)
+MIN_SAMPLES_FOR_JITTER_CHECK = 3  # this many identical GPS samples in a row look faked (suspicious_gps)
 COOLDOWN_PER_STOP_S = 1800
 
 FIRST_VISIT_POINTS = 20

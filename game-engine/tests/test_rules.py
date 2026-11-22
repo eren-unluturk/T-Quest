@@ -98,6 +98,26 @@ class SpeedTests(unittest.TestCase):
         self.assertTrue(validate_checkin(previous_checkin=(NOW - timedelta(minutes=30), 42.3564, -71.0624), **args).ok)
 
 
+class GpsQualityTests(unittest.TestCase):
+    def test_accuracy(self):
+        self.assertEqual(base(accuracy_m=80).reason, "poor_gps")
+        self.assertEqual(base(accuracy_m=80).http_status, 422)
+        self.assertTrue(base(accuracy_m=20).ok)
+        self.assertTrue(base(accuracy_m=50).ok)       # exactly 50 m is allowed
+        self.assertTrue(base().ok)                    # not reported: no check
+
+    def test_identical_samples_look_faked(self):
+        p = PARK
+        self.assertEqual(base(samples=[p, p, p]).reason, "suspicious_gps")
+        self.assertEqual(base(samples=[p, p, p, p, p]).reason, "suspicious_gps")
+        self.assertTrue(base(samples=[p, (p[0] + 0.00001, p[1]), (p[0], p[1] - 0.00001)]).ok)   # real GPS jitters
+        self.assertTrue(base(samples=[p, p]).ok)      # too few samples to judge
+        self.assertTrue(base(samples=None).ok)
+
+    def test_far_still_wins_over_samples(self):
+        self.assertEqual(base(user_lat=PARK[0] + 0.002, samples=[PARK, PARK, PARK]).reason, "too_far")
+
+
 class RankInfoTests(unittest.TestCase):
     def test_names_and_next(self):
         info = rank_info(0)

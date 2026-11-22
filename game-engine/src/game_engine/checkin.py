@@ -19,7 +19,7 @@ def distance_m(lat1, lon1, lat2, lon2):
 @dataclass
 class CheckinResult:
     ok: bool
-    reason: str = "ok"   # ok | no_consent | too_far | no_vehicle | cooldown | too_fast
+    reason: str = "ok"   # ok | no_consent | too_far | no_vehicle | cooldown | too_fast | poor_gps | suspicious_gps
     http_status: int = 201
 
 
@@ -37,17 +37,25 @@ def too_fast(prev, now, lat, lon):
 
 
 def validate_checkin(*, consent, user_lat, user_lon, stop_lat, stop_lon, now,
-                     last_vehicle_seen_at, last_checkin_at, previous_checkin=None):
+                     last_vehicle_seen_at, last_checkin_at, previous_checkin=None,
+                     accuracy_m=None, samples=None):
     """Return a CheckinResult. Times are datetimes; the last_* values may be None.
 
     previous_checkin is (at, lat, lon) of the user's latest check-in anywhere, or None to skip the speed check.
+    accuracy_m (optional): reported GPS accuracy in metres; worse than MAX_GPS_ACCURACY_M is refused (poor_gps).
+    samples (optional): list of (lat, lon) GPS readings over a few seconds; real GPS jitters, so several
+    byte-identical readings are refused (suspicious_gps).
     """
     if not consent:
         return CheckinResult(False, "no_consent", 403)
     if last_checkin_at is not None and now - last_checkin_at < timedelta(seconds=config.COOLDOWN_PER_STOP_S):
         return CheckinResult(False, "cooldown", 409)
+    if accuracy_m is not None and accuracy_m > config.MAX_GPS_ACCURACY_M:
+        return CheckinResult(False, "poor_gps", 422)
     if distance_m(user_lat, user_lon, stop_lat, stop_lon) > config.MAX_DISTANCE_M:
         return CheckinResult(False, "too_far", 422)
+    if samples and len(samples) >= config.MIN_SAMPLES_FOR_JITTER_CHECK and len(set(samples)) == 1:
+        return CheckinResult(False, "suspicious_gps", 422)
     if last_vehicle_seen_at is None or now - last_vehicle_seen_at > timedelta(seconds=config.VEHICLE_SEEN_WITHIN_S):
         return CheckinResult(False, "no_vehicle", 422)
     if too_fast(previous_checkin, now, user_lat, user_lon):

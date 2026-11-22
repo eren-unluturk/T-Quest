@@ -168,13 +168,14 @@ class PgStore:
         oid = _uuid_or_none(offer_id)
         if not oid:
             return None
-        row = self._q("select id, store_id, title, min_rank, points_cost, stock, active, starts_at, ends_at "
-                      "from offers where id=%s", (oid,), one=True)
+        row = self._q("select id, store_id, title, min_rank, points_cost, stock, active, starts_at, ends_at, "
+                      "required_badge_id, per_user_limit from offers where id=%s", (oid,), one=True)
         if not row or not row[6]:
             return None
         return {"id": str(row[0]), "store_id": str(row[1]) if row[1] else None, "title": row[2],
                 "min_rank": row[3] or 1, "points_cost": row[4] or 0, "stock": row[5],
-                "starts_at": row[7], "ends_at": row[8]}
+                "starts_at": row[7], "ends_at": row[8],
+                "required_badge_id": row[9], "per_user_limit": row[10]}
 
     # users (demo users only: the database name is "demo_" + client name)
     def _uid(self, user):
@@ -324,6 +325,9 @@ class PgStore:
         uid = self._uid(user)
         if user_rank < offer["min_rank"]:
             raise RedemptionError("rank_too_low", 403)
+        need = offer.get("required_badge_id")
+        if need and need not in self.badges(user):
+            raise RedemptionError("badge_required", 403)
         if offer["starts_at"] and now < _naive(offer["starts_at"]):
             raise RedemptionError("not_started", 409)
         if offer["ends_at"] and now > _naive(offer["ends_at"]):
@@ -337,6 +341,12 @@ class PgStore:
                           (uid, offer["id"], week_ago), one=True)
         if row:
             raise RedemptionError("weekly_store_limit", 409)
+        limit = offer.get("per_user_limit")
+        if limit:
+            mine = self._q("select count(*) from redemptions where user_id=%s and offer_id=%s "
+                           "and status in ('issued','claimed')", (uid, offer["id"]), one=True)[0]
+            if mine >= limit:
+                raise RedemptionError("per_user_limit", 409)
         if offer["stock"] is not None:
             used = self._q("select count(*) from redemptions where offer_id=%s and status in ('issued','claimed')",
                            (offer["id"],), one=True)[0]

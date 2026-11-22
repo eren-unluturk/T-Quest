@@ -106,6 +106,43 @@ class AppTests(unittest.TestCase):
         # off by default in memory mode
         self.assertEqual(self.c.post("/checkins", json=harvard, headers=H("cy")).status_code, 201)
 
+    def test_gps_quality_fields(self):
+        r = self.c.post("/checkins", json=dict(PARK, accuracy_m=80), headers=H("gps1"))
+        self.assertEqual((r.status_code, r.json()["detail"]), (422, "poor_gps"))
+        same = {"lat": PARK["lat"], "lon": PARK["lon"]}
+        r = self.c.post("/checkins", json=dict(PARK, samples=[same, same, same]), headers=H("gps2"))
+        self.assertEqual((r.status_code, r.json()["detail"]), (422, "suspicious_gps"))
+        jitter = [{"lat": PARK["lat"] + d, "lon": PARK["lon"] - d} for d in (0, 0.00001, 0.00002)]
+        ok = self.c.post("/checkins", json=dict(PARK, accuracy_m=12, samples=jitter), headers=H("gps3"))
+        self.assertEqual(ok.status_code, 201, ok.text)
+        too_many = [same] * 11
+        self.assertEqual(self.c.post("/checkins", json=dict(PARK, samples=too_many), headers=H("gps4")).status_code, 422)
+
+    def test_offer_needs_badge(self):
+        """o3 needs the Red Line badge: refused until the (fake) Red Line is complete."""
+        r = self.c.post("/redemptions", json={"offer_id": "o3"}, headers=H("red"))
+        self.assertEqual((r.status_code, r.json()["detail"]), (403, "badge_required"))
+        stops = {"alewife": (42.3954, -71.1425), "harvard": (42.3736, -71.1190), "park": (42.3564, -71.0624),
+                 "downtown": (42.3555, -71.0602), "south-station": (42.3519, -71.0552)}
+        for sid, (lat, lon) in stops.items():
+            body = {"stop_id": sid, "lat": lat, "lon": lon, "client_time": "2026-11-21T12:00:00"}
+            self.assertEqual(self.c.post("/checkins", json=body, headers=H("red")).status_code, 201)
+        self.assertIn("line-red-complete", self.c.get("/me/collection", headers=H("red")).json()["badges"])
+        self.assertEqual(self.c.post("/redemptions", json={"offer_id": "o3"}, headers=H("red")).status_code, 201)
+
+    def test_per_user_limit_in_the_store(self):
+        from datetime import datetime, timedelta
+        from game_engine.redemption import RedemptionError
+        st = appmod.get_store()
+        st.add_badge("lim", "line-red-complete", datetime(2026, 11, 1), "test")
+        offer = st.offer("o3")
+        now = datetime(2026, 11, 21, 12)
+        st.issue_redemption(user="lim", offer_id="o3", offer=offer, user_rank=1, balance=0, now=now)
+        st.issue_redemption(user="lim", offer_id="o3", offer=offer, user_rank=1, balance=0, now=now + timedelta(days=8))
+        with self.assertRaises(RedemptionError) as c:
+            st.issue_redemption(user="lim", offer_id="o3", offer=offer, user_rank=1, balance=0, now=now + timedelta(days=16))
+        self.assertEqual((c.exception.reason, c.exception.http_status), ("per_user_limit", 409))
+
     def test_spot_visit(self):
         r = self.c.post("/spots/demo-cafe/visit", json={}, headers=H("ann"))
         self.assertEqual(r.status_code, 201, r.text)

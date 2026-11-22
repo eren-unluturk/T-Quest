@@ -56,5 +56,30 @@ class CompensationTests(unittest.TestCase):
         self.assertEqual(self.pay(already_paid_alerts={"a1"}), 0)
 
 
+class SchedulerTests(unittest.TestCase):
+    def test_background_loop_runs_and_survives_errors(self):
+        import threading
+        from game_engine.delay_job import start_background
+        calls, logs = [], []
+        enough = threading.Event()
+
+        def runner():
+            calls.append(1)
+            if len(calls) == 2:
+                raise RuntimeError("database hiccup")
+            if len(calls) >= 4:
+                enough.set()
+            return {"paid": 1 if len(calls) == 3 else 0}
+
+        stop = start_background(0.02, runner=runner, log=logs.append)
+        self.assertTrue(enough.wait(3))           # kept running after the error
+        stop.set()
+        n = len(calls)
+        threading.Event().wait(0.15)
+        self.assertLessEqual(len(calls) - n, 1)   # stops when asked
+        self.assertTrue(any("database hiccup" in m for m in logs))
+        self.assertTrue(any("paid" in m for m in logs))
+
+
 if __name__ == "__main__":
     unittest.main()

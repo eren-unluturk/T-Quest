@@ -269,6 +269,29 @@ class PgTests(unittest.TestCase):
             self.assertEqual((r.status_code, r.json()["detail"]), (422, "too_fast"))
             self.assertEqual(self.store.last_checkin("pytest-fast")[1:], (a[1], a[2]))
 
+    def test_offer_needs_badge_and_per_user_limit(self):
+        """Offer rules from the offers table: required_badge_id and per_user_limit (rolled back)."""
+        sponsor = self.conn.execute("select id from sponsors limit 1").fetchone()
+        if not sponsor:
+            self.skipTest("no sponsor in the database")
+        oid = self.conn.execute(
+            "insert into offers (sponsor_id, title, kind, min_rank, discount_pct, active, required_badge_id, per_user_limit) "
+            "values (%s, 'pytest perk', 'discount', 1, 5, true, 'freedom-trail', 1) returning id", (sponsor[0],)).fetchone()[0]
+        u = "pytest-perk"
+        r = self.c.post("/redemptions", json={"offer_id": str(oid)}, headers=H(u))
+        self.assertEqual((r.status_code, r.json()["detail"]), (403, "badge_required"))
+        from datetime import datetime
+        self.store.add_badge(u, "freedom-trail", datetime(2026, 11, 21, 12), "test")
+        ok = self.c.post("/redemptions", json={"offer_id": str(oid)}, headers=H(u))
+        self.assertEqual(ok.status_code, 201, ok.text)
+        # same week: the weekly rule answers first
+        self.assertEqual(self.c.post("/redemptions", json={"offer_id": str(oid)}, headers=H(u)).json()["detail"],
+                         "weekly_store_limit")
+        # a week later the per-user limit of 1 answers
+        self.conn.execute("update redemptions set issued_at = issued_at - interval '8 days' where offer_id = %s", (oid,))
+        r = self.c.post("/redemptions", json={"offer_id": str(oid)}, headers=H(u))
+        self.assertEqual((r.status_code, r.json()["detail"]), (409, "per_user_limit"))
+
     def test_unknown_stop_and_far(self):
         self.assertEqual(self.c.post("/checkins", json=dict(self.stop, stop_id="nope-nope"),
                                      headers=H("pytest-bob")).status_code, 404)
