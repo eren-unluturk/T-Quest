@@ -80,6 +80,7 @@ Stops, routes, schedules, live vehicles, predictions and alerts are **real** MBT
 - Setup: [docs/ONBOARDING.md](docs/ONBOARDING.md).
 - Collector (from `data-platform/`, needs `.env` with the database URL and MBTA key): `python -m data_platform.migrate`, `python -m data_platform.load_static`, `python -m data_platform.collector`.
 - Tests: `node --test tests/` (repo tooling), `pytest -q` inside `data-platform/` and `insights-sponsors/`.
+- Front-end wiring: [docs/FRONTEND_INTEGRATION.md](docs/FRONTEND_INTEGRATION.md) and `node scripts/connect-check.mjs`.
 - Demo: `node scripts/demo.mjs` (see [docs/DEMO.md](docs/DEMO.md)).
 - Docs refresh: `node scripts/sync-docs.mjs` (also the VS Code task "Sync docs").
 

@@ -144,6 +144,6 @@ def my_travel(authorization: Annotated[str | None, Header()] = None):
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(401, "missing bearer token")
     uid = resolve_user(authorization[7:].strip())
-    if uid is None:
-        raise HTTPException(404, "unknown user")
+    if uid is None:  # a rider with no events yet: zero state, so a new account does not break the screen
+        return build_travel(UUID(int=0))
     return build_travel(uid)

@@ -60,4 +60,5 @@ def test_travel_new_rider_has_zero_miles_and_all_lines(db_conn):
 def test_travel_auth_and_unknown_user():
     c = TestClient(app)
     assert c.get("/me/travel").status_code == 401
-    assert c.get("/me/travel", headers={"Authorization": "Bearer nobody_" + uuid.uuid4().hex}).status_code == 404
+    r = c.get("/me/travel", headers={"Authorization": "Bearer nobody_" + uuid.uuid4().hex})
+    assert r.status_code == 200 and r.json()["total_miles"] == 0 and r.json()["traveled_segments"] == []

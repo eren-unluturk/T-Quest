@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .routes import catalog, consent, content, insights, place_visits, spots, faves
@@ -6,6 +7,11 @@ from .routes import catalog, consent, content, insights, place_visits, spots, fa
 
 def create_app() -> FastAPI:
     app = FastAPI(title="T-Quest insights-sponsors", version="0.1.0")
+    origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()] or ["*"]
+    app.add_middleware(
+        CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"], allow_credentials=False,
+    )
     app.include_router(content.router)
     app.include_router(catalog.router)
     app.include_router(consent.router)

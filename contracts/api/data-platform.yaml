@@ -142,7 +142,7 @@ paths:
     get:
       summary: Miles per line, traveled segments and unlocked spots for the signed-in rider
       description: |
-        Dev auth: the bearer token is the username (or user uuid). A segment counts as traveled when two
+        Dev auth: the bearer token is the username (or user uuid). An unknown user gets the zero state (200). A segment counts as traveled when two
         consecutive check-ins or ride events on the same route, at most 3 hours apart, cover it. Miles are
         straight-line distances between consecutive stops (approximate). per_line lists every subway and
         light-rail line, with 0 for lines not ridden. Branching lines are approximate. unlocked_spots come
@@ -155,7 +155,6 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Travel'}
         '401': {description: Missing bearer token}
-        '404': {description: Unknown user}
 components:
   schemas:
     LineMiles:

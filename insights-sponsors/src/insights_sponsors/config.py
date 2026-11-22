@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     port: int = Field(default=8002, validation_alias="INSIGHTS_SPONSORS_PORT")
     auth_mode: Literal["dev", "strict"] = "dev"
     data_backend: Literal["memory", "postgres"] = "memory"
+    # Comma-separated browser origins allowed to call this API (the web app's host). "*" is fine in dev
+    # because auth is a bearer header, not cookies.
+    cors_origins: str = "*"
 
 
 settings = Settings()
