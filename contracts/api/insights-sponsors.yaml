@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
   title: T-Quest insights-sponsors API
-  version: 0.6.0
+  version: 0.7.0
   x-changelog:
+    - '0.7.0: add GET /me/faves, POST and DELETE /me/faves/{fact_id}; Spot.fun_fact (demo, hand-written); GET /stops/{id}/facts falls back to a general Boston fact with fallback=true and a note'
     - '0.6.0: rank tiers follow game-engine 8 named ranks; RankTier gains name, avatar_key, min_lifetime_points; min_rank maximum is 8'
     - '0.5.0: add GET /stops/{stop_id}/content and GET /loading-facts (open-source content with source_url, license, attribution); TrailSite gains source_url and attribution'
     - '0.4.0: add GET /stops/{stop_id}/nearby, /categories, /labels, /spots/{spot_id}, /rank-tiers; /offers gains rank and placement filters; Offer.store_id nullable and Offer.demo added'
@@ -103,6 +104,32 @@ paths:
               schema:
                 type: array
                 items: {$ref: '#/components/schemas/LoadingFact'}
+  /me/faves:
+    get:
+      summary: Faved facts, newest first (fact text, place, attribution)
+      responses:
+        '200':
+          description: Faved facts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Fave'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /me/faves/{fact_id}:
+    parameters:
+      - {name: fact_id, in: path, required: true, schema: {type: string}, description: 'id of a loading fact, content item, Freedom Trail site or stop fact'}
+    post:
+      summary: Fave a fact
+      responses:
+        '204': {description: Faved (idempotent)}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {description: Unknown fact}
+    delete:
+      summary: Remove a fave
+      responses:
+        '204': {description: Removed (idempotent)}
+        '401': {$ref: '#/components/responses/Unauthorized'}
   /fun-facts:
     get:
       summary: Loading-screen fun facts
@@ -419,6 +446,18 @@ components:
         application/json:
           schema: {$ref: '#/components/schemas/Error'}
   schemas:
+    Fave:
+      type: object
+      required: [fact_id, kind, text, attribution, faved_at]
+      properties:
+        fact_id: {type: string}
+        kind: {type: string, description: 'loading_fact, content_item or stop_fact'}
+        text: {type: string}
+        place: {type: string, nullable: true}
+        line: {type: string, nullable: true}
+        attribution: {type: string}
+        source_url: {type: string, nullable: true}
+        faved_at: {type: string, format: date-time}
     ContentItem:
       type: object
       required: [id, title, source_id, source_url, license, attribution, commercial_ok]
@@ -479,6 +518,7 @@ components:
         sponsor_id: {type: string, nullable: true}
         distance_m: {type: number, nullable: true}
         source: {type: string}
+        fun_fact: {type: string, nullable: true, description: 'hand-written demo fact; fictional for Sample spots'}
         labels:
           type: array
           items: {$ref: '#/components/schemas/SpotLabel'}
@@ -556,6 +596,8 @@ components:
         facts:
           type: array
           items: {$ref: '#/components/schemas/Fact'}
+        fallback: {type: boolean, description: 'true when no stop-specific facts exist and a general Boston fact is returned instead'}
+        note: {type: string, nullable: true}
     StorePartner:
       type: object
       required: [id, name, category, lat, lon, nearest_stop_id, address]

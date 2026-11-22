@@ -1,5 +1,5 @@
 -- GENERATED FILE. Migrations in data-platform/migrations/ are the source of truth.
--- NOTE: this is a concatenation of migrations 0000 to 0011, NOT a pg_dump. It was built
+-- NOTE: this is a concatenation of migrations 0000 to 0012, NOT a pg_dump. It was built
 -- without a database. To replace it with a real dump, run from data-platform/:
 --   docker compose up -d; python -m data_platform.migrate
 --   docker compose exec db pg_dump -U postgres -d tquest --schema-only --no-owner > contracts-draft/db/schema.sql
@@ -1021,5 +1021,16 @@ CREATE TABLE IF NOT EXISTS loading_facts (
     source_url  text,
     attribution text NOT NULL,
     needs_verify boolean NOT NULL DEFAULT true
+);
+
+-- ===== migrations/0012_spot_fun_facts_faves.sql =====
+-- Per-spot demo fun fact (hand-written, our own wording) and faved facts. Owner: data-platform.
+ALTER TABLE nearby_spots ADD COLUMN IF NOT EXISTS fun_fact text;
+
+CREATE TABLE IF NOT EXISTS fact_faves (
+    user_key   text NOT NULL,          -- dev auth: the bearer token; no FK so it works before real accounts
+    fact_id    text NOT NULL,          -- loading_facts.id or content_items.id
+    created_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_key, fact_id)
 );
 

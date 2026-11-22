@@ -120,14 +120,14 @@ def run(conn) -> dict:
     for sp in spots["spots"]:
         cur.execute(
             """INSERT INTO nearby_spots (id, name, category_slug, address, lat, lon, demo_placeholder,
-                 sponsor_id, placement_type, active, source) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                 sponsor_id, placement_type, active, source, fun_fact) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name, category_slug=EXCLUDED.category_slug,
                  address=EXCLUDED.address, demo_placeholder=EXCLUDED.demo_placeholder,
                  sponsor_id=EXCLUDED.sponsor_id, placement_type=EXCLUDED.placement_type,
-                 active=EXCLUDED.active, source=EXCLUDED.source""",
+                 active=EXCLUDED.active, source=EXCLUDED.source, fun_fact=EXCLUDED.fun_fact""",
             (u(sp["id"]), sp["name"], sp["category"], sp["address"], sp["lat"], sp["lon"],
              sp["demo_placeholder"], u(sp["sponsor_id"]) if sp["sponsor_id"] else None,
-             sp["placement_type"], sp["active"], sp["source"]),
+             sp["placement_type"], sp["active"], sp["source"], sp.get("fun_fact")),
         )
         for link in sp["stops"]:
             if link["stop_id"] not in existing_stops:

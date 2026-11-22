@@ -7,6 +7,7 @@ from pathlib import Path
 from ..spots import CategoryRef, Spot, SpotLabel, public_labels
 from .ids import slug_to_uuid
 from ..models import (
+    Fave,
     ContentItem,
     LoadingFact,
     Category,
@@ -100,6 +101,7 @@ class MemoryRepository:
             ),
             key=lambda v: v.time,
         )
+        self._faves: dict[str, dict[str, datetime]] = {}
         self._consents: dict[tuple[str, str], Consent] = {}
         self._profiles: dict[str, tuple[int, set[str]]] = {}
 
@@ -183,6 +185,7 @@ class MemoryRepository:
             sponsor_id=raw["sponsor_id"],
             distance_m=distance_m,
             source=raw["source"],
+            fun_fact=raw.get("fun_fact"),
             offers=[],
             labels=[
                 SpotLabel(
@@ -223,6 +226,39 @@ class MemoryRepository:
         from ..ranks import RANKS
 
         return [dict(r) for r in RANKS]
+
+    def _fact_lookup(self, fact_id: str) -> dict | None:
+        for f in self._fun_facts:
+            if f.id == fact_id:
+                return dict(kind="loading_fact", text=f.body, place=None, line=None, source_url=None,
+                            attribution="Written by the T-Quest team. Verify before publishing.")
+        for t in self._trail:
+            if t.id == fact_id:
+                return dict(kind="content_item", text=t.blurb, place=t.name, line=None,
+                            source_url=t.source_url, attribution=t.attribution)
+        for stop_id, facts in self._facts.items():
+            for f in facts:
+                if f.id == fact_id:
+                    return dict(kind="stop_fact", text=f.body, place=self._stops[stop_id].name, line=None,
+                                source_url=f.source_url, attribution="Written by the T-Quest team. Verify before publishing.")
+        return None
+
+    def add_fave(self, user_id: str, fact_id: str) -> bool:
+        if self._fact_lookup(fact_id) is None:
+            return False
+        self._faves.setdefault(user_id, {}).setdefault(fact_id, datetime.now(timezone.utc))
+        return True
+
+    def remove_fave(self, user_id: str, fact_id: str) -> None:
+        self._faves.get(user_id, {}).pop(fact_id, None)
+
+    def faves(self, user_id: str) -> list[Fave]:
+        out = []
+        for fid, at in sorted(self._faves.get(user_id, {}).items(), key=lambda kv: kv[1], reverse=True):
+            info = self._fact_lookup(fid)
+            if info:
+                out.append(Fave(fact_id=fid, faved_at=at, **info))
+        return out
 
     def physical_rewards(self) -> list[PhysicalReward]:
         return list(self._rewards)

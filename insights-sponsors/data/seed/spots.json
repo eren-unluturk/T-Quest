@@ -90,7 +90,8 @@
           "distance_m": null
         }
       ],
-      "labels": []
+      "labels": [],
+      "fun_fact": "Demo placeholder near Fenway and Kenmore stations, used to show how a team sponsor and merch offer could look."
     },
     {
       "id": "spot.mintjulep",
@@ -119,7 +120,8 @@
           "verified_at": null,
           "verified_by": null
         }
-      ]
+      ],
+      "fun_fact": "Demo placeholder: a clothing boutique at 43 Brattle St in Cambridge, a short walk from Harvard station."
     },
     {
       "id": "spot.diesel",
@@ -148,7 +150,8 @@
           "verified_at": null,
           "verified_by": null
         }
-      ]
+      ],
+      "fun_fact": "Demo placeholder: a cafe at 257 Elm St in Somerville, a short walk from Davis station."
     },
     {
       "id": "spot.sample-noodle",
@@ -193,7 +196,8 @@
           "verified_at": "2026-11-21T12:00:00Z",
           "verified_by": "demo seed (fictional)"
         }
-      ]
+      ],
+      "fun_fact": "Fictional sample: its demo story says the noodle recipe is three generations old."
     },
     {
       "id": "spot.sample-books",
@@ -230,7 +234,8 @@
           "verified_at": "2026-11-21T12:00:00Z",
           "verified_by": "demo seed (fictional)"
         }
-      ]
+      ],
+      "fun_fact": "Fictional sample: its demo story says the shop has a shelf for every Red Line stop."
     },
     {
       "id": "spot.sample-roasters",
@@ -267,7 +272,8 @@
           "verified_at": "2026-11-21T12:00:00Z",
           "verified_by": "demo seed (fictional)"
         }
-      ]
+      ],
+      "fun_fact": "Fictional sample: its demo story says the beans are roasted in the back room each morning."
     },
     {
       "id": "spot.sample-taqueria",
@@ -312,7 +318,8 @@
           "verified_at": null,
           "verified_by": null
         }
-      ]
+      ],
+      "fun_fact": "Fictional sample: its demo story says the salsas are made fresh before opening."
     },
     {
       "id": "spot.sample-slice",
@@ -341,7 +348,8 @@
           "verified_at": "2026-11-21T12:00:00Z",
           "verified_by": "demo seed (fictional)"
         }
-      ]
+      ],
+      "fun_fact": "Fictional sample: its demo story says it is a short walk from the ballpark."
     },
     {
       "id": "spot.sample-fenway-cafe",
@@ -382,7 +390,8 @@
           "verified_at": "2026-11-21T12:00:00Z",
           "verified_by": "demo seed (fictional)"
         }
-      ]
+      ],
+      "fun_fact": "Fictional sample: its demo story says it serves a tea flight named after the Green Line."
     },
     {
       "id": "spot.sample-grocery",
@@ -411,7 +420,8 @@
           "verified_at": "2026-11-21T12:00:00Z",
           "verified_by": "demo seed (fictional)"
         }
-      ]
+      ],
+      "fun_fact": "Fictional sample: its demo story says the corner store restocks every morning."
     },
     {
       "id": "spot.sample-closed",
@@ -440,7 +450,8 @@
           "verified_at": "2026-11-21T12:00:00Z",
           "verified_by": "demo seed (fictional)"
         }
-      ]
+      ],
+      "fun_fact": null
     }
   ]
 }

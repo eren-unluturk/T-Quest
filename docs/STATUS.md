@@ -5,8 +5,8 @@
 Sources: agents' `.work/HANDOFF.md` and `ROADMAP.md`, git history, open issues. Roadmap checkboxes can lag the real state. Live checklist counts are in [PLAN.md](../PLAN.md).
 
 ## Done per agent
-- **data-platform (Eren):** migrations 0000-0011 applied and verified on a live Tiger Cloud database (`python -m data_platform.verify` passed). Real MBTA static data loaded, live collector available, read API, benchmarks in [TIGER_DATA_RESULTS.md](TIGER_DATA_RESULTS.md). Real-data compression figures: TODO: measure.
-- **insights-sponsors (Eren):** OpenAPI v0.5.0 published in `contracts/api/`. Postgres backend serves stops, offers, physical rewards, nearby spots (category and label filters) and tourist content. Content ingestion ran once (counts in [DATA_SOURCES.md](DATA_SOURCES.md)). Demo placeholders only; labels demonstrated on fictional sample spots.
+- **data-platform (Eren):** migrations 0000-0012; `GET /me/travel` (miles per line, traveled segments, unlocked spots from `visit` events) built and tested; applied and verified on a live Tiger Cloud database (`python -m data_platform.verify` passed). Real MBTA static data loaded, live collector available, read API, benchmarks in [TIGER_DATA_RESULTS.md](TIGER_DATA_RESULTS.md). Real-data compression figures: TODO: measure.
+- **insights-sponsors (Eren):** OpenAPI v0.5.0 published in `contracts/api/`. Postgres backend serves stops, offers, physical rewards, nearby spots (category and label filters) and tourist content. Content ingestion ran once from official public APIs (counts in [DATA_SOURCES.md](DATA_SOURCES.md)); faved facts, per-spot demo fun facts and a stop-fact fallback are built (contract v0.7.0). Demo placeholders only; labels demonstrated on fictional sample spots.
 - **game-engine (Tobi):** service and rules for check-in, points, ranks, redemption, badges, quests, friends, leaderboards, home line and delay compensation, with an in-memory mode and a Postgres store. Its roadmap file is empty; see its README.
 - **client-bryan, client-isabella:** no UI built; they wait on sketches and Figma in `design/`.
 
@@ -14,7 +14,7 @@ Sources: agents' `.work/HANDOFF.md` and `ROADMAP.md`, git history, open issues. 
 1. Consent, place visits, route analytics and recommendations in insights-sponsors still run in memory; moving them to Postgres is planned.
 2. data-platform: Dockerfile and compose services (015); re-measure compression on settled chunks (TODO: measure).
 3. Clients build from `design/` only.
-4. Confirm MHC/MAPC terms or drop that data; set a real contact in the ingest User-Agent (see DATA_SOURCES.md).
+4. Add a real public contact for corrections before any public launch (see DATA_SOURCES.md).
 5. Open attribution-history decision (#23, #24).
 
 ## Open questions

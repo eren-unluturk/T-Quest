@@ -1,4 +1,4 @@
-"""python -m ingest_content.run [--sources analyze-boston,mhc-macris,digital-commonwealth,freedom-trail-seed]
+"""python -m ingest_content.run [--sources analyze-boston,digital-commonwealth,freedom-trail-seed]
 Resumable (raw responses cached in data/raw, upserts keyed on source + external id). Prints counts only."""
 import argparse
 import json
@@ -44,10 +44,8 @@ def upsert(cur, item: dict) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--sources", default="freedom-trail-seed,analyze-boston,mhc-macris,digital-commonwealth")
+    ap.add_argument("--sources", default="freedom-trail-seed,analyze-boston,digital-commonwealth")
     want = ap.parse_args().sources.split(",")
-    seed_stops = json.loads((S.SEED / "stops.json").read_text(encoding="utf-8"))
-    station_ids = [x["id"] for x in seed_stops if x["id"].startswith("place-")]
     report: dict = {}
     with psycopg.connect(settings.database_url) as conn:
         cur = conn.cursor()
@@ -58,12 +56,9 @@ def main() -> None:
                    license=EXCLUDED.license, attribution=EXCLUDED.attribution,
                    commercial_ok=EXCLUDED.commercial_ok""",
                 (sid, s["name"], s["url"], s["license"], s["attribution"], s["commercial_ok"], s["notes"]))
-        stops = [(r[0], r[1], r[2]) for r in cur.execute(
-            "SELECT id, lat, lon FROM stops WHERE id = ANY(%s) AND lat IS NOT NULL", (station_ids,)).fetchall()]
         for name in want:
             f = Fetcher(name)
-            gens = {"freedom-trail-seed": S.freedom_trail, "analyze-boston": lambda: S.analyze_boston(f),
-                    "mhc-macris": lambda: S.mhc(f, stops), "digital-commonwealth": lambda: S.digital_commonwealth(f)}
+            gens = {"freedom-trail-seed": S.freedom_trail, "analyze-boston": lambda: S.analyze_boston(f), "digital-commonwealth": lambda: S.digital_commonwealth(f)}
             n = 0
             try:
                 for item in gens[name]():
@@ -72,6 +67,8 @@ def main() -> None:
             except RuntimeError as e:  # a failing source must not stop the others
                 report[name + "_error"] = str(e)
             report[name] = n
+        cur.execute("DELETE FROM content_items WHERE source_id NOT IN (SELECT unnest(%s::text[]))", (list(S.SOURCES),))
+        cur.execute("DELETE FROM content_sources WHERE id NOT IN (SELECT unnest(%s::text[]))", (list(S.SOURCES),))
         for ff in json.loads((S.SEED / "fun_facts.json").read_text(encoding="utf-8")):
             cur.execute(
                 """INSERT INTO loading_facts (id, body, tags, source_url, attribution, needs_verify)

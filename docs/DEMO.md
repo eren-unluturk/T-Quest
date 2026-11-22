@@ -28,7 +28,21 @@ If the nearby spots or content are empty, reload the seed (both idempotent, from
 ## Where the Tiger Data numbers are
 `docs/TIGER_DATA_RESULTS.md` (also copied into the generated block in PITCH.md). Real-data compression is TODO: measure; the continuous-aggregate latency comparison is reported as measured.
 
-## Honest limits
-- No rider UI. Real check-ins on real stops need game-engine in Postgres mode (writes to the shared database), which this tour avoids on purpose.
-- Rider events are synthetic; the tour does not claim real users.
-- MHC content terms are unconfirmed; Freedom Trail text and loading facts await a human check.
+## Known limits
+- No rider UI yet; it waits on `design/`.
+- game-engine runs in in-memory demo mode with fake stops. We do not switch it to Postgres mode or write demo check-ins to shared tables, because that would put demo rows in the real database (and crowd the leaderboard tests). A repeat run within the cooldown returns HTTP 409; restart game-engine to reset the in-memory demo.
+- Rider events are synthetic; the tour does not claim real users. Real check-ins arrive only once game-engine runs against the database with real riders.
+- Freedom Trail text and loading facts are hand-written and await a human check.
+
+### Real check-in aggregates (read-only SQL)
+Use this when real or synthetic check-ins exist in `rider_events`. It only reads:
+
+```sql
+SELECT stop_id, count(*) AS checkins, count(DISTINCT user_id) AS riders,
+       count(*) FILTER (WHERE is_synthetic) AS synthetic_checkins
+  FROM rider_events
+ WHERE event_type = 'checkin' AND time >= now() - interval '7 days'
+ GROUP BY stop_id ORDER BY checkins DESC LIMIT 10;
+```
+
+Per-rider miles and traveled segments for the same data: `GET /me/travel` on data-platform (bearer token = username), which is also read-only.

@@ -54,6 +54,8 @@ class StopFacts(BaseModel):
     stop_id: str
     stop_name: str
     facts: list[Fact]
+    fallback: bool = False
+    note: str | None = None
 
 
 class StorePartner(BaseModel):
@@ -104,6 +106,17 @@ class ContentItem(BaseModel):
     attribution: str
     commercial_ok: bool
     needs_verify: bool = False
+
+
+class Fave(BaseModel):
+    fact_id: str
+    kind: str
+    text: str
+    place: str | None = None
+    line: str | None = None
+    attribution: str
+    source_url: str | None = None
+    faved_at: datetime
 
 
 class LoadingFact(BaseModel):

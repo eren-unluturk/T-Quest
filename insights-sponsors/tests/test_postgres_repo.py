@@ -144,3 +144,28 @@ def test_bad_ids_do_not_500(client):
     assert client.get("/offers", params={"store_id": "abc"}, headers=AUTH).json() == []
     assert client.get("/spots/%00", headers=AUTH).status_code == 404
     assert client.get("/stops/%00/nearby", headers=AUTH).status_code == 404
+
+
+def test_faves_and_fun_fact_on_postgres(client):
+    user = {"Authorization": "Bearer faves-test-user"}
+    fid = client.get("/loading-facts", params={"limit": 1}).json()[0]["id"]
+    try:
+        assert client.post(f"/me/faves/{fid}", headers=user).status_code == 204
+        faves = client.get("/me/faves", headers=user).json()
+        assert [f["fact_id"] for f in faves] == [fid] and faves[0]["attribution"]
+    finally:
+        client.delete(f"/me/faves/{fid}", headers=user)
+    assert client.get("/me/faves", headers=user).json() == []
+    one = client.get(f"/spots/{slug_to_uuid('spot.diesel')}", headers=AUTH).json()
+    assert "Demo placeholder" in one["fun_fact"]
+
+
+def test_content_records_are_complete_and_open():
+    with psycopg.connect(settings.database_url) as c:
+        bad = c.execute("""SELECT count(*) FROM content_items WHERE btrim(attribution) = '' OR btrim(license) = ''
+                            OR btrim(source_url) = '' OR btrim(title) = '' OR retrieved_at IS NULL""").fetchone()[0]
+        assert bad == 0
+        assert c.execute("SELECT count(*) FROM content_items WHERE source_id = 'mhc-macris'").fetchone()[0] == 0
+        not_open = c.execute("""SELECT count(*) FROM content_items WHERE source_id = 'digital-commonwealth'
+              AND lower(license) NOT LIKE '%%no known copyright restrictions%%' AND lower(license) NOT LIKE '%%no known us copyright restrictions%%' AND lower(license) NOT LIKE '%%public domain%%'""").fetchone()[0]
+        assert not_open == 0

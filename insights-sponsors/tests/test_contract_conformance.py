@@ -16,7 +16,7 @@ HTTP_METHODS = {"get", "post", "put", "patch", "delete"}
 # Concrete values for path parameters and request bodies, using seeded ids.
 from insights_sponsors.repo.ids import slug_to_uuid
 
-PATH_VALUES = {"stop_id": "place-pktrm", "scope": "place_visits", "spot_id": str(slug_to_uuid("spot.sample-noodle"))}
+PATH_VALUES = {"fact_id": "fact.pktrm.1", "stop_id": "place-pktrm", "scope": "place_visits", "spot_id": str(slug_to_uuid("spot.sample-noodle"))}
 def _visit_body() -> dict:
     return {
         "lat": 42.3564,
@@ -58,7 +58,7 @@ def is_public(path: str, method: str) -> bool:
 
 
 def test_operations_found():
-    assert len(OPERATIONS) == 21
+    assert len(OPERATIONS) == 24
 
 
 @pytest.mark.parametrize("path,method", OPERATIONS, ids=[f"{m.upper()} {p}" for p, m in OPERATIONS])
@@ -78,6 +78,8 @@ def test_operation_conforms(client, path, method):
 
     declared = SPEC["paths"][path][method]["responses"]
     assert str(response.status_code) in declared, f"{response.status_code} not documented for {method} {path}"
+    if response.status_code == 204:
+        return
     schema = declared[str(response.status_code)]["content"]["application/json"]["schema"]
     check_shape(schema, response.json())
 

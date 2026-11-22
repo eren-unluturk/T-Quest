@@ -14,12 +14,6 @@ SOURCES = {
         license="Open Data Commons Public Domain Dedication and License (PDDL)",
         attribution="Contains data from Analyze Boston, City of Boston (PDDL).", commercial_ok=True,
         notes="CKAN API https://data.boston.gov/api/3"),
-    "mhc-macris": dict(
-        name="Massachusetts Historical Commission inventory (MACRIS data, MAPC-hosted feature service)",
-        url="https://services1.arcgis.com/hGdibHYSPO59RG1h/arcgis/rest/services/MHC_Inventory_GDB/FeatureServer",
-        license="TODO: confirm terms with MHC/MAPC before commercial use",
-        attribution="Massachusetts Historical Commission (MACRIS), via MAPC ArcGIS feature service.",
-        commercial_ok=False, notes="Not scraped from mhc-macris.net. Public feature service."),
     "digital-commonwealth": dict(
         name="Digital Commonwealth", url="https://www.digitalcommonwealth.org",
         license="Per item; only items whose rights statement says no known restrictions or public domain are kept",
@@ -70,29 +64,8 @@ def analyze_boston(f: Fetcher):
                 break
 
 
-def mhc(f: Fetcher, stops, per_stop: int = 25):
-    """Designated MHC inventory points within 500 m of each given stop (spatial query per stop)."""
-    base = SOURCES["mhc-macris"]["url"] + "/0/query"
-    for stop_id, lat, lon in stops:
-        data = f.get_json(base, {
-            "where": "DESIGNATIO IS NOT NULL", "geometry": f"{lon},{lat}",
-            "geometryType": "esriGeometryPoint", "inSR": 4326, "distance": 500, "units": "esriSRUnit_Meter",
-            "spatialRel": "esriSpatialRelIntersects", "outSR": 4326, "returnGeometry": "true",
-            "outFields": "MHCN,HISTORIC_N,COMMON_NAM,TYPE,DESIGNATIO,CONSTRUCTI,TOWN_NAME,ADDRESS,DEMOLISHED",
-            "resultRecordCount": per_stop, "f": "json"})
-        for ft in data.get("features", []):
-            a, g = ft["attributes"], ft.get("geometry") or {}
-            name = (a.get("COMMON_NAM") or "").strip() or (a.get("HISTORIC_N") or "").strip()
-            if not name or "y" not in g or str(a.get("DEMOLISHED") or "").strip().lower() in ("y", "yes"):
-                continue
-            year = f", built {a['CONSTRUCTI']}" if a.get("CONSTRUCTI") else ""
-            yield dict(source_id="mhc-macris", external_id=str(a["MHCN"]),
-                       source_url=f"https://mhc-macris.net/Details?mhcn={a['MHCN']}", title=name.strip(),
-                       short_description=f"{a.get('TYPE') or 'Resource'}, {a['DESIGNATIO']}{year}",
-                       category="historic-resource", lat=g["y"], lon=g["x"])
-
-
-OPEN_RIGHTS = ("no known copyright restrictions", "public domain")
+OPEN_RIGHTS = ("no known copyright restrictions", "no known us copyright restrictions", "public domain")
+CLOSED_HINTS = ("noncommercial", "non-commercial", "all rights reserved", "not evaluated", "undetermined", "under copyright")
 
 
 def _txt(v):
@@ -107,7 +80,8 @@ def digital_commonwealth(f: Fetcher, pages: int = 5, per_page: int = 50):
         for x in d["data"]:
             a = x["attributes"]
             rights, lic = _txt(a.get("rights_ss")), _txt(a.get("license_ss"))
-            if not any(k in rights.lower() or k in lic.lower() for k in OPEN_RIGHTS):
+            both = (rights + " " + lic).lower()
+            if not any(k in both for k in OPEN_RIGHTS) or any(k in both for k in CLOSED_HINTS):
                 continue
             title = (a.get("title_info_primary_tsi") or "").strip()
             if not title:

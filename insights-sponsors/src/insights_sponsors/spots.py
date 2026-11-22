@@ -42,6 +42,7 @@ class Spot(BaseModel):
     sponsor_id: str | None = None
     distance_m: float | None = None
     source: str = "manual"
+    fun_fact: str | None = None
     labels: list[SpotLabel]
     offers: list[Offer]
 

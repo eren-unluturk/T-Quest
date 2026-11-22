@@ -42,3 +42,6 @@ STOPPED SAFELY at 2026-11-21 13:20 (planner). See .work/HANDOFF.md.
 
 # STATE (merge and cleanup pass, 2026-11-21)
 - main equals origin/main; no branches of mine remain. 130 data-platform tests pass. test_user_rank_with_redemption now reads the ranks table (game-engine changed it to 8 named ranks in the shared database).
+
+# STATE (final pass)
+- Tests: insights-sponsors 211 pass, data-platform 136 pass, node 58 pass. Demo cold start OK.

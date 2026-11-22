@@ -43,7 +43,8 @@ const post = async (port, p, body, user = 'demo-rider') => {
   return { status: r.status, body: await r.json() };
 };
 const h = (t) => console.log(`\n=== ${t}`);
-const spot = (s) => `${s.name} [${s.category.slug}${s.placement_type === 'sponsored' ? ', sponsored' : ''}${s.demo ? ', demo' : ''}] labels: ${s.labels.map((l) => `${l.display_name} (${l.status})`).join(', ') || 'none'}`;
+const spot = (s) => `${s.name} [${s.category.slug}${s.placement_type === 'sponsored' ? ', sponsored' : ''}${s.demo ? ', demo' : ''}] labels: ${s.labels.map((l) => `${l.display_name} (${l.status})`).join(', ') || 'none'}${s.fun_fact ? `
+     fun fact (demo): ${s.fun_fact}` : ''}`;
 
 async function tour() {
   console.log('Demo placeholder. No partnership, endorsement or real discount is implied. Rider data is synthetic; MBTA data is real.');
@@ -78,6 +79,8 @@ async function tour() {
   h('5. Tourist content near Park Street with attribution');
   const c = (await get(8002, '/stops/place-pktrm/content?limit=4')).body;
   c.forEach((i) => console.log(`  ${i.title} (${i.category}, ${i.distance_m} m)\n     source: ${i.source_url}\n     attribution: ${i.attribution}`));
+  const fb = (await get(8002, '/stops/place-fenwy/facts')).body;
+  if (fb.fallback) console.log(`  Fenway has no stop facts: "${fb.note}" fallback fact: ${fb.facts[0]?.body}`);
   const lf = (await fetch('http://127.0.0.1:8002/loading-facts?limit=2')).json();
   (await lf).forEach((f) => console.log(`  loading fact: ${f.body}`));
 

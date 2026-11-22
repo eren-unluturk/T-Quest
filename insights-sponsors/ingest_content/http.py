@@ -7,7 +7,7 @@ from pathlib import Path
 
 import httpx
 
-USER_AGENT = "T-Quest-hackathon-ingest/0.1 (contact: TODO-contact-placeholder)"
+USER_AGENT = "T-Quest-Hackathon/1.0"
 RAW_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
 DELAY_S = 1.0
 

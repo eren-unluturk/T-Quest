@@ -28,4 +28,7 @@
 - The shared `ranks` table now has 8 named ranks (game-engine). Anything that hard-codes the old 5-rank table is stale; the data-platform test no longer does.
 
 ## Update (final checks)
-- Added `node scripts/demo.mjs` and docs/DEMO.md. Fixed: blank-title MHC rows (365 removed), 500s on malformed ids in Postgres mode, setup-me.mjs syntax error (#39). 198 insights-sponsors tests, 130 data-platform tests, 58 node tests pass.
+- Added `node scripts/demo.mjs` and docs/DEMO.md. Fixed: blank-title content rows (365 removed; the source was later dropped), 500s on malformed ids in Postgres mode, setup-me.mjs syntax error (#39). 198 insights-sponsors tests, 130 data-platform tests, 58 node tests pass.
+
+## Update (issues #43/#44, sources)
+- data-platform: `GET /me/travel` (routes/travel.py, tests/test_travel.py), migration 0012 (nearby_spots.fun_fact, fact_faves). insights-sponsors v0.7.0: /me/faves, Spot.fun_fact, stop-facts fallback. Historic-inventory source dropped (code and rows removed); ingestion User-Agent T-Quest-Hackathon/1.0. #43 and #44 stay open (unlocked_spots writer in game-engine, #64; along-line ordering). Counts: docs/DATA_SOURCES.md.

@@ -20,12 +20,13 @@ Status is derived from each agent's `.work/ROADMAP.md` and handoff notes. See [P
 - Real MBTA static data loaded (routes, lines, stops, schedules) and a standalone live collector for vehicles, predictions and alerts.
 - Benchmark commands and measured results: [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md). The real-data compression figures are TODO: measure.
 - data-platform read API (FastAPI) and published contracts in `contracts/`.
-- insights-sponsors service, OpenAPI v0.5.0 published in `contracts/api/`: stop facts, Freedom Trail, loading-screen facts, tourist content with attribution, demo offers and rank tiers, physical-reward catalog, and **nearby spots with category and label filters**. Its Postgres backend serves stops, offers, physical rewards, nearby spots and tourist content.
-- Tourist content ingestion (Analyze Boston, MHC inventory, Digital Commonwealth, Freedom Trail seed), run once; counts in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md). MHC terms are unconfirmed.
+- insights-sponsors service, OpenAPI v0.5.0 published in `contracts/api/`: stop facts, Freedom Trail, loading-screen facts, tourist content with attribution, demo offers and rank tiers, physical-reward catalog, **nearby spots with category and label filters** (with a hand-written demo fun fact per spot), faved facts (`/me/faves`) and a general-fact fallback for stops with no history. Its Postgres backend serves stops, offers, physical rewards, nearby spots and tourist content.
+- Tourist content ingestion from official public APIs (Analyze Boston, Digital Commonwealth open-rights items, hand-written Freedom Trail facts), run once; counts in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
 - game-engine service (Tobi): check-in, points, rank, redemption, badges, quests, friends, leaderboards, home line and delay compensation rules, with an in-memory mode and a Tiger Data (Postgres) store, OpenAPI published.
 
 **In progress**
-- Consent, place visits, route analytics and recommendations run on the in-memory backend with seed data; moving them to Postgres is planned, not done.
+- Consent, place visits, personal analytics and recommendations in insights-sponsors still run on the in-memory backend with seed data; moving them to Postgres is planned, not done.
+- Rider travel (`GET /me/travel`: miles per line, traveled segments) is built in data-platform from check-in events; with no real riders yet it returns zeros except for synthetic test riders.
 
 **Planned**
 - Rider-facing apps (client-bryan, client-isabella). They wait on sketches and Figma in `design/`; nobody invents UI.
@@ -96,8 +97,7 @@ Each person runs planner/builder agents inside their own folders. GitHub Issues 
 ## Data sources and credits
 - **MBTA** V3 API and GTFS, under the MassDOT Developers License.
 - **Analyze Boston** (data.boston.gov), Public Domain Dedication and License (PDDL).
-- **MassGIS / Massachusetts Historical Commission**, MACRIS historic inventory data.
-- **Digital Commonwealth**: rights vary per item; only items with a clear public-domain or open-reuse rights statement are used.
+- **Digital Commonwealth**: rights vary per item; only items with a clear no-known-restrictions or public-domain rights statement are used (metadata and link only).
 - **Tiger Data** (Timescale) for Postgres + TimescaleDB.
 
-Per-source terms and the business-correction path will be in `docs/DATA_SOURCES.md`.
+Per-source terms, counts and the correction path are in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).

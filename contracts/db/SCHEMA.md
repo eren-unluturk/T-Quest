@@ -163,3 +163,6 @@ Tables `spot_categories`, `label_types`, `nearby_spots`, `spot_stop_links`, `spo
 
 ## Migration 0011: tourist content
 `content_sources`, `content_items` (source, source_url, license, attribution, commercial_ok, retrieved_at, needs_verify), `stop_content` (items within about 500 m of a stop), `loading_facts`. Written by `insights-sponsors/ingest_content`. Clients must display attribution.
+
+## Migration 0012
+`nearby_spots.fun_fact` (hand-written demo text) and `fact_faves` (user_key, fact_id, created_at; dev auth key, no FK).

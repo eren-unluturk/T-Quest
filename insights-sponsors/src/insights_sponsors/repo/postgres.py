@@ -11,7 +11,7 @@ import psycopg
 from psycopg.rows import dict_row
 
 from ..config import settings
-from ..models import ContentItem, LoadingFact, Offer, PhysicalReward, RewardStore, Stop
+from ..models import ContentItem, Fave, LoadingFact, Offer, PhysicalReward, RewardStore, Stop
 from ..spots import CategoryRef, Spot, SpotLabel, public_labels
 from .memory import MemoryRepository
 
@@ -107,6 +107,45 @@ class PostgresRepository(MemoryRepository):
         rows = self._q("SELECT rank, name, avatar_key, min_lifetime_points, discount_pct FROM ranks ORDER BY rank")
         return [dict(r) for r in rows] or super().rank_tiers()
 
+    # faved facts (keyed by the bearer token; dev auth)
+    def _fact_lookup(self, fact_id: str) -> dict | None:
+        if not _is_uuid(fact_id):
+            return super()._fact_lookup(fact_id)
+        rows = self._q("SELECT body, attribution, source_url FROM loading_facts WHERE id = %s", (fact_id,))
+        if rows:
+            r = rows[0]
+            return dict(kind="loading_fact", text=r["body"], place=None, line=None,
+                        source_url=r["source_url"], attribution=r["attribution"])
+        rows = self._q("""SELECT c.title, c.short_description, c.attribution, c.source_url,
+                                 (SELECT s.name FROM stop_content sc JOIN stops s ON s.id = sc.stop_id
+                                   WHERE sc.content_id = c.id ORDER BY sc.distance_m LIMIT 1) AS place
+                            FROM content_items c WHERE c.id = %s""", (fact_id,))
+        if rows:
+            r = rows[0]
+            return dict(kind="content_item", text=r["short_description"] or r["title"], place=r["place"] or r["title"],
+                        line=None, source_url=r["source_url"], attribution=r["attribution"])
+        return None
+
+    def add_fave(self, user_id: str, fact_id: str) -> bool:
+        if self._fact_lookup(fact_id) is None:
+            return False
+        with psycopg.connect(self._url) as conn:
+            conn.execute("INSERT INTO fact_faves (user_key, fact_id) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                         (user_id, fact_id))
+        return True
+
+    def remove_fave(self, user_id: str, fact_id: str) -> None:
+        with psycopg.connect(self._url) as conn:
+            conn.execute("DELETE FROM fact_faves WHERE user_key = %s AND fact_id = %s", (user_id, fact_id))
+
+    def faves(self, user_id: str) -> list[Fave]:
+        out = []
+        for r in self._q("SELECT fact_id, created_at FROM fact_faves WHERE user_key = %s ORDER BY created_at DESC", (user_id,)):
+            info = self._fact_lookup(r["fact_id"])
+            if info:
+                out.append(Fave(fact_id=r["fact_id"], faved_at=r["created_at"], **info))
+        return out
+
     # tourist content
     def stop_content(self, stop_id: str) -> list[ContentItem]:
         rows = self._q(
@@ -133,7 +172,7 @@ class PostgresRepository(MemoryRepository):
     def _spots(self, where: str, params: dict) -> list[Spot]:
         rows = self._q(f"""
             SELECT s.id, s.name, s.category_slug, c.display_name AS category_name, s.address, s.lat, s.lon,
-                   s.demo_placeholder, s.sponsor_id, s.placement_type, s.source,
+                   s.demo_placeholder, s.sponsor_id, s.placement_type, s.source, s.fun_fact,
                    {'l.distance_m' if 'stop' in params else 'NULL::float8 AS distance_m'}
               FROM nearby_spots s JOIN spot_categories c ON c.slug = s.category_slug
               {'JOIN spot_stop_links l ON l.spot_id = s.id' if 'stop' in params else ''}
@@ -163,7 +202,7 @@ class PostgresRepository(MemoryRepository):
                 category=CategoryRef(slug=r["category_slug"], display_name=r["category_name"]),
                 address=r["address"], lat=r["lat"], lon=r["lon"], placement_type=r["placement_type"],
                 demo=r["demo_placeholder"], sponsor_id=str(r["sponsor_id"]) if r["sponsor_id"] else None,
-                distance_m=r["distance_m"], source=r["source"], labels=labels.get(r["id"], []),
+                distance_m=r["distance_m"], source=r["source"], fun_fact=r["fun_fact"], labels=labels.get(r["id"], []),
                 offers=offers)))
         return out
 

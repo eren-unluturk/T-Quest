@@ -5,7 +5,7 @@
 - New: nearby spots (`/stops/{id}/nearby`, `/categories`, `/labels`, `/spots/{id}`), `/rank-tiers`, `/offers?rank=&placement=`, `/stops/{id}/content`, `/loading-facts`. Contract v0.5.0 is in contracts/api/insights-sponsors.yaml.
 - Load data: `python scripts/load_seed.py` then `python -m ingest_content.run` (both idempotent). Tests: `python -m pytest -q` (195 pass; db tests need migration 0010/0011 and a reachable database).
 - Label rule: only declared or certified labels are exposed; the three demo sponsors hold local-independent as pending, so no real business shows a label.
-- Not pursuing real partnerships; all sponsors are demo placeholders. Open decisions for Eren: MHC/MAPC terms; set a real contact in the ingest User-Agent; rank-4 badge (#5).
+- Not pursuing real partnerships; all sponsors are demo placeholders. A historic-inventory source was dropped; ingestion User-Agent is `T-Quest-Hackathon/1.0` with no contact details.
 
 ## Earlier handoff (2026-11-21 13:17)
 
@@ -86,4 +86,7 @@ Next 3 queue prompts: **014, 015, 016** (017 depends on 016). 007 is superseded 
 - Rank migration done (v0.6.0): `/rank-tiers` reads game-engine's 8 named ranks from the shared `ranks` table (memory mode copy in `ranks.py`), `min_rank` max is 8, demo offer percentages follow the tier table (placeholders), the free-item demo offer is at rank 8. This supersedes the "Rank mismatch" note above.
 
 ## Update (final checks)
-- Added `node scripts/demo.mjs` and docs/DEMO.md. Fixed: blank-title MHC rows (365 removed), 500s on malformed ids in Postgres mode, setup-me.mjs syntax error (#39). 198 insights-sponsors tests, 130 data-platform tests, 58 node tests pass.
+- Added `node scripts/demo.mjs` and docs/DEMO.md. Fixed: blank-title content rows (365 removed; the source was later dropped), 500s on malformed ids in Postgres mode, setup-me.mjs syntax error (#39). 198 insights-sponsors tests, 130 data-platform tests, 58 node tests pass.
+
+## Update (issues #43/#44, sources)
+- data-platform: `GET /me/travel` (routes/travel.py, tests/test_travel.py), migration 0012 (nearby_spots.fun_fact, fact_faves). insights-sponsors v0.7.0: /me/faves, Spot.fun_fact, stop-facts fallback. Historic-inventory source dropped (code and rows removed); ingestion User-Agent T-Quest-Hackathon/1.0. #43 and #44 stay open (unlocked_spots writer in game-engine, #64; along-line ordering). Counts: docs/DATA_SOURCES.md.

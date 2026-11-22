@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from ..auth import current_user_id
-from ..models import ContentItem, FunFact, LoadingFact, StopFacts, TrailSite
+from ..models import ContentItem, Fact, Fave, FunFact, LoadingFact, StopFacts, TrailSite
 from ..repo import Repository, get_repository
 
 router = APIRouter()
@@ -19,6 +19,15 @@ def stop_facts(
     facts = repo.stop_facts(stop_id)
     if facts is None:
         raise HTTPException(status_code=404, detail="unknown stop")
+    if not facts.facts:
+        # No history recorded: fall back to one general Boston fact, picked by stop id so it is stable.
+        general = repo.loading_facts()
+        note = "No history recorded yet for this stop."
+        if general:
+            g = general[sum(map(ord, stop_id)) % len(general)]
+            fb = Fact(id=g.id, kind="fast_fact", title="About Boston and the T", body=g.body, source_url=g.source_url)
+            return facts.model_copy(update={"facts": [fb], "fallback": True, "note": note})
+        return facts.model_copy(update={"fallback": True, "note": note})
     return facts
 
 
