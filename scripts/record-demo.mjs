@@ -1,13 +1,12 @@
 #!/usr/bin/env node
-// Records a captioned screen video of the LOCAL demo app (client-bryan/demo, with the Boston maps), using Playwright
-// from web/node_modules. Start everything first:  node scripts/demo-up.mjs   then check:  node scripts/preflight.mjs --running
-//   node scripts/record-demo.mjs [--url http://localhost:4321] [--out docs/demo] [--pace 1.2]
-//                                [--width 460] [--height 892] [--caption-height 96]
-// The phone frame is 390x844 with a 24 px page margin (client-bryan/demo/public/style.css). The video is that frame
-// (viewport 460x892) plus a caption strip below it, so captions never cover the app. --pace scales every pause.
-// Needs internet (map tiles, MBTA schedule). Only existing elements are tapped, and captions that depend on an outcome
-// (a ride verified or rejected) are chosen from what the screen actually shows. The ride and check-in only touch
-// game-engine's in-memory mode; faves and rides live in the browser's localStorage, so nothing is written to the database.
+// Records a captioned screen video of the LOCAL React app (web/, http://127.0.0.1:5173), using Playwright from
+// web/node_modules. Start everything first:  node scripts/demo-up.mjs   then check:  node scripts/preflight.mjs --running
+//   node scripts/record-demo.mjs [--url http://127.0.0.1:5173] [--out docs/demo] [--pace 1.0] [--user recordRider1]
+//                                [--width 430] [--height 884] [--caption-height 96]
+// The phone frame is 390x844 (web/src/app/app.tsx). The video is that frame plus a caption strip below it, so captions
+// never cover the app. --pace scales every pause. Needs internet (map tiles, MBTA schedule). Only existing elements
+// are tapped, and captions that depend on an outcome (a ride verified or rejected) are chosen from what the screen shows.
+// Faving a fact writes one demo row (is_demo); the script unfaves it again. Rides use game-engine's in-memory mode.
 // The output file is overwritten on every run (no old copies kept). No secrets are read or printed.
 import { createRequire } from 'node:module';
 import { mkdirSync, renameSync, rmSync } from 'node:fs';
@@ -18,12 +17,13 @@ const { chromium } = createRequire(path.join(root, 'web', 'package.json'))('play
 
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 && argv[i + 1] ? argv[i + 1] : d; };
-const URL_ = flag('url', 'http://localhost:4321');
+const URL_ = flag('url', 'http://127.0.0.1:5173');
+const USER = flag('user', 'recordRider1');
 const OUT = path.resolve(root, flag('out', 'docs/demo'));
-const W = Number(flag('width', 460));
-const H = Number(flag('height', 892));
+const W = Number(flag('width', 430));
+const H = Number(flag('height', 884));
 const CAP = Number(flag('caption-height', 96));
-const PACE = Number(flag('pace', 1.2));
+const PACE = Number(flag('pace', 1.0));
 const wait = (page, s) => page.waitForTimeout(Math.round(s * 1000 * PACE));
 
 async function caption(page, text, big = false) {
@@ -44,8 +44,12 @@ async function tap(locator, timeout = 5000) {
   if (await locator.count()) { await locator.first().click({ timeout }).catch(() => {}); return true; }
   return false;
 }
-const go = (page, hash) => page.evaluate((h) => { window.location.hash = h; }, hash);
-const stampText = async (page) => (await page.locator('.stampwrap').innerText().catch(() => '')).replace(/\s+/g, ' ');
+const nav = (page, name) => tap(page.locator(`nav a[aria-label="${name}"]`));
+const bodyText = async (page) => (await page.locator('body').innerText().catch(() => '')).replace(/\s+/g, ' ');
+const scrollInner = (page, to) => page.evaluate((to) => {
+  const el = [...document.querySelectorAll('div')].find((d) => getComputedStyle(d).overflowY === 'auto' && d.scrollHeight > d.clientHeight);
+  if (el) el.scrollTo({ top: to === 'end' ? el.scrollHeight : to, behavior: 'smooth' });
+}, to);
 
 async function main() {
   mkdirSync(OUT, { recursive: true });
@@ -54,106 +58,110 @@ async function main() {
   const page = await context.newPage();
   const t0 = Date.now();
   await page.goto(URL_);
-  await page.addStyleTag({ content: `body{padding-bottom:${CAP}px !important;}` });
 
-  // 1 Loading
-  await caption(page, 'Boston fun facts while the app loads.');
-  await page.waitForSelector('#start:not([disabled])', { timeout: 90000 });
-  await wait(page, 3);
-  await tap(page.locator('#next'));
-  await wait(page, 4);
-  await tap(page.locator('#start'));
-
-  // 2 Home: map with live stations and trains
-  await page.waitForSelector('#tapin', { timeout: 60000 });
-  await wait(page, 3);
-  await caption(page, 'Home: a Boston map with live MBTA stations and trains from Tiger Data.');
-  await wait(page, 7);
-  await tap(page.locator('#tilt'));
+  // 1 Sign in (a plain stub form: no design yet)
+  await caption(page, 'Sign in with a sandbox username. A plain form: this screen has no design yet.');
+  await wait(page, 2.5);
+  await page.fill('input', USER);
   await wait(page, 1.5);
-  await caption(page, '3D landmark buildings from Boston open data.');
-  await wait(page, 5);
-  await tap(page.locator('#tilt'));
-  await wait(page, 2);
-  await caption(page, 'Tap a spot on the map for a fact about it.');
-  await tap(page.locator('.pin'));
-  await wait(page, 5);
-  await caption(page, 'Star a fact to save it to Faves (kept in this browser).');
-  await tap(page.locator('#fave'));
-  await wait(page, 4);
+  await page.click('button');
 
-  // 3 Tap in, ride, verify
-  await caption(page, 'Tap in at a station, then choose where you get off.');
-  await tap(page.locator('#tapin'));
-  await wait(page, 4);
-  await tap(page.locator('[data-to]').nth(1)); // second stop in the list (South Station from Park Street)
+  // 2 Loading
+  await page.waitForSelector('text=Start exploring', { timeout: 30000 });
+  await caption(page, 'Boston fun facts while the app loads, each with its source.');
   await wait(page, 3);
-  await caption(page, 'Ride there skips the clock to the next real scheduled train, then checks the ride.');
-  await tap(page.locator('#ride'));
-  await page.waitForSelector('.stampwrap', { timeout: 40000 }).catch(() => {});
+  await tap(page.getByText('Tap for another fact'));
+  await wait(page, 3);
+  await tap(page.getByText('Start exploring'));
+
+  // 3 Home
+  await page.waitForSelector('text=Tap in at', { timeout: 60000 });
+  await wait(page, 3);
+  await caption(page, 'Home: your rank and points, a stop fact, and a live Boston map with MBTA lines and trains from Tiger Data.');
+  await wait(page, 7);
+  await caption(page, 'Star a fact to save it to Faves.');
+  await tap(page.getByLabel('Fave this fun fact'));
+  await wait(page, 3);
+
+  // 4 Tap in, ride, verify
+  await caption(page, 'Tap in at a station and choose where you get off.');
+  await tap(page.getByText(/Tap in at/));
+  await wait(page, 4);
+  await tap(page.getByText('South Station'));
   await wait(page, 2);
-  const st = await stampText(page);
-  if (/RIDE VERIFIED/.test(st)) {
-    const pts = st.match(/\+(\d+)/);
+  await caption(page, 'Ride there skips the clock to the next real scheduled train, then checks the ride.');
+  await tap(page.getByText('Ride there'));
+  await page.waitForSelector('text=/VERIFIED|No scheduled/i', { timeout: 40000 }).catch(() => {});
+  await wait(page, 2);
+  const t1 = await bodyText(page);
+  if (/RIDE\s*VERIFIED/i.test(t1) && !/NOT\s*VERIFIED/i.test(t1)) {
+    const pts = t1.match(/\+(\d+)/);
     await caption(page, `Ride verified against the real MBTA schedule${pts ? `; game-engine awards +${pts[1]} points (demo mode)` : ''}.`);
-  } else if (st) {
+  } else if (/No scheduled/i.test(t1)) {
+    // overnight there are no scheduled trains, so there is nothing to verify; say so instead of showing a failure unexplained
+    await caption(page, 'No train is scheduled at this hour, so Ride there has nothing to verify.');
+  } else if (/NOT\s*VERIFIED/i.test(t1)) {
     await caption(page, 'This demo ride was not verified (the app checks the real MBTA schedule).');
   }
-  await wait(page, 7);
-  await tap(page.locator('#again'));
-  await wait(page, 3);
-
-  // 3b a spoofed tap-out is rejected
-  await caption(page, 'Tap in again, but tap out instantly, as a GPS spoofer would.');
-  await tap(page.locator('#tapin'));
-  await wait(page, 4);
-  await tap(page.locator('#now'));
-  await page.waitForSelector('.stampwrap', { timeout: 40000 }).catch(() => {});
-  await wait(page, 2);
-  const st2 = await stampText(page);
-  if (/NOT VERIFIED/.test(st2)) await caption(page, 'Rejected: no train is that fast, so no points.');
-  await wait(page, 6);
-  await tap(page.locator('#again'));
-  await wait(page, 2);
-
-  // 4 Traveled
-  await tap(page.locator('a[data-tab="traveled"]'));
-  await page.waitForTimeout(2500);
-  await caption(page, 'Traveled: your verified rides and unlocked spots. Rides are kept in this browser (demo).');
-  await wait(page, 9);
-
-  // 5 Explore
-  await tap(page.locator('a[data-tab="explore"]'));
-  await page.waitForTimeout(2500);
-  await caption(page, 'Explore: nearby spots and perks from fictional demo businesses. No real partnerships.');
-  await wait(page, 7);
-  await tap(page.locator('[data-cat]').nth(2));
-  await wait(page, 4);
-  await tap(page.locator('[data-cat]').first());
-  await wait(page, 1.5);
-  await caption(page, 'Filter by line and ownership label (demo data).');
-  await tap(page.locator('#filter'));
-  await wait(page, 3);
-  await tap(page.locator('[data-own]').first());
-  await wait(page, 3);
-  await tap(page.locator('#show'));
   await wait(page, 5);
+  if (/No scheduled/i.test(t1)) { await tap(page.getByLabel('Cancel ride')); await wait(page, 1); } else await tap(page.getByText('Back to map'));
+  await wait(page, 2);
+  await caption(page, 'Tap in again, but tap out instantly, as a GPS spoofer would.');
+  await tap(page.getByText(/Tap in at/));
+  await wait(page, 3);
+  await tap(page.getByText('Tap out now'));
+  await page.waitForSelector('text=/NOT\\s*VERIFIED/i', { timeout: 30000 }).catch(() => {});
+  await wait(page, 1.5);
+  if (/NOT\s*VERIFIED/i.test(await bodyText(page))) await caption(page, 'Rejected: no train is that fast, so no points.');
+  await wait(page, 5);
+  await tap(page.getByText('Back to map'));
+  await wait(page, 1);
 
-  // 6 Faves
-  await go(page, '#/home');
-  await page.waitForSelector('#tapin', { timeout: 30000 });
-  await tap(page.locator('a[aria-label="Your faved fun facts"]'));
-  await page.waitForTimeout(2000);
+  // 5 Traveled
+  await nav(page, 'Traveled');
+  await caption(page, 'Traveled: the real MBTA network, with miles per line and unlocked spots as you ride.');
+  await page.waitForTimeout(3500);
+  await wait(page, 7);
+
+  // 6 Explore
+  await nav(page, 'Explore');
+  await caption(page, 'Explore: nearby spots and perks from fictional demo businesses. No real partnerships.');
+  await page.waitForTimeout(2500);
+  await wait(page, 5);
+  await tap(page.getByRole('button', { name: 'Cafés' }));
+  await wait(page, 3);
+  await tap(page.getByRole('button', { name: 'All', exact: true }));
+  await wait(page, 1);
+
+  // 7 Faves
+  await tap(page.getByLabel('Your faved fun facts'));
   await caption(page, 'Faves: the facts you starred.');
+  await page.waitForTimeout(2000);
+  await wait(page, 4);
+  await tap(page.getByLabel('Unfave this fact')); // leaves no demo row behind
+  await wait(page, 2);
+
+  // 8 Profile
+  await page.evaluate(() => { window.location.hash = '#/profile'; });
+  await caption(page, 'Profile: rank and demo perks. Offers are placeholders; no real discounts or partners.');
+  await page.waitForTimeout(3000);
   await wait(page, 6);
 
-  // 7 User page
-  await go(page, '#/home');
-  await page.waitForSelector('#tapin', { timeout: 30000 });
-  await tap(page.locator('a[aria-label="Open your user page"]'));
-  await page.waitForTimeout(2500);
-  await caption(page, 'Your user page: rank and points from game-engine (demo mode), and demo perks.');
-  await wait(page, 8);
+  // 9 Analytics
+  await nav(page, 'Analytics');
+  await page.waitForSelector('text=Right now', { timeout: 40000 }).catch(() => {});
+  await wait(page, 1);
+  await caption(page, 'Analytics, live MBTA data from Tiger Data: vehicles per line right now, active alerts and feed freshness.');
+  await wait(page, 6);
+  await scrollInner(page, 330);
+  await caption(page, 'Vehicle reports per hour for each line, from the continuous aggregate behind the vehicle feed.');
+  await wait(page, 6);
+  await scrollInner(page, 760);
+  await caption(page, 'Busiest and quietest hours, from the hours collected so far.');
+  await wait(page, 6);
+  await scrollInner(page, 'end');
+  await caption(page, 'Your ride insights are demo rider data, not real people.');
+  await wait(page, 6);
 
   // closing card
   await caption(page, 'Demo build. Check-in screen design coming. Transit data from the MBTA', true);

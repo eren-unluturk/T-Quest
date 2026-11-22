@@ -27,7 +27,7 @@ Mapping the four selling points to what we built (measured numbers are in the ge
 |---|---|
 | Standard SQL power | Recommendations, route analytics and leaderboards are plain SQL (`insights-sponsors/sql/`, data-platform views). |
 | One stack for relational profiles and high-frequency streams | Users, consent, offers, rewards and `rider_events` live beside MBTA `vehicles`, `predictions` and `alerts` in one Postgres database, joined in SQL. |
-| Instant dashboards via continuous aggregates | `leaderboard_daily`, `user_route_daily` / `home_line`, and `vehicles_route_5m`. |
+| Instant dashboards via continuous aggregates | `leaderboard_daily`, `user_route_daily` / `home_line`, and `vehicles_route_5m`, which now feeds the live Analytics tab through `GET /analytics/system`. |
 | Compression to keep millions of events on a small instance | Compression policies on `rider_events`, `vehicles` and `predictions`, running on a 0.5 CPU, 2 GiB service. We report the ratios exactly as measured, including where compression or aggregates did not help at this small size. |
 
 <!-- AUTO:numbers:start -->
@@ -131,16 +131,16 @@ Subway and bus share the same model (a stop is a stop). Start with a handful of 
 
 ## 3-minute demo script
 
-What is live in the demo build: the demo app (`client-bryan/demo`, Isabella's screens with Boston GIS maps) running locally against real MBTA stations and live trains from Tiger Data, with demo placeholders (sponsors, offers, labels). A rider can tap in, ride and have the ride verified against the real MBTA schedule (a spoofed tap-out is rejected); points come from game-engine in demo mode. What is not built: the check-in screen has no approved design, and friends, leaderboard, quests and redemptions have no screens. Rider data is synthetic. See docs/REHEARSAL.md for the timed run sheet.
+What is live in the demo build: the React app (`web/`) running locally against real MBTA data in Tiger Data, with demo placeholders (sponsors, offers, labels). It has the designed screens, Boston GIS maps with live trains, tap-in with ride verification against the real MBTA schedule (a spoofed tap-out is rejected), and an Analytics tab: three blocks of live MBTA data computed from Tiger Data aggregates and one block of demo rider data, each labeled. What is not built: the check-in screen has no approved design, and friends, leaderboard, quests and redemptions have no screens. Rider data is synthetic. See docs/REHEARSAL.md for the timed run sheet.
 
 | Time | Beat | Notes |
 |---|---|---|
 | 0:00 | Hook and problem | Use the 30-second hook above |
-| 0:30 | **[Demo app: Loading, Home]** fun facts, then the live Boston map with stations and trains; 3D toggle | Needs internet for map tiles; say it is a demo |
-| 1:00 | **[Demo app: tap in, Ride there]** verified against the real schedule, points; then a spoofed tap-out rejected | The tap-in sheet and stamp are a proposal, not in the approved canvas |
-| 1:30 | **Live data moment:** trains on the Home map, vehicles from the MBTA feed our collector stores in Tiger Data | Check `last_vehicle_at` on data-platform `/health` first |
+| 0:25 | **[Web app: Loading, Home]** fun facts, then the live Boston map with MBTA lines and trains | Needs internet for map tiles; say it is a demo |
+| 0:55 | **[Web app: tap in, Ride there]** verified against the real schedule, then a spoofed tap-out rejected | Needs a scheduled train (service hours). The tap-in sheet is a proposal, not in the approved canvas |
+| 1:25 | **[Web app: Analytics]** live MBTA data: vehicles per line right now, vehicle reports per hour, busiest and quietest hours | Computed from the `vehicles_route_5m` continuous aggregate in Tiger Data; the rider block is labeled demo data |
 | 2:00 | Tiger Data: compression and continuous aggregate numbers | Read from the generated block above |
-| 2:30 | **[Demo app: Explore, user page]** fictional demo businesses and perks, rank and points | Say clearly that offers are demo placeholders |
+| 2:30 | **[Web app: Explore, Profile]** fictional demo businesses and perks, rank and points | Say clearly that offers are demo placeholders |
 | 2:50 | Close: what we would do next | More lines, tourist layer, a possible sponsor program (not pursued now) |
 
 ## Q&A prep
@@ -152,6 +152,7 @@ What is live in the demo build: the demo app (`client-bryan/demo`, Isabella's sc
 - **Is compression a big win?** See the generated numbers: we report them as measured. The real-data run is small, so we do not claim more than it shows.
 - **Privacy?** Location tracking beyond check-ins is opt-in, revocable, coordinates are rounded, city analytics hide groups under three riders.
 - **Why isn't it deployed publicly?** A deliberate choice for a demo that runs on live data. Our single database holds the live MBTA stream and its credentials, and a public host would need a connection to it. The container images were never tested, the game engine keeps its state in memory by default, and the default login is for local demos only. Running locally keeps the live data live and exposes nothing. A production mode with signed tokens, exact CORS and rate limits exists but is off by default, and public hosting is documented as future work.
+- **On the Analytics screen, what is real and what is demo?** The three blocks labeled "Live MBTA data" (vehicles per line now, reports per hour, busiest and quietest hours) are computed from the real MBTA feed that our collector stores in Tiger Data, mostly from the `vehicles_route_5m` continuous aggregate. The block labeled "demo rider data" comes from synthetic demo riders, not real people. The hour-of-day view only covers the hours we have collected so far.
 - **Does it cost per token?** No. No LLM or API-key billing anywhere in the product.
 
 ## Team

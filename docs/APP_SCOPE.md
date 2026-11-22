@@ -2,7 +2,7 @@
 
 > Demo placeholder. No partnership, endorsement or real discount is implied. UI comes only from `design/`.
 
-> **Two clients.** This page describes the React port in `web/`. The app we demo is `client-bryan/demo` (vanilla JS + MapLibre, Boston GIS maps, ride verification), documented in `client-bryan/demo/README.md` and `docs/DEMO.md`. Since issue #80 the maps in `web/` Home and Traveled are the real GIS maps too (mounted from `client-bryan/map`); the placeholder-map notes below date from before that.
+> **Two clients.** This page describes the React app in `web/`, which is the app we demo and record (Boston GIS maps from `client-bryan/map`, plus the Analytics tab). The earlier vanilla prototype `client-bryan/demo` is documented in `client-bryan/demo/README.md`.
 
 ## What exists in `design/`
 | File | Contents |

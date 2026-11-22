@@ -25,8 +25,9 @@ Status is derived from each agent's `.work/ROADMAP.md` and handoff notes. See [P
 - game-engine service (Tobi): check-in, points, rank, redemption, badges, quests, friends, leaderboards, home line and delay compensation rules, with an in-memory mode and a Tiger Data (Postgres) store, OpenAPI published.
 - **Favorite (home) line compensation:** riders earn points when their favorite line goes down. The favorite line is the "home line", the line a rider checked in on most in the last 30 days (at least 5 rides). When an MBTA alert on that line is an outage (no service, suspension, shuttle, significant delay, cancellation), game-engine pays compensation points once per alert, to riders whose home line it is. The rule and the job are built and tested in game-engine (`delay.py`, `delay_job.py`) and read live alerts from Tiger Data; there is no screen for it yet, and with no real riders no real rider has earned any.
 
-- **Demo app (`client-bryan/demo/`, vanilla JS + MapLibre)**, the one we demo: Isabella's screens with Boston GIS maps (live MBTA stations and trains from Tiger Data, 3D landmark buildings, Ethnic Boston neighborhoods with wording still to be confirmed), tap-in and ride verification against the real MBTA schedule with points from game-engine in demo mode, Explore with fictional demo businesses, Faves and a user page. Start it with `node scripts/demo-up.mjs` and open http://localhost:4321; a captioned recording is made with `node scripts/record-demo.mjs`. Details in [docs/DEMO.md](docs/DEMO.md).
-- **React web app (`web/`, Vite + React + TypeScript)**, with the Boston GIS maps from `client-bryan/map` mounted on Home and Traveled: the six designed screens (Loading, Home, Traveled, Explore, Faves, Profile) are ported from `design/canvas` and wired to the real endpoints; screens with no design (sign in, check in, friends, leaderboard, quests, redemptions) are plain stubs. See [docs/APP_SCOPE.md](docs/APP_SCOPE.md). Maps are placeholders.
+- **Demo app (`web/`, Vite + React + TypeScript), the one we demo and record:** the designed screens (Loading, Home, Traveled, Explore, Faves, Profile) ported from `design/canvas` and wired to the three backends, with the Boston GIS maps from `client-bryan/map` on Home and Traveled (live MBTA lines and trains from Tiger Data, 3D landmark buildings, tap-in with ride verification against the real MBTA schedule, a spoofed tap-out rejected). Screens with no design (sign in, check in, friends, leaderboard, quests, redemptions) are plain stubs. Start it with `node scripts/demo-up.mjs` and open http://127.0.0.1:5173. Details in [docs/DEMO.md](docs/DEMO.md) and [docs/APP_SCOPE.md](docs/APP_SCOPE.md).
+- **Analytics tab (admin-authored design, `design/canvas/Analytics.dc.html`):** a fourth tab with four compact blocks. Three are **Live MBTA data** computed from Tiger Data by data-platform `GET /analytics/system`: vehicles per subway line right now with active alerts and feed freshness, vehicle reports per hour per line over the last hours (from the `vehicles_route_5m` continuous aggregate), and the busiest and quietest hours and lines. The fourth is **demo rider data**: stops collected, home line, points and leaderboard place. Every number comes from an API response. The hour-of-day view gets richer as the collector runs longer.
+- **Earlier prototype (`client-bryan/demo/`, vanilla JS + MapLibre):** the first version of the maps and ride verification, still runnable on http://localhost:4321 but no longer the app we demo and without Analytics.
 - **Optional production mode (default off; not deployed):** signed short-lived tokens with a demo login, exact-origin CORS, rate limits, request-size limits, security headers and fail-closed configuration, checked locally by `node scripts/e2e-prod.mjs`. The demo itself runs in dev mode on a laptop. See "Future work: public hosting" below.
 
 **In progress**
@@ -83,7 +84,7 @@ In the demo no real business carries a label. In general, a label such as local/
 | Auth (on main) | Demo bearer token: the token is the sandbox username. game-engine also accepts an `X-Store-Key` header for store verification | Identifies demo users. Not real authentication | `game-engine/src/game_engine/app.py`, `insights-sponsors/src/insights_sponsors/auth.py` |
 | CORS (on main) | FastAPI `CORSMiddleware` | data-platform allows any origin for GET; insights-sponsors is configurable by env; game-engine sets its own allowed headers | each service's `app.py` / `main.py` |
 | Hardening (on main, optional production mode, default off) | HMAC-signed short-lived tokens, exact-origin CORS, rate limits, body-size limit, security headers, generic errors, fail-closed config | Dev mode is the default and is what the local demo uses; prod mode is set with `APP_ENV=prod` and checked locally by `scripts/e2e-prod.mjs` | `shared/tquest_auth.py`, `shared/tquest_http.py`, `shared/tests/` |
-| Web app (on main) | React 18, TypeScript, Vite, Vitest, ESLint (`web/`); the demo app in `client-bryan/demo/` is vanilla JS with MapLibre | Front end ported from the approved design canvas, wired to the three backends; run with the Vite dev server | `web/`, `design/canvas/` |
+| Web app (on main) | React 18, TypeScript, Vite, Vitest, ESLint (`web/`); MapLibre maps from `client-bryan/map` | Front end ported from the approved design canvas, wired to the three backends, with an admin-authored Analytics tab; run with the Vite dev server | `web/`, `design/canvas/`, `client-bryan/map/` |
 | Python tests | pytest, pytest-asyncio (data-platform), openapi-spec-validator, pyyaml, pglast (SQL syntax checks) | Unit, contract-conformance and migration-syntax tests; `db`-marked tests need a database | `*/tests/` |
 | Repo tooling tests | Node's built-in test runner (`node --test`) | Tests hooks, ownership guard, billing safety, attribution, docs sync | `tests/*.test.mjs` |
 | Linting | None configured for Python. ESLint in `web/` | | |
@@ -95,7 +96,7 @@ In the demo no real business carries a label. In general, a label such as local/
 
 All of this exists in `data-platform/migrations/`.
 - **Hypertables:** `rider_events` (0001), `points_ledger` (0001), `vehicles` and `predictions` (0003), `place_visits` (0005). `alerts` and `alert_entities` are ordinary tables, not hypertables.
-- **Continuous aggregates, each with a refresh policy:** `leaderboard_daily`, `home_line_weekly`, `personal_stats_daily` (0004); `user_stop_daily`, `user_stop_hourly` (0006); `user_route_daily` (0007, the 30-day home-line rule); `vehicles_route_5m` (0009, vehicle reports per line per 5 minutes).
+- **Continuous aggregates, each with a refresh policy:** `leaderboard_daily`, `home_line_weekly`, `personal_stats_daily` (0004); `user_stop_daily`, `user_stop_hourly` (0006); `user_route_daily` (0007, the 30-day home-line rule); `vehicles_route_5m` (0009, vehicle reports per line per 5 minutes; it also feeds the Analytics tab through `GET /analytics/system`).
 - **Compression policies:** `vehicles` and `predictions` after 1 day (0003), `rider_events` after 7 days with `compress_segmentby = 'user_id'` (0008).
 - **Retention policies:** `vehicles` and `predictions` 30 days (0003), `place_visits` 90 days (0005).
 - **`time_bucket` analytics:** the aggregates above, the benchmark scripts and `insights-sponsors/sql/analytics_me.sql`, `analytics_boston.sql`.
@@ -135,10 +136,10 @@ All of this exists in `data-platform/migrations/`.
 |---|---|---|---|
 | Database | Migrations 0000-0015 on a live Tiger Cloud service; `verify` passed; aggregates, compression and retention policies | | |
 | Ingestion | MBTA static load, live collector, tourist content ingestion (run once) | | |
-| data-platform API | Read API for stops, routes, lines, vehicles, predictions, alerts, travel; contract published | | |
+| data-platform API | Read API for stops, routes, lines, vehicles, predictions, alerts, travel and `/analytics/system` (live subway snapshot from the continuous aggregate); contract published | | |
 | insights-sponsors | Content, offers, rank tiers, physical-reward catalog, nearby spots, tourist content on Postgres; faves endpoints; contract published | Consent, place visits, analytics, recommendations still on the in-memory backend | Move those to Postgres; community quests |
 | game-engine | Rules, in-memory and Postgres stores, contract published, shared auth and hardening (optional prod mode) | | Delay and cancellation notifications |
-| Front end | Approved design canvas in `design/canvas/`; `web/` React + Vite app with six designed screens and stubs for the rest | Designs for the stub screens | Public hosting (future, untested) |
+| Front end | Approved design canvas in `design/canvas/`; `web/` React + Vite app with the designed screens, the GIS maps and the Analytics tab, and stubs for the rest | Designs for the stub screens; Isabella to review the Analytics tab | Public hosting (future, untested) |
 
 ## Screenshots
 Taken from the React app (`node scripts/shoot-web.mjs`) running locally against our Tiger Data database, with a sandbox username. The check-in screen has no approved design yet (Home has a tap-in button that is a proposal), and friends, leaderboard, quests and redemptions have no screens. The Analytics tab was designed by the admin to match the canvas (see [docs/APP_SCOPE.md](docs/APP_SCOPE.md)).
@@ -195,7 +196,7 @@ We have **not** deployed the demo publicly. It runs locally on a laptop (see [do
 - Collector (from `data-platform/`, needs `.env` with the database URL and MBTA key): `python -m data_platform.migrate`, `python -m data_platform.load_static`, `python -m data_platform.collector`.
 - Tests: `node --test tests/` (repo tooling), `pytest -q` inside `data-platform/` and `insights-sponsors/`.
 - Front-end wiring: [docs/FRONTEND_INTEGRATION.md](docs/FRONTEND_INTEGRATION.md) and `node scripts/connect-check.mjs`.
-- Demo: `node scripts/preflight.mjs` then `node scripts/demo-up.mjs`, open http://localhost:4321 (see [docs/DEMO.md](docs/DEMO.md)); backend tour: `node scripts/demo.mjs`.
+- Demo: `node scripts/preflight.mjs` then `node scripts/demo-up.mjs`, open http://127.0.0.1:5173 (see [docs/DEMO.md](docs/DEMO.md)); record the captioned video with `node scripts/record-demo.mjs`; backend tour: `node scripts/demo.mjs`.
 - Docs refresh: `node scripts/sync-docs.mjs` (also the VS Code task "Sync docs").
 
 ## Team

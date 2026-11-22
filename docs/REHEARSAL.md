@@ -2,7 +2,7 @@
 
 > Demo placeholder. No partnership, endorsement or real discount is implied. Sponsors, offers and labels are placeholders. Rider data is synthetic; MBTA data is real.
 
-Built from the demo script in [PITCH.md](../PITCH.md) and the runbook in [DEMO.md](DEMO.md). The demo app is `client-bryan/demo` (http://localhost:4321). A captioned recording (`node scripts/record-demo.mjs`, see DEMO.md) is the backup if the live demo fails.
+Built from the demo script in [PITCH.md](../PITCH.md) and the runbook in [DEMO.md](DEMO.md). The demo app is the React app in `web/` (http://127.0.0.1:5173). A captioned recording (`node scripts/record-demo.mjs`, see DEMO.md) is the backup if the live demo fails.
 
 ## Before every rehearsal
 ```powershell
@@ -10,7 +10,7 @@ Remove-Item Env:DATABASE_URL -ErrorAction SilentlyContinue
 node scripts/preflight.mjs          # must end with "Preflight passed."
 node scripts/demo-up.mjs            # starts the 3 backends, the demo app and the React app, prints the URLs
 ```
-Open http://localhost:4321 (the demo app with the maps; needs internet). Restart `demo-up` before each full run so game-engine starts with no collected stops (otherwise a repeat ride earns no points). Ctrl+C in the demo-up terminal stops everything. Afterwards `node scripts/reset-demo.mjs` (dry run) shows what the demo wrote to the database (normally nothing: faves and rides stay in the browser).
+Open http://127.0.0.1:5173 (the React app with the maps and Analytics; needs internet). Restart `demo-up` before each full run so game-engine starts with no collected stops (otherwise a repeat ride earns no points). Ctrl+C in the demo-up terminal stops everything. Afterwards `node scripts/reset-demo.mjs` (dry run) shows what the demo wrote to the database (one fave row at most, flagged demo).
 
 ## Who says what (TODO: assign)
 | Part | Speaker |
@@ -24,13 +24,12 @@ Open http://localhost:4321 (the demo app with the maps; needs internet). Restart
 | Time | Click | Say | Notes |
 |---|---|---|---|
 | 0:00 | Title slide | The 30-second hook from PITCH.md. | Say once that this is a demo with placeholders. |
-| 0:30 | **Loading, then Home** | Boston fun facts load first; Home is a Boston map with live MBTA stations and trains from Tiger Data. Toggle 3D for the landmark buildings. | Map tiles need internet. |
-| 1:00 | **Tap in at Park Street, Ride there** | The ride is checked against the real MBTA schedule and earns points from game-engine (demo mode). Then tap in again and **Tap out now**: it is rejected as a spoof. | The tap-in sheet and ride stamp are a proposal, not in the approved canvas. Only Park Street, Downtown Crossing, Harvard, Alewife and South Station score points. |
-| 1:30 | **Live data moment:** the trains on the Home map, or `http://127.0.0.1:8001/vehicles?route_id=Red` in a tab | Vehicles on the line right now come from the MBTA feed our collector stores in Tiger Data. | Check `last_vehicle_at` at `http://127.0.0.1:8001/health` is under 5 minutes old. |
+| 0:25 | **Loading, then Home** | Boston fun facts load first; Home is a Boston map with live MBTA lines and trains from Tiger Data. Toggle 3D for the landmark buildings. | Map tiles need internet. |
+| 0:55 | **Tap in at Park Street, Ride there** | The ride is checked against the real MBTA schedule and earns points from game-engine (demo mode). Then tap in again and **Tap out now**: it is rejected as a spoof. | Needs service hours (no scheduled trains overnight). The tap-in sheet is a proposal, not in the approved canvas. Only Park Street, Downtown Crossing, Harvard, Alewife and South Station score points. |
+| 1:25 | **Analytics** | Vehicles per line right now and active alerts, then vehicle reports per hour and the busiest and quietest hours: live MBTA data computed from the aggregate in Tiger Data. Last block is demo rider data. | Check `last_vehicle_at` at `http://127.0.0.1:8001/health` is under 5 minutes old. The hour-of-day bars are thin until more days are collected. |
 | 2:00 | Slide: Tiger Data numbers | Read only the figures in the generated block in PITCH.md / `docs/TIGER_DATA_RESULTS.md`. | If a figure says "TODO: measure", say it is still being measured. Do not add numbers. |
-| 2:20 | **Explore** | Nearby spots and perks from fictional demo businesses; filter by category, line and ownership label. | Everything shown is a demo placeholder. |
-| 2:40 | **User page** | Rank and points from game-engine; demo perks. No real partnerships. | Friends, leaderboard, quests and redemptions have no screens yet. |
-| 2:50 | Close | What we would do next: more lines, the tourist layer, a possible sponsor program (not pursued now). | Public hosting is future work; do not imply a public URL. Do not present Ethnic Boston as verified (wording unconfirmed). |
+| 2:20 | **Explore, Profile** | Nearby spots and perks from fictional demo businesses; rank and demo perks. | Everything shown is a demo placeholder. |
+| 2:50 | Close | What we would do next: more lines, the tourist layer, a possible sponsor program (not pursued now). | Public hosting is future work. Do not present Ethnic Boston as verified (wording unconfirmed). |
 
 ## 60-second version
 1. (0:00) One sentence of hook and "this is a demo with placeholders".

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // One command for the local demo: data-platform (8001), insights-sponsors (8002), game-engine (8003, in-memory mode),
-// the demo client with the Boston maps (4321, client-bryan/demo) and the React web app (5173), all in dev mode. Waits for health, prints the URLs, stops everything on Ctrl+C.
+// the earlier vanilla prototype (4321, client-bryan/demo) and the React web app (5173, the app we demo), all in dev mode. Waits for health, prints the URLs, stops everything on Ctrl+C.
 //   node scripts/demo-up.mjs
 // Refuses to start if a port is taken (so you never talk to a stale process). Prints no secrets.
 // DATABASE_URL is removed from the children's environment so each service loads the repo's .env itself.
@@ -58,8 +58,8 @@ async function main() {
     console.log(`  up: ${s.name} on ${s.port}`);
   }
   console.log('\nT-Quest demo is running (dev mode, live MBTA data from your Tiger Data database).');
-  console.log('  Demo app (maps):    http://localhost:4321   <- the one to demo (needs internet for map tiles and the MBTA schedule)');
-  console.log('  React web app:     http://127.0.0.1:5173');
+  console.log('  Demo app (React):   http://127.0.0.1:5173   <- the one to demo (needs internet for map tiles and the MBTA schedule)');
+  console.log('  Earlier prototype:  http://localhost:4321');
   console.log('  data-platform:      http://127.0.0.1:8001/docs');
   console.log('  insights-sponsors:  http://127.0.0.1:8002/docs');
   console.log('  game-engine:        http://127.0.0.1:8003/docs   (in-memory mode: check-ins write nothing to the database)');
