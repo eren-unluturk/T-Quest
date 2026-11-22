@@ -1,17 +1,19 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from . import _shared  # noqa: F401
+import tquest_auth
+import tquest_http
 
 from .config import settings
-from .routes import catalog, consent, content, insights, place_visits, spots, faves
+from .routes import catalog, consent, content, insights, place_visits, spots, faves, login
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="T-Quest insights-sponsors", version="0.1.0")
-    origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()] or ["*"]
-    app.add_middleware(
-        CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type"], allow_credentials=False,
+    prod = tquest_auth.app_env() == "prod"
+    app = FastAPI(
+        title="T-Quest insights-sponsors", version="0.1.0",
+        docs_url=None if prod else "/docs", redoc_url=None, openapi_url=None if prod else "/openapi.json",
     )
+    tquest_http.harden(app)  # CORS from CORS_ORIGINS, rate limits, body limit, security headers, generic errors
     app.include_router(content.router)
     app.include_router(catalog.router)
     app.include_router(consent.router)
@@ -19,6 +21,7 @@ def create_app() -> FastAPI:
     app.include_router(place_visits.router)
     app.include_router(spots.router)
     app.include_router(faves.router)
+    app.include_router(login.router)
 
     @app.get("/health")
     def health() -> dict:

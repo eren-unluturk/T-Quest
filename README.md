@@ -16,7 +16,7 @@ Hundreds of thousands of people ride the MBTA every day. For residents it is a f
 Status is derived from each agent's `.work/ROADMAP.md` and handoff notes. See [PLAN.md](PLAN.md) for the live checklist counts.
 
 **Built**
-- Tiger Data schema (migrations 0000-0011) applied to a live Tiger Cloud database: rider events, MBTA vehicles and predictions as hypertables (alerts are plain tables), continuous aggregates, compression policies. `python -m data_platform.verify` passed on the live database.
+- Tiger Data schema (migrations 0000-0014) applied to a live Tiger Cloud database: rider events, MBTA vehicles and predictions as hypertables (alerts are plain tables), continuous aggregates, compression policies. `python -m data_platform.verify` passed on the live database.
 - Real MBTA static data loaded (routes, lines, stops, schedules) and a standalone live collector for vehicles, predictions and alerts.
 - Benchmark commands and measured results: [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md). The real-data compression figures are TODO: measure.
 - data-platform read API (FastAPI) and published contracts in `contracts/`.
@@ -24,12 +24,15 @@ Status is derived from each agent's `.work/ROADMAP.md` and handoff notes. See [P
 - Tourist content ingestion from official public APIs (Analyze Boston, Digital Commonwealth open-rights items, hand-written Freedom Trail facts), run once; counts in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
 - game-engine service (Tobi): check-in, points, rank, redemption, badges, quests, friends, leaderboards, home line and delay compensation rules, with an in-memory mode and a Tiger Data (Postgres) store, OpenAPI published.
 
+- **Web app (`web/`, Vite + React + TypeScript)**: the six designed screens (Loading, Home, Traveled, Explore, Faves, Profile) are ported from `design/canvas` and wired to the real endpoints; screens with no design (sign in, check in, friends, leaderboard, quests, redemptions) are plain stubs. See [docs/APP_SCOPE.md](docs/APP_SCOPE.md). Maps are placeholders.
+- **Public-demo hardening (prepared, not deployed):** signed short-lived demo tokens, restricted CORS, rate limits, security headers, a seed script for a separate demo database, and Dockerfiles (untested). See [docs/DEPLOY.md](docs/DEPLOY.md).
+
 **In progress**
 - Consent, place visits, personal analytics and recommendations in insights-sponsors still run on the in-memory backend with seed data; moving them to Postgres is planned, not done.
 - Rider travel (`GET /me/travel`: miles per line, traveled segments) is built in data-platform from check-in events; with no real riders yet it returns zeros except for synthetic test riders.
 
 **Planned**
-- Rider-facing apps (client-bryan, client-isabella). They wait on sketches and Figma in `design/`; nobody invents UI.
+- Designs for the stub screens, Boston-GIS maps (Bryan), along-line ordering in Explore, and the actual deployment (done by hand from docs/DEPLOY.md).
 - Community quests ("visit three local spots near stops") proposed to game-engine, delay and cancellation notifications.
 - Opt-in tracking of other places visited, with explicit consent (the consent table and gate exist).
 

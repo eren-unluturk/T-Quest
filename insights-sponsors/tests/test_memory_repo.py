@@ -5,6 +5,7 @@ import pytest
 import yaml
 from insights_sponsors import spots as spots_mod
 from insights_sponsors.routes import catalog as catalog_mod
+from insights_sponsors.routes import login as login_mod
 
 from insights_sponsors import models
 from insights_sponsors.repo import get_repository
@@ -133,12 +134,12 @@ def test_models_match_openapi_fields():
     for name, schema in schemas.items():
         if schema.get("type") != "object":
             continue
-        model = next(getattr(m, name) for m in (models, spots_mod, catalog_mod) if hasattr(m, name))
+        model = next(getattr(m, name) for m in (models, spots_mod, catalog_mod, login_mod) if hasattr(m, name))
         assert set(model.model_fields) == set(schema["properties"]), name
         required = {k for k, f in model.model_fields.items() if f.is_required()}
         assert required == set(schema.get("required", [])), name
         checked += 1
-    assert checked == 32
+    assert checked == 33
 
 
 def test_seed_covers_neighborhoods_and_bus(repo):

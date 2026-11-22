@@ -11,7 +11,7 @@ Make the T something riders look forward to: a Pokemon-Go-style game layer over 
 - Check-in, points, rank and leaderboard (game-engine) on real stops.
 - Nearby spots at a stop with category and label filters (demonstrated on fictional sample spots); three labeled demo placeholders.
 - Offers by rank tier, physical-reward catalog (stickers and patches).
-- UI from the Figma/sketches in `design/` (not started, waiting on design).
+- UI from `design/`: six screens built in `web/`; stubs for screens without designs (see docs/APP_SCOPE.md).
 
 **Stretch**
 - Tourist content: stop facts, Freedom Trail, loading-screen facts, from open sources with attribution.
@@ -40,20 +40,20 @@ Roadmap checkbox progress (counted from each agent's `.work/ROADMAP.md`; checkbo
 
 | Open issues addressed to | Count |
 |---|---|
-| `to:client-bryan` | 5 |
-| `to:client-isabella` | 5 |
+| `to:client-bryan` | 6 |
+| `to:client-isabella` | 6 |
 | `to:data-platform` | 2 |
 | `to:game-engine` | 1 |
 | `to:insights-sponsors` | 4 |
 
-Total open issues: 18.
+Total open issues: 20.
 <!-- AUTO:status:end -->
 
 ## Per-agent roadmap (hand-written, as of 2026-11-21)
 - **data-platform:** schema 0000-0009 applied and verified on a live Tiger Cloud database; real static data loaded; collector running; benchmarks recorded in `docs/TIGER_DATA_RESULTS.md`. Left: Dockerfile and compose services (015). Some roadmap checkboxes still read "DB-unverified" and lag the verified state.
 - **insights-sponsors:** OpenAPI v0.5.0 published. Postgres backend serves stops, offers, physical rewards, nearby spots with category and label filters, and tourist content (ingested once). Consent, place visits, analytics and recommendations are still in memory (planned).
 - **game-engine:** service and rules done, with a Tiger Data (Postgres) store and 8 named ranks merged; its roadmap file is empty, so status comes from git history and its README.
-- **client-bryan, client-isabella:** no UI built, by design, until sketches and Figma land in `design/`.
+- **client-bryan, client-isabella:** their folders hold docs only. `web/` (admin branch work) builds the designed screens from `design/canvas`; they review it and own designs for the stubs and the Boston-GIS maps.
 
 ## Hackathon timeline
 | Slot | Goal |
@@ -81,7 +81,8 @@ No open issues carry `priority:blocker`.
 | Plan usage limits hit mid-work | Small commits, handoff notes, queue prompts; stop cleanly |
 | Real data volume is small (days of polling) so TimescaleDB gains are modest | Report numbers as measured, keep the collector running, no claims beyond `docs/TIGER_DATA_RESULTS.md` |
 | Sponsors read as real | Not pursuing real partnerships; all sponsors are demo placeholders, flagged `demo` in every response. Demo placeholder. No partnership, endorsement or real discount is implied. |
-| UI waits on Figma | Backends and contracts first; clients build only from `design/` |
+| UI waits on designs | Designed screens are built; screens without designs are plain stubs; nobody invents UI |
+| Public deployment exposes the real database | Separate demo database, signed expiring tokens, exact CORS, rate limits, checklists in docs/DEPLOY.md; deployment is manual |
 | Ownership labels wrong or offensive | Real businesses carry no labels in the demo; labels show only if declared or certified, filtering is demonstrated on fictional sample spots, pending never exposed, correction and removal path in `docs/DATA_SOURCES.md` |
 | Source licenses | Official APIs and downloads only, per-record license and attribution, commercial_ok flag, checklist before any commercial launch |
 | Synthetic data mistaken for real | `is_synthetic` flag and explicit wording everywhere |

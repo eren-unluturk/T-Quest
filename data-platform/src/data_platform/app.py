@@ -1,13 +1,18 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from . import _shared  # noqa: F401
+import tquest_auth
+import tquest_http
 
 from . import db
 from .routes import realtime, routes, stops, travel
 
-app = FastAPI(title="T-Quest data-platform", version="0.1.0")
-
-# Public read API: no user data, so any origin may call it.
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"])
+_prod = tquest_auth.app_env() == "prod"
+app = FastAPI(
+    title="T-Quest data-platform", version="0.1.0",
+    docs_url=None if _prod else "/docs", redoc_url=None, openapi_url=None if _prod else "/openapi.json",
+)
+# Read API: CORS from CORS_ORIGINS (exact origins in prod), security headers, generic errors.
+tquest_http.harden(app, allow_methods=("GET", "OPTIONS"))
 
 app.include_router(routes.router)
 app.include_router(stops.router)

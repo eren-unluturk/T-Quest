@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
   title: T-Quest insights-sponsors API
-  version: 0.7.0
+  version: 0.8.0
   x-changelog:
+    - '0.8.0: add POST /auth/demo-login (sandbox login, signed short-lived token); with APP_ENV=prod bearer tokens must be signed'
     - '0.7.0: add GET /me/faves, POST and DELETE /me/faves/{fact_id}; Spot.fun_fact (demo, hand-written); GET /stops/{id}/facts falls back to a general Boston fact with fallback=true and a note'
     - '0.6.0: rank tiers follow game-engine 8 named ranks; RankTier gains name, avatar_key, min_lifetime_points; min_rank maximum is 8'
     - '0.5.0: add GET /stops/{stop_id}/content and GET /loading-facts (open-source content with source_url, license, attribution); TrailSite gains source_url and attribution'
@@ -130,6 +131,29 @@ paths:
       responses:
         '204': {description: Removed (idempotent)}
         '401': {$ref: '#/components/responses/Unauthorized'}
+  /auth/demo-login:
+    post:
+      summary: Sandbox login; returns a short-lived signed token
+      description: Any 3-32 letter or digit username, no password, no personal data. Send the token as Authorization Bearer on every other route. In dev without TOKEN_SECRET the token is the username.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties:
+                username: {type: string, minLength: 3, maxLength: 32, pattern: '^[A-Za-z0-9]+$'}
+      responses:
+        '200':
+          description: Token issued
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/LoginResponse'}
+        '422': {description: Invalid username}
+        '429': {description: Too many requests}
+        '503': {description: Login unavailable (server not configured)}
   /fun-facts:
     get:
       summary: Loading-screen fun facts
@@ -446,6 +470,13 @@ components:
         application/json:
           schema: {$ref: '#/components/schemas/Error'}
   schemas:
+    LoginResponse:
+      type: object
+      required: [token, username, expires_in]
+      properties:
+        token: {type: string}
+        username: {type: string}
+        expires_in: {type: integer, description: seconds}
     Fave:
       type: object
       required: [fact_id, kind, text, attribution, faved_at]

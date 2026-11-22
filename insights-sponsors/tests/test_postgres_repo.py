@@ -169,3 +169,8 @@ def test_content_records_are_complete_and_open():
         not_open = c.execute("""SELECT count(*) FROM content_items WHERE source_id = 'digital-commonwealth'
               AND lower(license) NOT LIKE '%%no known copyright restrictions%%' AND lower(license) NOT LIKE '%%no known us copyright restrictions%%' AND lower(license) NOT LIKE '%%public domain%%'""").fetchone()[0]
         assert not_open == 0
+
+
+def test_every_offer_is_flagged_demo(client):
+    offers = client.get("/offers", headers=AUTH).json()
+    assert offers and all(o["demo"] is True for o in offers)
