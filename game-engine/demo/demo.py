@@ -101,6 +101,18 @@ def main(argv):
     show("6. Quests")
     call(c, "GET", "/quests", "ann")
 
+    show("6b. Tapping a spot saves one visit event (no points), once a day")
+    call(c, "POST", "/spots/demo-cafe/visit", "ann", {}, note="201: first tap today")
+    call(c, "POST", "/spots/demo-cafe/visit", "ann", {}, note="200: already visited today, nothing new written")
+    call(c, "POST", "/spots/demo-cafe/visit", "ann", {"stop_id": "harvard"}, note="422: that spot is not near harvard")
+
+    if not url:
+        show("6c. Speed check (on by default with the database; switched on here): park then harvard in one second")
+        os.environ["SPEED_CHECK"] = "strict"
+        checkin(c, "cy", "park", "first check-in")
+        checkin(c, "cy", "harvard", "422 too_fast: about 5 km in one second")
+        os.environ.pop("SPEED_CHECK")
+
     show("7. Redeeming a reward: single-use code, checked at the store")
     red = call(c, "POST", "/redemptions", "ann", {"offer_id": "o1"}, note="rank 1 is enough for o1")
     code = red.json().get("code")

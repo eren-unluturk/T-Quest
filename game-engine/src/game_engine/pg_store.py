@@ -21,6 +21,7 @@ Pass a connection to PgStore(conn). With autocommit on, each statement is saved
 at once. With autocommit off, nothing is saved until commit(), so tests can roll back.
 """
 import hashlib
+import json
 import os
 import secrets
 from datetime import timedelta, timezone
@@ -234,6 +235,37 @@ class PgStore:
         self._q("insert into rider_events (time, user_id, event_type, stop_id, mode, lat, lon, client_time, "
                 "points_awarded, is_synthetic) values (%s,%s,'checkin',%s,%s,%s,%s,%s,%s,true)",
                 (at, self._uid(user), stop_id, mode, lat, lon, client_time, points))
+
+    def last_checkin(self, user):
+        """(at, lat, lon) of the user's latest check-in anywhere, or None."""
+        row = self._q("select time, lat, lon from rider_events where user_id=%s and event_type='checkin' "
+                      "and lat is not null and lon is not null order by time desc limit 1",
+                      (self._uid(user),), one=True)
+        return (_naive(row[0]), row[1], row[2]) if row else None
+
+    # spots (placeholder places near stops, from insights-sponsors tables)
+    def spot_stops(self, spot_id):
+        """{station id: distance_m or None} for an active spot, or None if the spot does not exist."""
+        sid = _uuid_or_none(spot_id)
+        if not sid:
+            return None
+        rows = self._q("select l.stop_id, l.distance_m from nearby_spots s left join spot_stop_links l on l.spot_id = s.id "
+                       "where s.id = %s and s.active and s.removed_at is null", (sid,), many=True)
+        if not rows:
+            return None
+        return {r[0]: r[1] for r in rows if r[0]}
+
+    def spot_visited_since(self, user, spot_id, since):
+        row = self._q("select 1 from rider_events where user_id=%s and event_type='visit' and time >= %s "
+                      "and payload->>'spot_id' = %s limit 1", (self._uid(user), since, str(spot_id)), one=True)
+        return row is not None
+
+    def record_spot_visit(self, user, spot_id, stop_id, at):
+        """A rider tapped a spot: one 'visit' rider event with payload.spot_id (demo row, is_synthetic)."""
+        self._w()
+        self._q("insert into rider_events (time, user_id, event_type, stop_id, payload, is_synthetic) "
+                "values (%s,%s,'visit',%s,%s::jsonb,true)",
+                (at, self._uid(user), stop_id, json.dumps({"spot_id": str(spot_id)})))
 
     # points
     def ledger_entries(self, user):

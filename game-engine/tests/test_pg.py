@@ -31,7 +31,7 @@ class PgTests(unittest.TestCase):
     def setUp(self):
         self.conn = psycopg.connect(URL, autocommit=False, connect_timeout=15)
         self.conn.execute("set timezone = 'UTC'")
-        self.env = patch.dict(os.environ, {"VEHICLE_CHECK": "off"})
+        self.env = patch.dict(os.environ, {"VEHICLE_CHECK": "off", "SPEED_CHECK": "off"})
         self.env.start()
         self.store = PgStore(self.conn, allow_writes=True)
         appmod.set_store(self.store)
@@ -199,7 +199,8 @@ class PgTests(unittest.TestCase):
         self.assertEqual(self.c.get("/me/rank", headers=H("pytest-ro")).json()["name"], "Harbor Seal")
         for method, path, body in [("post", "/checkins", self.stop), ("post", "/friends", {"username": "x"}),
                                    ("post", "/redemptions", {"offer_id": "o"}),
-                                   ("post", "/redemptions/verify", {"code": "c", "store_id": "s"})]:
+                                   ("post", "/redemptions/verify", {"code": "c", "store_id": "s"}),
+                                   ("post", "/spots/00000000-0000-0000-0000-000000000000/visit", {})]:
             r = getattr(self.c, method)(path, json=body, headers=H("pytest-ro"))
             self.assertEqual((r.status_code, r.json()["detail"]), (503, "db_writes_disabled"), path)
         n = self.conn.execute("select count(*) from users where username like 'demo_pytest-ro%'").fetchone()[0]
@@ -230,6 +231,43 @@ class PgTests(unittest.TestCase):
         self.assertEqual(sum(after.values()), 0)
         self.assertEqual(self.conn.execute(
             "select count(*) from pg_trigger where tgname = 'points_ledger_no_mutation' and tgenabled <> 'O'").fetchone()[0], 0)
+
+    def test_spot_visit_writes_one_demo_event(self):
+        row = self.conn.execute(
+            "select s.id, l.stop_id from nearby_spots s join spot_stop_links l on l.spot_id = s.id "
+            "where s.active and s.removed_at is null order by l.distance_m nulls last limit 1").fetchone()
+        if not row:
+            self.skipTest("no spot with a station in the database")
+        spot_id, stop_id = str(row[0]), row[1]
+        u = "pytest-spot"
+        r = self.c.post(f"/spots/{spot_id}/visit", json={}, headers=H(u))
+        self.assertEqual(r.status_code, 201, r.text)
+        self.assertEqual((r.json()["spot_id"], r.json()["already_visited_today"]), (spot_id, False))
+        self.assertEqual(r.json()["stop_id"], stop_id)
+        count = lambda: self.conn.execute(
+            "select count(*), bool_and(is_synthetic) from rider_events where event_type='visit' "
+            "and payload->>'spot_id' = %s and user_id = (select id from users where username = %s)",
+            (spot_id, "demo_" + u)).fetchone()
+        self.assertEqual(count(), (1, True))
+        again = self.c.post(f"/spots/{spot_id}/visit", json={}, headers=H(u))
+        self.assertEqual((again.status_code, again.json()["already_visited_today"]), (200, True))
+        self.assertEqual(count(), (1, True))                  # no duplicate event
+        self.assertEqual(self.c.post(f"/spots/{spot_id}/visit", json={"stop_id": "place-nowhere"}, headers=H(u)).status_code, 422)
+        self.assertEqual(self.c.post("/spots/00000000-0000-4000-8000-000000000000/visit", headers=H(u)).status_code, 404)
+        self.assertEqual(self.c.post("/spots/not-a-uuid/visit", headers=H(u)).status_code, 404)
+        self.assertEqual(self.c.get("/me/points", headers=H(u)).json()["balance"], 0)          # no points
+        self.assertEqual(self.c.get("/me/collection", headers=H(u)).json()["stops"], [])       # not a check-in
+
+    def test_too_fast_with_database(self):
+        """On by default with the database: two far stations in the same second are refused."""
+        a = self.conn.execute("select id, lat, lon from stops where id='place-pktrm'").fetchone()
+        b = self.conn.execute("select id, lat, lon from stops where id='place-ccmnl'").fetchone()
+        mk = lambda s: {"stop_id": s[0], "lat": s[1], "lon": s[2], "client_time": "2026-11-21T12:00:00"}
+        with patch.dict(os.environ, {"SPEED_CHECK": "strict"}):
+            self.assertEqual(self.c.post("/checkins", json=mk(a), headers=H("pytest-fast")).status_code, 201)
+            r = self.c.post("/checkins", json=mk(b), headers=H("pytest-fast"))
+            self.assertEqual((r.status_code, r.json()["detail"]), (422, "too_fast"))
+            self.assertEqual(self.store.last_checkin("pytest-fast")[1:], (a[1], a[2]))
 
     def test_unknown_stop_and_far(self):
         self.assertEqual(self.c.post("/checkins", json=dict(self.stop, stop_id="nope-nope"),

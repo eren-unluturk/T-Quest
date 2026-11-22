@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -74,6 +75,35 @@ class AppTests(unittest.TestCase):
         self.assertEqual(ok.json()["status"], "claimed")
         again = self.c.post("/redemptions/verify", json=body, headers={"X-Store-Key": "dev-store-key"})
         self.assertEqual(again.status_code, 410)
+
+    def test_too_fast_between_far_check_ins(self):
+        """Speed check (server time): park -> harvard (about 5 km) in the same second is refused."""
+        harvard = {"stop_id": "harvard", "lat": 42.3736, "lon": -71.1190, "client_time": "2026-11-21T12:00:00"}
+        with patch.dict(os.environ, {"SPEED_CHECK": "strict"}):
+            self.assertEqual(self.c.post("/checkins", json=PARK, headers=H("cy")).status_code, 201)
+            r = self.c.post("/checkins", json=harvard, headers=H("cy"))
+            self.assertEqual((r.status_code, r.json()["detail"]), (422, "too_fast"))
+            # another rider is not affected
+            self.assertEqual(self.c.post("/checkins", json=harvard, headers=H("dee")).status_code, 201)
+        # off by default in memory mode
+        self.assertEqual(self.c.post("/checkins", json=harvard, headers=H("cy")).status_code, 201)
+
+    def test_spot_visit(self):
+        r = self.c.post("/spots/demo-cafe/visit", json={}, headers=H("ann"))
+        self.assertEqual(r.status_code, 201, r.text)
+        self.assertEqual((r.json()["spot_id"], r.json()["stop_id"], r.json()["already_visited_today"]),
+                         ("demo-cafe", "park", False))
+        again = self.c.post("/spots/demo-cafe/visit", headers=H("ann"))
+        self.assertEqual((again.status_code, again.json()["already_visited_today"]), (200, True))
+        # nearest station is the default; an explicit station must be one of the spot's stations
+        self.assertEqual(self.c.post("/spots/demo-bar/visit", headers=H("ann")).json()["stop_id"], "downtown")
+        self.assertEqual(self.c.post("/spots/demo-bar/visit", json={"stop_id": "park"}, headers=H("bob")).json()["stop_id"], "park")
+        r = self.c.post("/spots/demo-cafe/visit", json={"stop_id": "harvard"}, headers=H("bob"))
+        self.assertEqual((r.status_code, r.json()["detail"]), (422, "spot_not_near_stop"))
+        self.assertEqual(self.c.post("/spots/nope/visit", headers=H("bob")).status_code, 404)
+        self.assertEqual(self.c.post("/spots/demo-cafe/visit").status_code, 401)
+        # no points for tapping a spot
+        self.assertEqual(self.c.get("/me/points", headers=H("ann")).json()["balance"], 0)
 
 
 if __name__ == "__main__":

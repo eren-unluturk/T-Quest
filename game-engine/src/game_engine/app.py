@@ -20,7 +20,7 @@ import os
 import threading
 from datetime import datetime, timezone
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Response
 from pydantic import BaseModel
 
 from . import badges, config
@@ -125,10 +125,12 @@ def post_checkin(body: CheckinRequest, user: str = Depends(current_user)):
             seen = st.vehicle_seen_at(body.stop_id, t, stop["lat"], stop["lon"])
         else:
             seen = t
+        # Speed check (server time only): on by default with the database, off in memory demo mode
+        previous = st.last_checkin(user) if os.environ.get("SPEED_CHECK", default_mode) == "strict" else None
         res = validate_checkin(
             consent=body.consent, user_lat=body.lat, user_lon=body.lon,
             stop_lat=stop["lat"], stop_lon=stop["lon"], now=t,
-            last_vehicle_seen_at=seen, last_checkin_at=last)
+            last_vehicle_seen_at=seen, last_checkin_at=last, previous_checkin=previous)
         if not res.ok:
             raise HTTPException(res.http_status, res.reason)
 
@@ -167,6 +169,40 @@ def post_checkin(body: CheckinRequest, user: str = Depends(current_user)):
                 "points_awarded": pts + extra, "first_visit": first,
                 "new_rank": final_rank if final_rank != old_rank else None,
                 "badges_unlocked": sorted(new_badges)}
+
+
+class SpotVisitRequest(BaseModel):
+    stop_id: str | None = None  # the station the rider was looking at; default: the spot's nearest station
+
+
+@app.post("/spots/{spot_id}/visit", status_code=201)
+def post_spot_visit(spot_id: str, response: Response, body: SpotVisitRequest = SpotVisitRequest(),
+                    user: str = Depends(current_user)):
+    """A rider tapped a spot: save one 'visit' rider event with payload.spot_id (once per spot per day).
+
+    No points. Spots are placeholder places near stations (insights-sponsors tables).
+    """
+    st = get_store()
+    require_write(st)
+    stops = st.spot_stops(spot_id)
+    if stops is None:
+        raise HTTPException(404, "unknown spot")
+    if body.stop_id is not None:
+        if body.stop_id not in stops:
+            raise HTTPException(422, "spot_not_near_stop")
+        stop_id = body.stop_id
+    elif stops:
+        stop_id = min(stops, key=lambda s: (stops[s] is None, stops[s] or 0.0))
+    else:
+        raise HTTPException(422, "spot_has_no_stop")
+    with LOCK:
+        t = now()
+        day_start = t.replace(hour=0, minute=0, second=0, microsecond=0)
+        if st.spot_visited_since(user, spot_id, day_start):
+            response.status_code = 200
+            return {"spot_id": spot_id, "stop_id": stop_id, "visited_at": None, "already_visited_today": True}
+        st.record_spot_visit(user, spot_id, stop_id, t)
+    return {"spot_id": spot_id, "stop_id": stop_id, "visited_at": t.isoformat(), "already_visited_today": False}
 
 
 @app.get("/me/points")
