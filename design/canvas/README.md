@@ -23,6 +23,8 @@ Bottom nav on every screen: Home, Explore, Traveled, drawn as bubble icons from 
 
 ## Placeholders
 
+- The two maps (Home and Traveled) are placeholders: client-bryan will rebuild them from Boston GIS data, keeping the pins, line styles and legend described above.
+
 - Partner stores and their offers are FICTIONAL demo businesses (Abuela's Kitchen, Steep & Swirl Tea Bar, Old Brick Walking Tours, Harborlight Books, Roxbury Roots Cafe, Copley Corner Bakery, Pho Lantern, Sabor del Barrio). Eren will replace them with the real example stores; for the demo, locally owned places are preferred.
 - Points, miles, usernames, member numbers and anything in [brackets] are placeholders. Real values come from the APIs (rank thresholds: game-engine PR #46).
 - Facts about real places (Park Street, Granary, State House, etc.) are real but must be shown with source attribution from the content API (#56).
