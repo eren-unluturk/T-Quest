@@ -93,3 +93,6 @@ Next 3 queue prompts: **014, 015, 016** (017 depends on 016). 007 is superseded 
 
 ## Update (public-demo work, merged to main)
 - Added shared/ (signed-token auth, hardening), demo login on insights (POST /auth/demo-login), scripts/seed-demo-db.mjs (+ data_platform.seed_demo), Dockerfiles (untested), web/ app, docs/DEPLOY.md, docs/APP_SCOPE.md, scripts/e2e-prod.mjs (47/47). Migrations 0013 (rank names) and 0014 (all sponsors demo). Deployment is manual: docs/DEPLOY.md. Not verified: Docker builds, hosts, Vercel, seed script against a real second DB.
+
+## Update (local-demo pass)
+- The demo runs locally: `node scripts/demo-up.mjs`, checks with `node scripts/preflight.mjs`, runbook docs/DEMO.md. Public hosting is future work (docs/FUTURE_PUBLIC_HOSTING.md, future-hosting/). PostgresRepository._q now reuses one connection per worker thread. Faves rows carry is_demo (migration 0015) and are removed by scripts/reset-demo.mjs.

@@ -48,3 +48,10 @@ STOPPED SAFELY at 2026-11-21 13:20 (planner). See .work/HANDOFF.md.
 
 # STATE (demo-deploy merged)
 - main has the public-demo work; all suites green (shared 14, data-platform 147, insights 217, game-engine 64, node 58, web 28).
+
+# STATE (local-demo pass, 2026-11-21)
+- Interrupted single-db-demo run left nothing: no commits, no uncommitted files, no tquest_app role, no new tables (checked read-only). Branch single-db-demo is now this pass's branch.
+- Public-hosting files moved to future-hosting/ (Dockerfiles, vercel.json, seed-demo-db.mjs); deploy guide is docs/FUTURE_PUBLIC_HOSTING.md. data_platform.seed_demo and its test stay in place (moving them breaks the package).
+- Added scripts/demo-up.mjs, preflight.mjs, reset-demo.mjs, VS Code tasks; /health now has last_vehicle_at; migration 0015 (fact_faves.is_demo) applied to the live database; insights Postgres reads reuse a connection per thread (nearby went from about 750 ms to under 100 ms).
+- Known: predictions are stored per platform id and stops has no platform-to-station link, so /predictions?stop_id=place-... is empty; no screen uses it.
+- demo-deploy remote branch is fully merged but was idle under 2 hours at check time; left in place.
