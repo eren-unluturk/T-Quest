@@ -21,6 +21,7 @@ import threading
 from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Response
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from . import badges, config
@@ -32,6 +33,16 @@ from .social import leaderboard, points_in_period
 from .store import MemoryStore
 
 app = FastAPI(title="T-Quest game-engine", version="0.2.0")
+
+# CORS so a browser app (Vite, Vercel) can call this API. Demo default: any origin, no cookies.
+# Set CORS_ORIGINS="https://my-app.example,http://localhost:5173" to allow only those sites.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in os.environ.get("CORS_ORIGINS", "*").split(",") if o.strip()],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Store-Key"],
+    allow_credentials=False,
+)
 
 LOCK = threading.RLock()
 _store = None
