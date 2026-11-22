@@ -87,28 +87,34 @@ WITH recent AS (
 <!-- section:real:start -->
 ## Real MBTA data
 
-Source of every number in this section: REAL data from the MBTA V3 API (`/vehicles`, `/predictions`, `/alerts`, subway, light rail and bus), collected by `python -m data_platform.collector` into Tiger Data. No synthetic rows are involved. Measured 2026-11-21 on a Tiger Cloud service (0.5 CPU, 2 GiB RAM), TimescaleDB 2.32.1. Reproduce with `python -m data_platform.bench_real` (collector stopped).
+Source of every number in this section: REAL data from the MBTA V3 API (`/vehicles`, `/predictions`, `/alerts`, subway, light rail and bus), collected by `python -m data_platform.collector` into Tiger Data. No synthetic rows are involved. Measured 2026-11-22 on a Tiger Cloud service (0.5 CPU, 2 GiB RAM), TimescaleDB 2.32.1, while the collector kept running.
 
 ### Data (source: MBTA V3 live feed)
 
 | Table | Rows |
 |---|---|
-| `vehicles` (positions, 2026-11-19 19:37 to 2026-11-21 22:16 UTC) | 274,565 |
-| `predictions` | 335,050 |
-| `alerts` | 74 |
-| `alert_entities` | 290 |
-| `vehicles_route_5m` aggregate buckets | 3,330 |
+| `vehicles` (positions, 2026-11-19 19:37 to 2026-11-22 02:13 UTC, about 2.3 days) | 733,219 |
+| `predictions` | 1,015,921 |
+| `alerts` | 94 |
+| `alert_entities` | 324 |
+| `vehicles_route_5m` aggregate buckets | 9,082 |
 
-### Compression (source: `hypertable_detailed_size` total, tables + indexes + toast; every chunk compressed for this measurement)
+### Compression (settled chunk only; on-disk size of the chunk including indexes and toast, from `chunks_detailed_size`)
 
-TODO: measure. The earlier real-data compression figures were unreliable (the benchmark mixed already-compressed and uncompressed chunks) and were removed. Re-measure on settled chunks with `python -m data_platform.bench_real`, then record the result here.
+| Hypertable | Chunk measured | Rows in chunk | Size uncompressed | Size compressed | Ratio |
+|---|---|---|---|---|---|
+| `vehicles` | 2026-11-21 (UTC day) | 416,348 | 148.9 MB | 9.7 MB | 15.3x |
+| `predictions` | 2026-11-21 (UTC day) | 640,018 | 236.5 MB | 9.7 MB | 24.3x |
 
-### Query latency: vehicle position reports per line per 5 minutes, last 3 days (source: `EXPLAIN (ANALYZE)` server-side planning + execution, median of 5 after 1 warm-up)
+Method: the 2026-11-21 chunk of each hypertable had stopped receiving writes (its range ended at 00:00 UTC). It was decompressed, its on-disk size (table + indexes + toast) was read from `chunks_detailed_size`, it was compressed again, and the size was read again. The live chunk (2026-11-22) was not touched. The two older chunks are tiny (a first, partial collection day) and were left out. We do not quote the `hypertable_compression_stats` ratio or a whole-table ratio, because the stats "before" figure and the mix of compressed and live chunks make them misleading. One chunk per hypertable over about one day of data is a small sample; larger volumes may behave differently.
 
-| State | Continuous aggregate `vehicles_route_5m` (ms) | Raw `vehicles` (ms) | Speedup |
-|---|---|---|---|
-| Before forced compression | 67.5 | 567.93 | 8.41x |
-| After compression | 8.25 | 563.79 | 68.34x |
+### Query latency: vehicle position reports per line per 5 minutes, last 3 days (source: `EXPLAIN (ANALYZE)` server-side planning + execution, median of 5 after 1 warm-up; excludes network round trip)
+
+| Continuous aggregate `vehicles_route_5m` (ms) | Raw `vehicles` (ms) | Speedup |
+|---|---|---|
+| 19.86 | 1671.22 | 84.2x |
+
+Cache state: one warm-up run, then five timed runs, aggregate refreshed first, collector running. Settled chunks were compressed; the live chunk was not.
 
 Aggregate query:
 

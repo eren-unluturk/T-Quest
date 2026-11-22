@@ -67,7 +67,7 @@ In the demo no real business carries a label. In general, a label such as local/
 
 | Layer | Technology | What it does here | Where in the repo |
 |---|---|---|---|
-| Database | Tiger Data (Tiger Cloud): PostgreSQL + TimescaleDB | Single store for profiles, rewards, content and the high-volume MBTA streams. Measured on PostgreSQL 18.7, TimescaleDB 2.32.1, 0.5 CPU, 2 GiB | `data-platform/migrations/` (0000-0012), [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md) |
+| Database | Tiger Data (Tiger Cloud): PostgreSQL + TimescaleDB | Single store for profiles, rewards, content and the high-volume MBTA streams. Measured on PostgreSQL 18.7, TimescaleDB 2.32.1, 0.5 CPU, 2 GiB | `data-platform/migrations/` (0000-0015), [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md) |
 | Local database | Docker Compose, image `timescale/timescaledb:latest-pg16` | Local TimescaleDB for development | `data-platform/docker-compose.yml` |
 | Schema and migrations | Plain SQL files, ordered runner (`python -m data_platform.migrate`) | Creates tables, hypertables, aggregates and policies; idempotent | `data-platform/migrations/`, `data-platform/src/data_platform/migrate.py` |
 | Database contract | Markdown + concatenated SQL | What other agents may rely on | `contracts/db/SCHEMA.md`, `contracts/db/schema.sql` |
@@ -100,7 +100,7 @@ All of this exists in `data-platform/migrations/`.
 - **SQL recommendations:** drafts in `insights-sponsors/sql/recs_*.sql`. Today recommendations are served by the in-memory backend with seed data; running them on Postgres is planned, not done.
 - **Measured numbers** (all from [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md), never edited by hand):
   - Synthetic data: 250,000 `rider_events` compress 5.9x on total hypertable size (96.0 MB to 16.2 MB). Aggregate-vs-raw speedups on that small set range from 0.8x to 1.6x, reported as measured with no claim of a win.
-  - Real data: on live MBTA `vehicles` (274,565 rows), the `vehicles_route_5m` aggregate ran 8.41x faster than the raw table before forced compression. Real-data compression ratio: TODO: measure (settled chunks).
+  - Real data: on live MBTA `vehicles` (733,219 rows, about 2.3 days), the `vehicles_route_5m` aggregate ran 84.2x faster than the raw table (19.86 ms vs 1671.22 ms, server-side). Compression of one settled chunk per hypertable, on-disk size including indexes: `vehicles` 15.3x (148.9 MB to 9.7 MB), `predictions` 24.3x (236.5 MB to 9.7 MB). One chunk of about a day each, so a small sample.
 
 ### Data sources
 
