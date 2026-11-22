@@ -12,7 +12,16 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["vite/client", "node"]
+    "types": ["vite/client", "node"],
+    // client-bryan/map lives outside web/: point it, and the React/MapLibre types it uses, at this app's copies
+    "paths": {
+      "@tquest/map": ["../client-bryan/map/src/index.ts"],
+      "maplibre-gl": ["./node_modules/maplibre-gl"],
+      "react": ["./node_modules/@types/react"],
+      "react/*": ["./node_modules/@types/react/*"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "react-dom/*": ["./node_modules/@types/react-dom/*"]
+    }
   },
   "include": ["src", "vitest.config.ts", "vite.config.ts"]
 }

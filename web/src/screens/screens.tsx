@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { HOME_MAP_CARD, HomeMap, MapSlot, TRAVELED_MAP, TraveledMap } from '@tquest/map';
+import type { MapPin, MapServices, TraveledSummary } from '@tquest/map';
 import { ApiError } from '../api/client';
 import type { Fave, Offer } from '../api/types';
 import { Frame, Status, useApp, useAsync } from '../app/app';
@@ -13,6 +15,11 @@ import LoadingMarkup from '../design/generated/LoadingMarkup';
 import ProfileMarkup from '../design/generated/ProfileMarkup';
 import TraveledMarkup from '../design/generated/TraveledMarkup';
 import { DEMO_STOPS, HOME_STOP, loadSpots } from './data';
+import { readConfig } from '../config';
+import type { ApiConfig } from '../config';
+
+// GIS maps (client-bryan/map) read stations and live trains straight from data-platform
+const MAP_SERVICES: MapServices = { dp: (readConfig() as ApiConfig).dp };
 
 const TEAM_CREDIT = 'Written by the T-Quest team. Verify before publishing.';
 const loadingOrError = (a: { loading: boolean; error?: Error; reload: () => void; data: unknown }) =>
@@ -56,6 +63,12 @@ export function HomeScreen() {
     const own = d.facts.fallback ? [] : d.facts.facts;
     return buildPlaces(d.stop, own, fallbackText, d.content);
   }, [d]);
+  const pins = useMemo<MapPin[]>(() => {
+    if (!d) return [];
+    const at: Record<string, { lat: number; lon: number }> = { [`stop:${d.stop.id}`]: d.stop };
+    for (const c of d.content) if (c.lat != null && c.lon != null) at[c.id] = { lat: c.lat, lon: c.lon };
+    return places.filter((p) => at[p.id]).map((p) => ({ id: p.id, name: p.name, color: p.c, ...at[p.id] }));
+  }, [d, places]);
 
   const early = loadingOrError(data);
   if (early || !d) return early;
@@ -97,6 +110,17 @@ export function HomeScreen() {
   return (
     <Frame credits={[`Source: ${credit}${place.source ? ` (${place.source})` : ''}`]}>
       <HomeMarkup v={v} />
+      <MapSlot target={HOME_MAP_CARD}>
+        {(frame) => (
+          <HomeMap services={MAP_SERVICES} overlay={frame} pins={pins} selectedPin={place.id}
+            onPickPin={(id) => { setSel(id); setIdx(0); }}
+            onRideVerified={async (ride) => {
+              const r = await api.checkin({ stop_id: ride.to.id, lat: ride.to.lat, lon: ride.to.lon, client_time: ride.tapOut.toISOString(), mode: 'subway' });
+              data.reload();
+              return { points: r.points_awarded };
+            }} />
+        )}
+      </MapSlot>
       {err && <Status loading={false} error={err} />}
     </Frame>
   );
@@ -106,15 +130,30 @@ export function HomeScreen() {
 export function TraveledScreen() {
   const { api } = useApp();
   const data = useAsync(() => api.travel(), []);
+  const [sum, setSum] = useState<TraveledSummary>();
+  const [sel, setSel] = useState(0);
+  const segments = useMemo(() => (data.data?.traveled_segments ?? []).map((s) => ({ route: s.route_id, from: s.from_stop_id, to: s.to_stop_id })), [data.data]);
   const early = loadingOrError(data);
   if (early || !data.data) return early;
   const t = data.data;
-  const miles = (key: string) => fmtMiles(t.per_line.find((l) => l.line_id.toLowerCase().includes(key))?.miles ?? 0);
+  // miles along the real track once the map has measured it; until then the API's straight-line miles
+  const miles = (key: string, line: 'Green' | 'Red' | 'Blue' | 'Orange') =>
+    fmtMiles(sum ? sum.miles[line] : t.per_line.find((l) => l.line_id.toLowerCase().includes(key))?.miles ?? 0);
+  const spot = sum?.unlocked[Math.min(sel, sum.unlocked.length - 1)];
   const v = {
-    spots: [], spot: { name: '', facts: 0, stop: '' }, spotLine: '', unlockedCount: t.unlocked_spots.length,
-    totalMiles: fmtMiles(t.total_miles), milesGreen: miles('green'), milesRed: miles('red'), milesBlue: miles('blue'), milesOrange: miles('orange'),
+    spots: [], spot: { name: spot?.name ?? 'Ride somewhere to unlock spots', facts: spot?.facts ?? 0, stop: spot?.stop ?? '' },
+    spotLine: spot ? `unlocked · ${spot.facts} fact${spot.facts > 1 ? 's' : ''} · near ${spot.stop}` : '',
+    unlockedCount: sum ? sum.unlocked.length : t.unlocked_spots.length,
+    totalMiles: fmtMiles(sum ? sum.total : t.total_miles), milesGreen: miles('green', 'Green'), milesRed: miles('red', 'Red'), milesBlue: miles('blue', 'Blue'), milesOrange: miles('orange', 'Orange'),
   };
-  return <Frame credits={['Miles are straight-line distances between stops (approximate). Map art is a placeholder.']}><TraveledMarkup v={v} /></Frame>;
+  return (
+    <Frame credits={[sum ? 'Miles follow the real MBTA track (MBTA V3 shapes). Map: OpenStreetMap, BPDA roofprints.' : 'Miles are straight-line distances between stops (approximate).']}>
+      <TraveledMarkup v={v} />
+      <MapSlot target={TRAVELED_MAP}>
+        {() => <TraveledMap services={MAP_SERVICES} segments={segments} selected={sel} onSummary={setSum} onPickSpot={setSel} />}
+      </MapSlot>
+    </Frame>
+  );
 }
 
 // ---------------------------------------------------------------- Explore

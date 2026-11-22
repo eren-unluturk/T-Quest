@@ -16,7 +16,7 @@ The demo runs on one laptop: the three backends and the web app locally, reading
 ```powershell
 node scripts/demo-up.mjs       # data-platform 8001, insights-sponsors 8002, game-engine 8003, demo app 4321, React web app 5173; waits for health
 ```
-Open **http://localhost:4321**: the demo app (`client-bryan/demo`, Isabella's screens with Boston GIS maps). It needs internet for the map tiles, fonts and the public MBTA schedule API. Ctrl+C stops everything it started. VS Code task: "Demo: start". If a port is taken the script names it and exits without starting anything. `node scripts/preflight.mjs --running` checks that all five answer. The React port in `web/` (http://127.0.0.1:5173) is the earlier build without real maps and is not the one we demo.
+Open **http://localhost:4321**: the demo app (`client-bryan/demo`, Isabella's screens with Boston GIS maps). It needs internet for the map tiles, fonts and the public MBTA schedule API. Ctrl+C stops everything it started. VS Code task: "Demo: start". If a port is taken the script names it and exits without starting anything. `node scripts/preflight.mjs --running` checks that all five answer. The React port in `web/` (http://127.0.0.1:5173) is the React build; it now mounts the same GIS maps (from `client-bryan/map`) on Home and Traveled, but the vanilla demo app above is the one we record and demo.
 
 Backend-only tour (prints real calls, no UI): `node scripts/demo.mjs` (or `--serve` to keep the services up).
 
