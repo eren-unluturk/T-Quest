@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: T-Quest game-engine API
-  version: 0.3.0
+  version: 0.4.0
   description: |
     Game logic for T-Quest: check-ins, points, ranks, quests, badges, friends,
     leaderboards, and redemptions. Owner: game-engine (Tobi).
@@ -15,6 +15,7 @@ info:
     flagged is_synthetic, and are removed by `python -m game_engine.demo_reset`.
     Errors are {"detail": "<code>"} with the codes listed on each route.
   x-changelog:
+    - '0.4.0: CheckinRequest gains optional accuracy_m and samples[] (poor_gps and suspicious_gps, 422); redemptions enforce offers.required_badge_id (403 badge_required) and per_user_limit (409 per_user_limit); badges rank-3 to rank-8 (all 13 badges have a sticker or patch); the delay bonus job runs inside the service when demo writes are on'
     - '0.3.0: check-ins are refused as too_fast when two check-ins need more than 80 km/h (server time only; client_time is informational); POST /spots/{spot_id}/visit writes one visit rider event (no points). Not built yet, see #61: tap_in/tap_out verified rides, accuracy_m and samples[], ride result, points weighting, flags'
     - '0.2.0: 8 named ranks; /me/rank returns name, avatar_key, next rank and points_to_next; badge slugs follow data-platform (line-<line>-complete, freedom-trail, rank-3..5, local-explorer); physical_rewards come from the physical_rewards table; quest type spots_near_stops; GET /healthz; 503 db_writes_disabled; demo-safe database mode; server port 8003'
     - '0.1.0: first draft'
@@ -30,6 +31,7 @@ x-rules:
     vehicle_check: on by default with the database (live vehicles table, matched by position); off in memory mode or with VEHICLE_CHECK=off
     cooldown_per_stop_s: 1800
     speed_check: 'too_fast (422): the distance from the user''s previous check-in, divided by the server-time gap, must stay under 80 km/h (plus 150 m of GPS slack). On by default with the database, off in memory mode or with SPEED_CHECK=off'
+    gps_quality: 'accuracy_m above 50 is refused (poor_gps); 3 or more byte-identical samples[] are refused (suspicious_gps); real GPS jitters. Both fields are optional.'
     time_source: server time only for every rule; client_time is stored for information
     requires_location_consent: true
     station_rule: a check-in at a platform counts for its parent station when badges and quests are checked
@@ -55,7 +57,7 @@ x-rules:
   badges:
     line_complete: 'line-<line>-complete (line-red-complete, line-green-complete, line-blue-complete, line-orange-complete, line-mattapan-complete): every station of at least one route on that line (Green: one branch)'
     freedom_trail: 'freedom-trail: every station in the Freedom Trail set (stops.is_freedom_trail plus freedom_trail_sites.nearest_stop_id); off until 2 or more stations are loaded'
-    rank: 'rank-3, rank-4, rank-5 on reaching that rank (ranks 1, 2, 6, 7 and 8 have no badge)'
+    rank: 'rank-3 to rank-8 on reaching that rank (ranks 1 and 2 are the entry tiers and have no badge)'
     quest: a quest can award its own badge (for example local-explorer)
   quests:
     criteria_shapes:
@@ -99,7 +101,7 @@ paths:
         '403': {description: 'no_consent: location consent missing'}
         '404': {description: 'unknown stop'}
         '409': {description: 'cooldown: checked in at this stop in the last 30 minutes'}
-        '422': {description: 'too_far (more than 75 m from the stop), no_vehicle (no live vehicle within 300 m in the last 5 minutes) or too_fast (more than 80 km/h from the previous check-in)'}
+        '422': {description: 'too_far (more than 75 m from the stop), poor_gps (accuracy_m above 50), suspicious_gps (3 or more identical samples), no_vehicle (no live vehicle within 300 m in the last 5 minutes) or too_fast (more than 80 km/h from the previous check-in)'}
         '503': {$ref: '#/components/responses/WritesDisabled'}
   /spots/{spot_id}/visit:
     post:
@@ -241,9 +243,9 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Redemption'}
         '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {description: 'rank_too_low'}
+        '403': {description: 'rank_too_low, or badge_required (the offer needs a badge the rider does not have)'}
         '404': {description: unknown offer}
-        '409': {description: 'weekly_store_limit, out_of_stock, not_enough_points, not_started or ended'}
+        '409': {description: 'weekly_store_limit, per_user_limit, out_of_stock, not_enough_points, not_started or ended'}
         '503': {$ref: '#/components/responses/WritesDisabled'}
   /redemptions/verify:
     post:
@@ -313,6 +315,18 @@ components:
         client_time: {type: string, format: date-time}
         mode: {type: string, enum: [subway, bus]}
         consent: {type: boolean, default: true, description: Location consent flag (stand-in until the consent table is read)}
+        accuracy_m: {type: number, nullable: true, description: 'Reported GPS accuracy in metres; above 50 is refused'}
+        samples:
+          type: array
+          maxItems: 10
+          nullable: true
+          description: '3 to 10 GPS readings over a few seconds; identical readings look faked'
+          items:
+            type: object
+            required: [lat, lon]
+            properties:
+              lat: {type: number}
+              lon: {type: number}
     CheckinResult:
       type: object
       properties:

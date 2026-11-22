@@ -18,11 +18,12 @@ Set VEHICLE_CHECK=off to skip it. Memory mode skips it.
 """
 import os
 import threading
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from . import badges, config
 from .checkin import validate_checkin
@@ -32,7 +33,21 @@ from .redemption import RedemptionError
 from .social import leaderboard, points_in_period
 from .store import MemoryStore
 
-app = FastAPI(title="T-Quest game-engine", version="0.2.0")
+@asynccontextmanager
+async def lifespan(_app):
+    """Start the delay-bonus loop when the database is on and demo writes are allowed."""
+    stop = None
+    if os.environ.get("DATABASE_URL") and os.environ.get("GE_ALLOW_DB_WRITES") == "1":
+        interval = int(os.environ.get("DELAY_JOB_INTERVAL_S", "300"))
+        if interval > 0:
+            from .delay_job import start_background
+            stop = start_background(interval)
+    yield
+    if stop is not None:
+        stop.set()
+
+
+app = FastAPI(title="T-Quest game-engine", version="0.2.0", lifespan=lifespan)
 
 # CORS so a browser app (Vite, Vercel) can call this API. Demo default: any origin, no cookies.
 # Set CORS_ORIGINS="https://my-app.example,http://localhost:5173" to allow only those sites.
@@ -81,6 +96,11 @@ def lifetime_of(entries):
     return sum(e.delta for e in entries if e.delta > 0)
 
 
+class GpsSample(BaseModel):
+    lat: float
+    lon: float
+
+
 class CheckinRequest(BaseModel):
     stop_id: str
     lat: float
@@ -88,6 +108,8 @@ class CheckinRequest(BaseModel):
     client_time: datetime
     mode: str | None = None
     consent: bool = True  # stand-in until the consent table is wired
+    accuracy_m: float | None = None  # reported GPS accuracy; worse than 50 m is refused (poor_gps)
+    samples: list[GpsSample] | None = Field(default=None, max_length=10)  # 3 to 10 readings over a few seconds
 
 
 class FriendRequest(BaseModel):
@@ -141,7 +163,9 @@ def post_checkin(body: CheckinRequest, user: str = Depends(current_user)):
         res = validate_checkin(
             consent=body.consent, user_lat=body.lat, user_lon=body.lon,
             stop_lat=stop["lat"], stop_lon=stop["lon"], now=t,
-            last_vehicle_seen_at=seen, last_checkin_at=last, previous_checkin=previous)
+            last_vehicle_seen_at=seen, last_checkin_at=last, previous_checkin=previous,
+            accuracy_m=body.accuracy_m,
+            samples=[(s.lat, s.lon) for s in body.samples] if body.samples else None)
         if not res.ok:
             raise HTTPException(res.http_status, res.reason)
 

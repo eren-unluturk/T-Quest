@@ -33,6 +33,12 @@ class BadgeTests(unittest.TestCase):
         self.assertEqual(unlocked_badges(visited_stops=set(), rank=5, already_have={"rank-3"}),
                          {"rank-4", "rank-5"})
 
+    def test_top_ranks_have_badges(self):
+        got = unlocked_badges(visited_stops=set(), rank=8, already_have=set())
+        self.assertEqual(got, {"rank-3", "rank-4", "rank-5", "rank-6", "rank-7", "rank-8"})
+        self.assertEqual(unlocked_badges(visited_stops=set(), rank=2, already_have=set()), set())
+        self.assertEqual(badges.physical_rewards_for({"rank-6", "rank-8"}), {"rank-6-patch", "rank-8-patch"})
+
     def test_no_repeat(self):
         got = unlocked_badges(visited_stops=badges.LINES["Red"], rank=1, already_have={"line-red-complete"})
         self.assertNotIn("line-red-complete", got)

@@ -12,6 +12,7 @@ GE_ALLOW_DB_WRITES=1; --dry-run only counts. Rows are removed by demo_reset. Pai
 """
 import os
 import sys
+import threading
 
 from . import delay
 from .pg_store import DEMO_PREFIX
@@ -50,6 +51,37 @@ def run(conn, dry_run=False, allow_writes=None):
             paid += 1
             points += pts
     return {"alerts": len(alerts), "paid": paid, "points": points}
+
+
+def run_standalone():
+    """One run on its own connection (used by the background loop)."""
+    from .pg_store import connect
+    conn = connect()
+    try:
+        return run(conn, allow_writes=True)
+    finally:
+        conn.close()
+
+
+def start_background(interval_s, runner=run_standalone, log=print):
+    """Run the job every interval_s seconds in a daemon thread. Returns an Event; set() it to stop.
+
+    A failed run is logged and the loop keeps going. Started by the app when DATABASE_URL and
+    GE_ALLOW_DB_WRITES=1 are set (interval env DELAY_JOB_INTERVAL_S, default 300, 0 = off).
+    """
+    stop = threading.Event()
+
+    def loop():
+        while not stop.wait(interval_s):
+            try:
+                result = runner()
+                if result.get("paid"):
+                    log(f"delay job: {result}")
+            except Exception as exc:  # keep the loop alive
+                log(f"delay job failed: {exc}")
+
+    threading.Thread(target=loop, daemon=True, name="delay-job").start()
+    return stop
 
 
 def main(argv):

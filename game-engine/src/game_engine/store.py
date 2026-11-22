@@ -11,7 +11,7 @@ from datetime import timedelta
 
 from . import badges
 from .points import Ledger
-from .redemption import RedemptionBook
+from .redemption import RedemptionBook, RedemptionError
 
 # FAKE demo reference data (used by MemoryStore only)
 DEMO_STOPS = {
@@ -24,6 +24,9 @@ DEMO_STOPS = {
 DEMO_OFFERS = {
     "o1": {"store_id": "s1", "title": "5% off a coffee", "min_rank": 1},
     "o2": {"store_id": "s2", "title": "Free cookie", "min_rank": 5},
+    # needs a badge and allows 2 per rider, to show those rules
+    "o3": {"store_id": "s3", "title": "Red Line riders perk", "min_rank": 1,
+           "required_badge_id": "line-red-complete", "per_user_limit": 2},
 }
 DEMO_QUESTS = [
     badges.Quest("q1", "Downtown loop", frozenset({"park", "downtown"}), 40, None, "sponsor1"),
@@ -54,6 +57,7 @@ class MemoryStore:
         self._last = {}          # user -> (at, lat, lon) of the latest check-in
         self._spot_visits = []   # (user, spot_id, stop_id, at)
         self._book = RedemptionBook()
+        self._redeemed = {}      # (user, offer_id) -> codes issued
 
     # reference data
     def stop(self, stop_id):
@@ -137,8 +141,17 @@ class MemoryStore:
 
     # redemptions
     def issue_redemption(self, *, user, offer_id, offer, user_rank, balance, now):
+        if user_rank < offer["min_rank"]:
+            raise RedemptionError("rank_too_low", 403)
+        need = offer.get("required_badge_id")
+        if need and need not in self._badges.get(user, set()):
+            raise RedemptionError("badge_required", 403)
+        limit = offer.get("per_user_limit")
+        if limit and self._redeemed.get((user, offer_id), 0) >= limit:
+            raise RedemptionError("per_user_limit", 409)
         red = self._book.issue(user_id=user, store_id=offer["store_id"], offer_id=offer_id,
                                user_rank=user_rank, min_rank=offer["min_rank"], now=now)
+        self._redeemed[(user, offer_id)] = self._redeemed.get((user, offer_id), 0) + 1
         return {"code": red.code, "offer_id": offer_id, "status": red.status,
                 "expires_at": red.expires_at, "points_spent": 0}
 

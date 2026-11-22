@@ -16,7 +16,7 @@ LINES = {
 FREEDOM_TRAIL = {"park", "downtown", "state", "haymarket"}
 
 # rank number -> badge id
-RANK_BADGES = {3: "rank-3", 4: "rank-4", 5: "rank-5"}
+RANK_BADGES = {3: "rank-3", 4: "rank-4", 5: "rank-5", 6: "rank-6", 7: "rank-7", 8: "rank-8"}
 
 # badge id -> physical reward it unlocks (fake)
 PHYSICAL_REWARDS = {
@@ -24,6 +24,10 @@ PHYSICAL_REWARDS = {
     "freedom-trail": "freedom-trail-sticker",
     "rank-3": "rank-3-patch",
     "rank-4": "rank-4-patch",
+    "rank-5": "rank-5-patch",
+    "rank-6": "rank-6-patch",
+    "rank-7": "rank-7-patch",
+    "rank-8": "rank-8-patch",
 }
 
 

@@ -53,6 +53,7 @@ curl -H "Authorization: Bearer ann" http://127.0.0.1:8003/me/rank
 |---|---|
 | `DATABASE_URL` | Set: use the database (read-only unless the next line is set). Not set: in-memory demo. |
 | `GE_ALLOW_DB_WRITES` | `1` lets database mode write demo rows. Default: off (every POST answers 503). Also needed by the delay job (to pay) and `demo_reset` (to delete). |
+| `DELAY_JOB_INTERVAL_S` | Seconds between runs of the delay bonus loop that starts with the server when `DATABASE_URL` and `GE_ALLOW_DB_WRITES=1` are set. Default 300. `0` turns it off. |
 | `CORS_ORIGINS` | Comma-separated sites allowed to call the API from a browser. Default `*` (any site, no cookies), fine for the demo. Example: `https://my-app.example,http://localhost:5173`. |
 | `VEHICLE_CHECK` | `off` skips the live vehicle check. Default: on with the database, off in memory mode. |
 | `SPEED_CHECK` | `off` skips the speed check (a check-in that needs more than 80 km/h from the user's previous one is refused as `too_fast`). Default: on with the database, off in memory mode. `strict` turns it on. Uses server time only. |
@@ -70,9 +71,9 @@ To try calls by hand: start the server in demo mode (no `DATABASE_URL`), open `h
 
 +
 
-+Pays 50 points once per alert to riders whose home line has an outage. It does not run by itself. Run it on a schedule:
++Pays 50 points once per alert to riders whose home line has an outage. It runs by itself inside the service every `DELAY_JOB_INTERVAL_S` seconds (default 300) when `DATABASE_URL` and `GE_ALLOW_DB_WRITES=1` are set, so it only works while the server is running. To run it by hand:
 
-Pays 50 points once per alert to riders whose home line has an outage. It does not run by itself. Run it on a schedule:
+Pays 50 points once per alert to riders whose home line has an outage. It runs by itself inside the service every `DELAY_JOB_INTERVAL_S` seconds (default 300) when `DATABASE_URL` and `GE_ALLOW_DB_WRITES=1` are set, so it only works while the server is running. To run it by hand:
 
 ```powershell
 cd game-engine/src
