@@ -180,7 +180,7 @@ export function HomeMap(props: HomeMapProps) {
         setFlat(!flat);
       }}>{flat ? '3D' : '2D'}</button>
       <button type="button" className={`tqm-ethnic${ethnic ? ' on' : ''}`} aria-pressed={ethnic} onClick={() => setEthnic(!ethnic)}>Ethnic Boston</button>
-      <span className="tqm-label">{ethnic ? 'tap a neighborhood' : 'tap a spot to learn about it'}</span>
+      <span className="tqm-label">{data?.t.mbtaError ? 'T lines offline, try again soon' : ethnic ? 'tap a neighborhood' : 'tap a spot to learn about it'}</span>
 
       {plan && station && data && (
         <Overlay target={overlay}>

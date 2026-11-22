@@ -18,11 +18,18 @@ export interface RideVerdict { ok: boolean; checks: Check[]; trip: Trip | null; 
 export const bostonTime = (t: number) =>
   new Date(t).toLocaleTimeString('en-GB', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
 
-/** The MBTA schedule time window for a ride. The API's time filter does not wrap past midnight, so cap at 23:59. */
+const SERVICE_DAY_START_H = 3; // the MBTA service day runs about 3 AM to 3 AM
+
+/** Boston time as the MBTA schedule filter wants it: after midnight a train still belongs to yesterday's service day, as 24:xx. */
+export function serviceTime(t: number) {
+  const [h, m] = bostonTime(t).split(':').map(Number);
+  const hh = h < SERVICE_DAY_START_H ? h + 24 : h;
+  return `${String(hh).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+/** The MBTA schedule time window for a ride: from 20 min before the tap-in to 10 min after the tap-out. */
 export function scheduleWindow(from: number, to: number) {
-  const min = bostonTime(from - EARLY_MS);
-  const late = bostonTime(to + 10 * 60000);
-  return { min, max: late < min ? '23:59' : late };
+  return { min: serviceTime(from - EARLY_MS), max: serviceTime(to + 10 * 60000) };
 }
 
 interface SchedItem {
@@ -64,7 +71,11 @@ export function verifyRide({ from, to, t1, t2, trips, seenTrain }: RideInput): R
   const kmh = dist / 1000 / (ms / 3600000);
   const mi = (dist / 1609.34).toFixed(1);
   const checks: Check[] = [{ ok: true, text: `Tapped in inside the ${ZONE_M} m zone at ${from.name}` }];
-  const fast = kmh > MAX_TRAIN_KMH;
+  const fast = kmh > MAX_TRAIN_KMH || t2 <= t1; // a tap-out before the tap-in is a forged clock, not a ride
+  if (from.id === to.id) {
+    checks.push({ ok: false, text: `Tapped out where you tapped in (${to.name})` });
+    return { ok: false, checks, trip: null, kmh: 0 };
+  }
   checks.push({
     ok: !fast,
     text: fast ? `${mi} mi in ${Math.max(1, Math.round(ms / 1000))} s is faster than any train` : `${mi} mi in ${Math.round(ms / 60000)} min is a believable ride`,

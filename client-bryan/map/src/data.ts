@@ -25,7 +25,8 @@ export interface Vehicle { vehicle_id: string; route_id: string | null; lat: num
 export interface IconicProps { name: string; category: 'trail' | 'landmark' | 'skyline'; height_m: number; height_ft: number; place_height_ft?: number; designated?: string | null; blurb?: string | null }
 export interface Place extends IconicProps { lat: number; lon: number }
 export interface HoodProps { name: string; heritage: string; color: string; heart: string; hub: Coord; blurb: string }
-export interface Transit { stations: Station[]; shapes: Shapes; net: Network }
+/** `mbtaError` is set when the MBTA API failed (it allows 20 requests a minute without a key): lines and directions are missing. */
+export interface Transit { stations: Station[]; shapes: Shapes; net: Network; mbtaError?: string }
 export interface Gis { iconic: Collection<GeoJSON.Polygon, IconicProps>; places: Place[]; ethnic: Collection<GeoJSON.Polygon | GeoJSON.MultiPolygon, HoodProps> }
 
 const MBTA = 'https://api-v3.mbta.com';
@@ -35,6 +36,19 @@ const json = async <T>(url: string): Promise<T> => {
   return r.json() as Promise<T>;
 };
 const mbtaBase = (s: MapServices) => (s.mbta ?? MBTA).replace(/\/+$/, '');
+
+// Line shapes and route patterns change a few times a year: keep them a day, so reloads stay under the MBTA rate limit
+const DAY_MS = 24 * 3600000;
+async function cachedJson<T>(url: string): Promise<T> {
+  const key = 'tqm.cache:' + url;
+  try {
+    const hit = JSON.parse(localStorage.getItem(key) ?? 'null') as { at: number; v: T } | null;
+    if (hit && Date.now() - hit.at < DAY_MS) return hit.v;
+  } catch { /* no storage, or a bad entry */ }
+  const v = await json<T>(url);
+  try { localStorage.setItem(key, JSON.stringify({ at: Date.now(), v })); } catch { /* full or private mode: just skip the cache */ }
+  return v;
+}
 
 let transit: Promise<Transit> | null = null;
 let gis: Promise<Gis> | null = null;
@@ -52,17 +66,25 @@ export function loadTransit(s: MapServices): Promise<Transit> {
     }));
     const base = mbtaBase(s);
     const features: Shapes['features'] = [];
-    const shapeRes = await Promise.all(SUBWAY.map((rid) =>
-      json<{ data?: { attributes: { polyline: string } }[] }>(`${base}/shapes?filter[route]=${rid}&fields[shape]=polyline`).then((r) => ({ rid, r }))));
-    for (const { rid, r } of shapeRes) {
-      const longest = (r.data ?? []).sort((a, b) => b.attributes.polyline.length - a.attributes.polyline.length).slice(0, 2);
-      for (const sh of longest) {
-        features.push({ type: 'Feature', properties: { color: LINE_COLOR[lineOf(rid)], line: lineOf(rid), route: rid }, geometry: { type: 'LineString', coordinates: decodePolyline(sh.attributes.polyline) } });
+    let net: Network = {};
+    let mbtaError: string | undefined;
+    // the map still works from data-platform alone when the MBTA API is down or rate limited
+    try {
+      const shapeRes = await Promise.all(SUBWAY.map((rid) =>
+        cachedJson<{ data?: { attributes: { polyline: string } }[] }>(`${base}/shapes?filter[route]=${rid}&fields[shape]=polyline`).then((r) => ({ rid, r }))));
+      for (const { rid, r } of shapeRes) {
+        const longest = (r.data ?? []).sort((a, b) => b.attributes.polyline.length - a.attributes.polyline.length).slice(0, 2);
+        for (const sh of longest) {
+          features.push({ type: 'Feature', properties: { color: LINE_COLOR[lineOf(rid)], line: lineOf(rid), route: rid }, geometry: { type: 'LineString', coordinates: decodePolyline(sh.attributes.polyline) } });
+        }
       }
+      const patterns = await cachedJson<RoutePatternsResponse>(`${base}/route_patterns?filter[route]=${SUBWAY.join(',')}&filter[direction_id]=0&include=representative_trip.stops&fields[stop]=name,parent_station&fields[route_pattern]=typicality&fields[trip]=headsign`);
+      net = buildNetwork(patterns, (id) => byId[id]?.name ?? id);
+    } catch (e) {
+      mbtaError = (e as Error).message;
+      transit = null; // try the MBTA again next time a map opens
     }
-    const patterns = await json<RoutePatternsResponse>(`${base}/route_patterns?filter[route]=${SUBWAY.join(',')}&filter[direction_id]=0&include=representative_trip.stops&fields[stop]=name,parent_station&fields[route_pattern]=typicality&fields[trip]=headsign`);
-    const net = buildNetwork(patterns, (id) => byId[id]?.name ?? id);
-    return { stations: Object.values(byId), shapes: fc(features), net };
+    return { stations: Object.values(byId), shapes: fc(features), net, mbtaError };
   })().catch((e) => { transit = null; throw e; });
   return transit;
 }

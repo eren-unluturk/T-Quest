@@ -92,9 +92,9 @@ describe('ride verification', () => {
     expect(matchTrip(trips, dep + 3 * 60000, arr)).toBeNull();
     expect(matchTrip(trips, dep, arr + 4 * 60000)).toBeNull();
   });
-  it('caps the schedule window at 23:59 instead of wrapping past midnight', () => {
+  it('runs the schedule window past midnight as 24:xx service time', () => {
     const lateNight = Date.parse('2026-11-22T23:55:00-05:00');
-    expect(scheduleWindow(lateNight, lateNight)).toEqual({ min: '23:35', max: '23:59' });
+    expect(scheduleWindow(lateNight, lateNight)).toEqual({ min: '23:35', max: '24:05' });
   });
 });
 
