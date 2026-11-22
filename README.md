@@ -16,7 +16,7 @@ Hundreds of thousands of people ride the MBTA every day. For residents it is a f
 Status is derived from each agent's `.work/ROADMAP.md` and handoff notes. See [PLAN.md](PLAN.md) for the live checklist counts.
 
 **Built**
-- Tiger Data schema (migrations 0000-0011) applied to a live Tiger Cloud database: rider events, MBTA vehicles/predictions/alerts as hypertables, continuous aggregates, compression policies. `python -m data_platform.verify` passed on the live database.
+- Tiger Data schema (migrations 0000-0011) applied to a live Tiger Cloud database: rider events, MBTA vehicles and predictions as hypertables (alerts are plain tables), continuous aggregates, compression policies. `python -m data_platform.verify` passed on the live database.
 - Real MBTA static data loaded (routes, lines, stops, schedules) and a standalone live collector for vehicles, predictions and alerts.
 - Benchmark commands and measured results: [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md). The real-data compression figures are TODO: measure.
 - data-platform read API (FastAPI) and published contracts in `contracts/`.
@@ -39,30 +39,101 @@ The Boston Red Sox, Mint Julep (43 Brattle St, Cambridge, near Harvard) and Dies
 ### Verified labels policy
 In the demo no real business carries a label. In general, a label such as local/independent, woman-owned or veteran-owned would be shown for a business only if the business declared it itself or an official certification or directory lists it. We never infer a label from a name, photo, review or menu, and no model assigns labels. Pending labels are never returned and never match a filter.
 
-## Architecture
+## Tech stack
+
+**Overview.** T-Quest is a monorepo of three Python FastAPI services (data-platform, insights-sponsors, game-engine) that all read and write one Tiger Data database (Postgres + TimescaleDB). data-platform owns the schema and the MBTA ingestion; the other two services own game logic and tourist/sponsor content. The services publish OpenAPI contracts that the front end is built against. There are no LLM or AI API calls anywhere in the code; recommendations and analytics are plain SQL and Python rules.
 
 ```
- MBTA V3 API ──► collector ─┐
- MBTA static ──► loader ────┤
-                            ▼
-              Tiger Data (Postgres + TimescaleDB)  ◄── schema owned by data-platform
-              hypertables, continuous aggregates, compression
-                  ▲            ▲              ▲
-        data-platform API  insights-sponsors  game-engine
-                  ▲            ▲              ▲
-                  └──── client-bryan / client-isabella (UI from design/ only)
+ MBTA V3 API (live) ──► collector (vehicles, predictions, alerts) ─┐
+ MBTA V3 / GTFS (static) ──► load_static (routes, stops, schedules) ┤
+ Analyze Boston, Digital Commonwealth ──► ingest_content ──────────┤
+ hand-written Freedom Trail + fun facts ────────────────────────────┤
+                                                                    ▼
+                  Tiger Data (Postgres + TimescaleDB)  ◄── schema owned by data-platform
+                  hypertables · continuous aggregates · compression
+                        ▲                ▲                 ▲
+                 data-platform     insights-sponsors   game-engine
+                 (read API :8001)  (:8002)             (:8003)
+                        ▲                ▲                 ▲
+                        └── OpenAPI contracts (contracts/api/) ──┘
+                                         ▲
+                              web app / clients (UI from design/ only)
 ```
 
-Contract-first: OpenAPI files in `contracts/api/`, database contract in `contracts/db/`.
+### Layers
 
-## Tiger Data usage
-- `rider_events`, `vehicles`, `predictions`, `alerts` as hypertables.
-- Continuous aggregates: leaderboards, home-line detection, per-line vehicle counts (`vehicles_route_5m`).
-- Compression policies and `time_bucket` analytics, SQL-based recommendations.
-- Measured numbers live only in [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md) (copied into [PITCH.md](PITCH.md) automatically).
+| Layer | Technology | What it does here | Where in the repo |
+|---|---|---|---|
+| Database | Tiger Data (Tiger Cloud): PostgreSQL + TimescaleDB | Single store for profiles, rewards, content and the high-volume MBTA streams. Measured on PostgreSQL 18.7, TimescaleDB 2.32.1, 0.5 CPU, 2 GiB | `data-platform/migrations/` (0000-0012), [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md) |
+| Local database | Docker Compose, image `timescale/timescaledb:latest-pg16` | Local TimescaleDB for development | `data-platform/docker-compose.yml` |
+| Schema and migrations | Plain SQL files, ordered runner (`python -m data_platform.migrate`) | Creates tables, hypertables, aggregates and policies; idempotent | `data-platform/migrations/`, `data-platform/src/data_platform/migrate.py` |
+| Database contract | Markdown + concatenated SQL | What other agents may rely on | `contracts/db/SCHEMA.md`, `contracts/db/schema.sql` |
+| Services | Python 3.11+, FastAPI, uvicorn | data-platform read API (stops, routes, lines, vehicles, predictions, alerts, travel), insights-sponsors (content, offers, nearby spots, consent, analytics, recommendations), game-engine (check-ins, points, ranks, badges, quests, friends, redemption) | `data-platform/`, `insights-sponsors/`, `game-engine/` |
+| DB access | psycopg 3 (binary); psycopg-pool in insights-sponsors | Direct SQL, no ORM | each service's `pyproject.toml` / `requirements.txt` |
+| Models and config | pydantic v2, pydantic-settings (insights-sponsors), python-dotenv (data-platform) | Request/response models, env-based settings | `insights-sponsors/src/insights_sponsors/models.py`, `config.py` |
+| HTTP client | httpx | Calls the MBTA V3 API | `data-platform/src/data_platform/mbta.py` |
+| API contracts | OpenAPI (YAML), contract-first | The interface the front end and other services build against | `contracts/api/{data-platform,insights-sponsors,game-engine}.yaml` |
+| Collector / ingestion | Python modules run with `python -m` | `load_static` loads routes, stops, schedules; `collector` stores live vehicles, predictions and alerts; `ingest_content` loads open tourist content (about 1 s between requests) | `data-platform/src/data_platform/{load_static,collector,ingest}.py`, `insights-sponsors/ingest_content/` |
+| Benchmarks | Python scripts using `EXPLAIN (ANALYZE)` | Compression ratio and aggregate-vs-raw timings | `data-platform/src/data_platform/{bench,bench_real,demo_measure,verify}.py` |
+| Auth (on main) | Demo bearer token: the token is the sandbox username. game-engine also accepts an `X-Store-Key` header for store verification | Identifies demo users. Not real authentication | `game-engine/src/game_engine/app.py`, `insights-sponsors/src/insights_sponsors/auth.py` |
+| CORS (on main) | FastAPI `CORSMiddleware` | data-platform allows any origin for GET; insights-sponsors is configurable by env; game-engine sets its own allowed headers | each service's `app.py` / `main.py` |
+| Hardening (in progress) | HMAC-signed short-lived tokens, rate limits, body-size limit, security headers | Prepared on branch `demo-deploy`, not merged to main | branch `demo-deploy`: `shared/tquest_auth.py`, `shared/tquest_http.py` |
+| Web app (in progress) | React 18, TypeScript, Vite, Vitest, ESLint | Front end ported from the approved design canvas. Local `web/` folder, not committed yet | `web/package.json` (uncommitted), `design/canvas/` |
+| Python tests | pytest, pytest-asyncio (data-platform), openapi-spec-validator, pyyaml, pglast (SQL syntax checks) | Unit, contract-conformance and migration-syntax tests; `db`-marked tests need a database | `*/tests/` |
+| Repo tooling tests | Node's built-in test runner (`node --test`) | Tests hooks, ownership guard, billing safety, attribution, docs sync | `tests/*.test.mjs` |
+| Linting | None configured for Python. ESLint only in the uncommitted `web/` | | |
+| Docker (services) | Dockerfiles for the three services | Prepared on branch `demo-deploy`, not merged to main | branch `demo-deploy`: `*/Dockerfile` |
+| Hosting | Vercel for the front end; a container or Python host for the three backends | Described in [docs/FRONTEND_INTEGRATION.md](docs/FRONTEND_INTEGRATION.md). **Prepared, not deployed.** | `docs/FRONTEND_INTEGRATION.md` |
+| CI | GitHub Actions: one workflow, `route-issues` (labels agent-message issues) | No build or test CI | `.github/workflows/route-issues.yml` |
 
-## Real data versus synthetic data
-Stops, routes, schedules, live vehicles, predictions and alerts are **real** MBTA data. There are no users yet, so rider events used for benchmarks and demos are **synthetic** and flagged `is_synthetic`. Synthetic data is never presented as real users. Demo sponsors and sample businesses are labeled placeholders.
+### How we use Tiger Data
+
+All of this exists in `data-platform/migrations/`.
+- **Hypertables:** `rider_events` (0001), `points_ledger` (0001), `vehicles` and `predictions` (0003), `place_visits` (0005). `alerts` and `alert_entities` are ordinary tables, not hypertables.
+- **Continuous aggregates, each with a refresh policy:** `leaderboard_daily`, `home_line_weekly`, `personal_stats_daily` (0004); `user_stop_daily`, `user_stop_hourly` (0006); `user_route_daily` (0007, the 30-day home-line rule); `vehicles_route_5m` (0009, vehicle reports per line per 5 minutes).
+- **Compression policies:** `vehicles` and `predictions` after 1 day (0003), `rider_events` after 7 days with `compress_segmentby = 'user_id'` (0008).
+- **Retention policies:** `vehicles` and `predictions` 30 days (0003), `place_visits` 90 days (0005).
+- **`time_bucket` analytics:** the aggregates above, the benchmark scripts and `insights-sponsors/sql/analytics_me.sql`, `analytics_boston.sql`.
+- **SQL recommendations:** drafts in `insights-sponsors/sql/recs_*.sql`. Today recommendations are served by the in-memory backend with seed data; running them on Postgres is planned, not done.
+- **Measured numbers** (all from [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md), never edited by hand):
+  - Synthetic data: 250,000 `rider_events` compress 5.9x on total hypertable size (96.0 MB to 16.2 MB). Aggregate-vs-raw speedups on that small set range from 0.8x to 1.6x, reported as measured with no claim of a win.
+  - Real data: on live MBTA `vehicles` (274,565 rows), the `vehicles_route_5m` aggregate ran 8.41x faster than the raw table before forced compression. Real-data compression ratio: TODO: measure (settled chunks).
+
+### Data sources
+
+| Source | What it provides | Attribution and terms |
+|---|---|---|
+| MBTA V3 API and GTFS | Routes, lines, stops, schedules (static); vehicles, predictions, alerts (live). Real data | MassDOT Developers License |
+| Analyze Boston (data.boston.gov, CKAN API) | Boston Landmarks Commission landmarks and historic districts, linked to nearby stops in SQL | Public Domain Dedication and License (PDDL); attribution stored with each item |
+| Digital Commonwealth (official JSON API) | Historic item metadata and links, only items whose rights statement is no-known-restrictions or public domain. No coordinates, so not linked to stops | Rights per item |
+| Hand-written content | Freedom Trail sites and loading-screen fun facts, written by the team, marked `needs_verify` | Ours; a human must verify before publishing |
+
+**Real versus synthetic.** Stops, routes, schedules, live vehicles, predictions and alerts are real MBTA data. There are no real users yet, so rider events used for benchmarks and demos are synthetic and flagged `is_synthetic` (migration 0009); they are never presented as real riders. Per-source counts and the correction path: [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
+
+### Developer workflow
+- **Monorepo.** One folder per agent (see Repo layout). Each person writes only in their own folders; `team.json` defines folders and per-path ownership.
+- **Message board.** GitHub Issues is the only channel between agents. Labels: `to:*`, `from:*`, `type:request|question|blocker|contract-change|handoff|done`, `priority:blocker`, `status:acked`. The `route-issues` workflow applies labels from the issue form. Protocol: [docs/PROTOCOL.md](docs/PROTOCOL.md).
+- **Planner/builder agents.** Each agent folder has a `.work/` directory (roadmap, prompt queue, reports, handoff). A planner session writes prompts and handles GitHub; a builder session implements them. See [docs/DUO.md](docs/DUO.md).
+- **Git hooks (`.githooks/`).** `pre-commit` is the ownership guard (`ALLOW_SHARED=1` overrides it); `commit-msg` and `pre-push` strip or reject attribution lines.
+- **Node scripts (`scripts/`):**
+  - `setup-me.mjs`: write your identity and set up hooks. `doctor.mjs`: setup checklist.
+  - `inbox.mjs`, `watch-inbox.mjs`: show your open issues. `send.mjs`, `ack.mjs`, `done.mjs`: create, acknowledge and close messages.
+  - `duo.mjs`: launch a planner or builder session. `planner-guard.mjs`: keeps planners inside `.work/`.
+  - `seed-work.mjs`, `seed-issues.mjs`, `setup-labels.mjs`, `sync-claude-config.mjs`: one-time and sync helpers.
+  - `sync-docs.mjs`: refresh the generated blocks in PLAN.md and PITCH.md. `check-attribution.mjs`: audit history, files and issues.
+  - `billing.mjs`: billing-safety helpers used by `doctor.mjs` and `duo.mjs`. `demo.mjs`: start the services and print a tour. `connect-check.mjs`: front-end wiring check.
+- **Slash commands** (`.claude-template/commands/`, copied into every agent folder): `/inbox`, `/send`, `/ack`, `/done`, `/handoff`, `/docs-refresh`.
+
+### Project status by layer
+
+| Layer | Built | In progress | Planned |
+|---|---|---|---|
+| Database | Migrations 0000-0012 on a live Tiger Cloud service; `verify` passed; aggregates, compression and retention policies | Real-data compression measurement | |
+| Ingestion | MBTA static load, live collector, tourist content ingestion (run once) | | |
+| data-platform API | Read API for stops, routes, lines, vehicles, predictions, alerts, travel; contract published | | |
+| insights-sponsors | Content, offers, rank tiers, physical-reward catalog, nearby spots, tourist content on Postgres; faves endpoints; contract published | Consent, place visits, analytics, recommendations still on the in-memory backend | Move those to Postgres; community quests |
+| game-engine | Rules, in-memory and Postgres stores, contract published | Shared auth and hardening (`demo-deploy` branch) | Delay and cancellation notifications |
+| Front end | Approved design canvas in `design/canvas/` | `web/` React + Vite port (uncommitted) | Hosting on Vercel and a backend container host |
 
 ## Repo layout
 | Path | What |
@@ -92,13 +163,5 @@ Stops, routes, schedules, live vehicles, predictions and alerts are **real** MBT
 | Bryan | client-bryan |
 | Isabella | client-isabella |
 
-## How the agents collaborate
-Each person runs planner/builder agents inside their own folders. GitHub Issues is the only inter-agent channel. See [docs/PROTOCOL.md](docs/PROTOCOL.md), [docs/DUO.md](docs/DUO.md), [AGENTS.md](AGENTS.md) and [TEAM.md](TEAM.md).
-
-## Data sources and credits
-- **MBTA** V3 API and GTFS, under the MassDOT Developers License.
-- **Analyze Boston** (data.boston.gov), Public Domain Dedication and License (PDDL).
-- **Digital Commonwealth**: rights vary per item; only items with a clear no-known-restrictions or public-domain rights statement are used (metadata and link only).
-- **Tiger Data** (Timescale) for Postgres + TimescaleDB.
-
-Per-source terms, counts and the correction path are in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
+## Credits
+MBTA data under the MassDOT Developers License. Analyze Boston under the PDDL. Digital Commonwealth items under their own stated rights. Postgres + TimescaleDB on Tiger Data (Timescale). Details per source: [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
