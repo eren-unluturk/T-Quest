@@ -32,6 +32,20 @@ No Figma export, no login, check-in, friends, leaderboard, quests, redemption or
 | Faves | insights `GET /me/faves`, `DELETE /me/faves/{id}` |
 | Profile | game-engine `GET /me/rank`, `GET /me/points`; insights `GET /rank-tiers`, `GET /offers?rank=`, `/stops/{id}/nearby` (sponsor names) |
 
+## Analytics tab (authored by the admin, not drawn by Isabella)
+Added 2026-11-22 as a fourth tab. `design/canvas/Analytics.dc.html` and `design/icons/nav-analytics.svg` were authored by the admin to match the approved canvas: same tokens (`design/tokens/colors.json`), fonts (Space Grotesk, Inter, Caveat, Fredoka), card radius and offset shadow, pill style and bubble nav icon. The nav in Home, Explore, Traveled and Profile was changed from three to four columns (`design/canvas/*.dc.html`), then `web/scripts/port-design.mjs` regenerated the components. Isabella should review it.
+
+| Block | Label on screen | Data |
+|---|---|---|
+| Right now: vehicles per subway line, active alerts, lines affected, feed freshness | Live MBTA data | data-platform `GET /analytics/system` (live `vehicles`, `active_alerts`) |
+| Last hours, vehicle reports per line (SVG line chart with a text alternative) | Live MBTA data | same endpoint, from the `vehicles_route_5m` continuous aggregate |
+| Busiest and quietest: hour-of-day bars (Boston time), busiest and quietest line | Live MBTA data | same endpoint; thin until more days are collected |
+| Your ride insights: stops collected, home line, points, leaderboard place | demo rider data | insights-sponsors `/analytics/me`, game-engine `/me/collection`, `/me/rank`, `/leaderboards` (in-memory demo data) |
+
+If the rider services fail, the live blocks still show and the rider block says it is unavailable. All numbers come from API responses; none is hard-coded.
+
+**Visual-diff check (2026-11-22).** `node scripts/shoot-web.mjs` took 390x844 screenshots of every existing screen before and after the change and `python scripts/visual-diff.py` compared them. Everything above the bottom nav matched (0.00% of pixels differ on Loading, Traveled, Explore, Faves and Profile; 0.01% on Home, one moving train dot on the live map). The only changes are in the nav region (18% to 27% of pixels there). Analytics was compared side by side with Explore and Profile for header, margins, card and pill style.
+
 ## Stubs (no design yet; plain page that says "No design yet" and lists endpoints)
 | Screen | Endpoints it will use |
 |---|---|

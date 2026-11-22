@@ -8,12 +8,15 @@ import {
   CATEGORY_ICON, CATEGORY_MAP, COLORS, OWNER_OPTIONS, PALETTE, bigOffer, buildPlaces, fmtInt, fmtMiles, lineColorOf, ownerDots,
   pointsLine, rankBarX, spotBadge,
 } from '../app/view';
+import AnalyticsMarkup from '../design/generated/AnalyticsMarkup';
 import ExploreMarkup from '../design/generated/ExploreMarkup';
 import FavesMarkup from '../design/generated/FavesMarkup';
 import HomeMarkup from '../design/generated/HomeMarkup';
 import LoadingMarkup from '../design/generated/LoadingMarkup';
 import ProfileMarkup from '../design/generated/ProfileMarkup';
 import TraveledMarkup from '../design/generated/TraveledMarkup';
+import { buildAnalyticsView } from '../app/analytics';
+import type { RiderData } from '../app/analytics';
 import { DEMO_STOPS, HOME_STOP, loadSpots } from './data';
 import { readConfig } from '../config';
 import type { ApiConfig } from '../config';
@@ -258,6 +261,29 @@ export function ProfileScreen() {
     offers: [...unlocked, ...(lockedOne ? [card(lockedOne, unlocked.length, true)] : [])],
   };
   return <Frame credits={['Offers are demo placeholders with placeholder discount percentages. No real discount is implied.']}><ProfileMarkup v={v} /></Frame>;
+}
+
+// ---------------------------------------------------------------- Analytics (designed by the admin, see design/canvas/Analytics.dc.html)
+export function AnalyticsScreen() {
+  const { api, session } = useApp();
+  const sys = useAsync(() => api.systemAnalytics(6), []);
+  // the rider block is demo data from other services; if it fails the live blocks still show
+  const rider = useAsync<RiderData | null>(async () => {
+    try {
+      const [rank, collection, me, board] = await Promise.all([api.myRank(), api.myCollection(), api.myAnalytics(), api.leaderboard()]);
+      return { rank, collection, me, board, username: session.username() ?? '' };
+    } catch {
+      return null;
+    }
+  }, []);
+  const early = loadingOrError(sys);
+  if (early || !sys.data) return early;
+  const v = buildAnalyticsView(sys.data, rider.data ?? null);
+  return (
+    <Frame credits={['Live MBTA data: vehicle position reports from the MBTA V3 feed, stored and aggregated in Tiger Data. Demo rider data: synthetic, not real people.']}>
+      <AnalyticsMarkup v={v} />
+    </Frame>
+  );
 }
 
 // ---------------------------------------------------------------- Stubs (no design yet)
