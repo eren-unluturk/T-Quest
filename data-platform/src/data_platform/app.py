@@ -4,7 +4,7 @@ import tquest_auth
 import tquest_http
 
 from . import db
-from .routes import realtime, routes, stops, travel
+from .routes import analytics, realtime, routes, stops, travel
 
 _prod = tquest_auth.app_env() == "prod"
 app = FastAPI(
@@ -18,6 +18,7 @@ app.include_router(routes.router)
 app.include_router(stops.router)
 app.include_router(realtime.router)
 app.include_router(travel.router)
+app.include_router(analytics.router)
 
 
 @app.get("/health")
