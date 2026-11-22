@@ -1,0 +1,86 @@
+/* @tquest/map styles. Tokens from design/tokens/colors.json; every class is prefixed tqm- so nothing leaks into the app. */
+.tqm-root { --navy: #1D3557; --cream: #FFF8EC; --red: #E63946; --red-dark: #C1272D; --yellow: #FFC93C; --pink: #F4A6C6;
+  --lblue: #A8DADC; --steel: #457B9D; --lgreen: #B8E0A8; --land: #F3EBDD; --head: 'Space Grotesk', sans-serif; --hand: Caveat, cursive;
+  position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--land); font-family: Inter, system-ui, sans-serif; color: var(--navy); }
+:where(.tqm-root, .tqm-layer) * { box-sizing: border-box; }
+.tqm-canvas { position: absolute; inset: 0; }
+.tqm-layer { --navy: #1D3557; --cream: #FFF8EC; --red: #E63946; --yellow: #FFC93C; --steel: #457B9D; --lgreen: #B8E0A8; --pink: #F4A6C6;
+  --head: 'Space Grotesk', sans-serif; --hand: Caveat, cursive; font-family: Inter, system-ui, sans-serif; color: var(--navy); }
+/* zero specificity, so each control's own font below wins */
+:where(.tqm-layer, .tqm-root) button { font: inherit; color: inherit; cursor: pointer; }
+.tqm-hand { font-family: var(--hand, Caveat, cursive); font-weight: 700; line-height: 1; }
+.tqm-head { font-family: var(--head, 'Space Grotesk', sans-serif); font-weight: 700; }
+.tqm-src { font-size: 10px; font-weight: 600; color: var(--steel, #457B9D); }
+.tqm-box { background: #fff; border: 3px solid var(--navy); border-radius: 16px; box-shadow: 3px 3px 0 var(--navy); }
+.tqm-round { width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 3px solid var(--navy); display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; }
+.tqm-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--navy); flex-shrink: 0; }
+.tqm-pill { border: 2.5px solid var(--navy); border-radius: 999px; font: 700 13px Inter, sans-serif; background: #fff; min-height: 40px; padding: 6px 14px; display: inline-flex; align-items: center; gap: 6px; }
+.tqm-pill.on { background: var(--yellow); box-shadow: 3px 3px 0 var(--navy); }
+.tqm-big { min-height: 48px; border-radius: 16px; border: 3px solid var(--navy); background: #fff; font: 800 14px Inter, sans-serif; color: var(--navy); display: grid; place-items: center; text-decoration: none; }
+.tqm-big.yellow { background: var(--yellow); box-shadow: 3px 3px 0 var(--navy); }
+.tqm-big[disabled] { opacity: .6; cursor: wait; }
+
+/* controls on the map card */
+.tqm-tapin { position: absolute; left: 10px; top: 10px; z-index: 5; background: var(--yellow); border: 2.5px solid var(--navy); border-radius: 999px; box-shadow: 3px 3px 0 var(--navy); padding: 6px 12px; font-weight: 800; font-size: 12px; }
+.tqm-tapin[disabled] { background: #fff; box-shadow: none; cursor: default; color: var(--steel); }
+.tqm-tilt { position: absolute; right: 10px; top: 10px; z-index: 5; width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 2.5px solid var(--navy); font: 800 11px Inter, sans-serif; padding: 0; }
+.tqm-ethnic { position: absolute; left: 10px; bottom: 8px; z-index: 5; background: #fff; border: 2.5px solid var(--navy); border-radius: 999px; padding: 5px 12px; font: 800 12px Inter, sans-serif; }
+.tqm-ethnic.on { background: #F8C8DC; box-shadow: 3px 3px 0 var(--navy); }
+.tqm-label { position: absolute; right: 10px; bottom: 8px; z-index: 5; background: #fff; border: 2px solid var(--navy); border-radius: 10px; padding: 3px 8px; font-size: 11px; font-weight: 700; }
+.tqm-msg { position: absolute; left: 10px; right: 10px; top: 50%; transform: translateY(-50%); z-index: 6; padding: 12px; font-size: 13px; font-weight: 700; text-align: center; }
+
+/* markers */
+.tqm-pin { width: 30px; height: 30px; border-radius: 50%; padding: 0; border: 3px solid var(--navy, #1D3557); display: flex; align-items: center; justify-content: center; transition: width .2s, height .2s; }
+.tqm-pin i { display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--navy, #1D3557); }
+.tqm-pin.sel { width: 48px; height: 48px; background: var(--yellow, #FFC93C) !important; box-shadow: 3px 3px 0 var(--navy, #1D3557); z-index: 2; }
+.tqm-pin.sel i { width: 14px; height: 14px; }
+.tqm-check { width: 30px; height: 30px; border-radius: 50%; padding: 0; background: var(--yellow, #FFC93C); border: 3px solid var(--navy, #1D3557); display: flex; align-items: center; justify-content: center; }
+.tqm-check.sel { width: 38px; height: 38px; box-shadow: 3px 3px 0 var(--navy, #1D3557); }
+.tqm-you { width: 18px; height: 18px; border-radius: 50%; background: #457B9D; border: 3px solid #fff; box-shadow: 0 0 0 2.5px #1D3557, 0 0 0 10px rgba(69,123,157,.22); }
+.tqm-root .maplibregl-ctrl-attrib { font-size: 9px; }
+.tqm-popup { z-index: 20; }
+.tqm-popup .maplibregl-popup-content { border: 2.5px solid #1D3557; border-radius: 14px; box-shadow: 3px 3px 0 #1D3557; padding: 10px 12px; font-family: Inter, sans-serif; color: #1D3557; }
+.tqm-popup .maplibregl-popup-tip { display: none; }
+.tqm-icard b { display: block; font-size: 15px; font-weight: 800; margin: 2px 0; }
+.tqm-icard p { margin: 6px 0 4px; font-size: 13px; line-height: 1.35; }
+
+/* sheets (directions, ride) */
+.tqm-sheetwrap { position: absolute; inset: 0; background: rgba(29,53,87,.45); display: flex; flex-direction: column; justify-content: flex-end; z-index: 50; }
+.tqm-sheet { background: var(--cream); border-top: 3px solid var(--navy); border-radius: 26px 26px 0 0; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 14px; max-height: 92%; overflow-y: auto; }
+.tqm-leg { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+.tqm-leg > .tqm-dot, .tqm-leg > svg { margin-top: 2px; }
+.tqm-leg b { font-size: 14px; }
+.tqm-leg span span { color: var(--steel); font-weight: 600; }
+.tqm-leg.change { color: var(--steel); font-weight: 600; padding-left: 2px; }
+.tqm-stops { display: flex; flex-direction: column; gap: 8px; }
+.tqm-stops button { display: flex; align-items: center; gap: 10px; text-align: left; background: #fff; border: 2.5px solid var(--navy); border-radius: 14px; padding: 9px 12px; font-weight: 700; font-size: 14px; }
+.tqm-stops button small { margin-left: auto; font-weight: 600; color: var(--steel); font-size: 12px; }
+.tqm-stops button.on { background: var(--yellow); box-shadow: 3px 3px 0 var(--navy); }
+
+/* ride stamp (not in the canvas yet: proposal for Isabella) */
+.tqm-stampwrap { position: absolute; inset: 0; z-index: 60; background: rgba(29,53,87,.55); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; }
+.tqm-stamp { width: 270px; height: 270px; border-radius: 50%; border: 6px double; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 26px; background: var(--cream); animation: tqm-slam .55s cubic-bezier(.2,1.6,.4,1) both; transform: rotate(-8deg); }
+@keyframes tqm-slam { 0% { transform: scale(2.4) rotate(-25deg); opacity: 0; } 60% { transform: scale(.94) rotate(-6deg); opacity: 1; } 100% { transform: scale(1) rotate(-8deg); } }
+.tqm-stamp .t { font-family: var(--head); font-size: 26px; font-weight: 700; letter-spacing: 1px; line-height: 1.05; }
+.tqm-stamp .r { font-weight: 800; font-size: 15px; margin-top: 8px; color: var(--navy); }
+.tqm-stamp .s { font-size: 11px; font-weight: 700; margin-top: 6px; opacity: .8; color: var(--navy); }
+.tqm-burst { position: relative; height: 0; }
+.tqm-burst i { position: absolute; left: 0; top: 0; font-style: normal; font-family: var(--head); font-weight: 700; font-size: 34px; color: var(--yellow); -webkit-text-stroke: 1.5px var(--navy); animation: tqm-fly 1.4s ease-out .5s both; }
+@keyframes tqm-fly { 0% { transform: translate(-50%, 0) scale(.6); opacity: 0; } 30% { opacity: 1; transform: translate(-50%, -20px) scale(1.15); } 100% { transform: translate(-50%, -90px) scale(1); opacity: 0; } }
+.tqm-checks { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; }
+.tqm-checks div { display: flex; gap: 8px; align-items: flex-start; }
+.tqm-checks b { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--navy); display: grid; place-items: center; font-size: 12px; }
+
+/* traveled overlays */
+.tqm-legend { position: absolute; left: 14px; right: 14px; top: 16px; z-index: 5; }
+.tqm-legend .tqm-box { border-radius: 18px; box-shadow: 4px 4px 0 var(--navy); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.tqm-miles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.tqm-miles div { color: #fff; border: 2.5px solid var(--navy); border-radius: 12px; padding: 3px; display: flex; flex-direction: column; align-items: center; }
+.tqm-miles div.zero { background: #fff !important; color: var(--navy); border-style: dashed; }
+.tqm-miles b { font-family: var(--head); font-size: 20px; line-height: 1.1; }
+.tqm-miles span { font-size: 10px; font-weight: 800; }
+.tqm-keys { display: flex; gap: 12px; font-size: 11px; font-weight: 700; flex-wrap: wrap; }
+.tqm-keys span { display: flex; align-items: center; gap: 5px; }
+.tqm-spot { position: absolute; left: 14px; right: 14px; bottom: var(--tqm-spot-bottom, 118px); z-index: 5; background: var(--yellow); border: 3px solid var(--navy); border-radius: 16px; box-shadow: 4px 4px 0 var(--navy); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+
+@media (prefers-reduced-motion: reduce) { .tqm-stamp, .tqm-burst i { animation: none !important; } }

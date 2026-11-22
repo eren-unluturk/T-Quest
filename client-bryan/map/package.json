@@ -1,0 +1,27 @@
+{
+  "name": "@tquest/map",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "T-Quest GIS maps for the web app: Home map with 3D landmarks, Ethnic Boston directions, ride verification, Traveled map",
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "maplibre-gl": "4.7.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "maplibre-gl": "4.7.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.9",
+    "vitest": "^2.1.3"
+  }
+}
