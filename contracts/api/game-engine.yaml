@@ -1,13 +1,22 @@
 openapi: 3.0.3
 info:
   title: T-Quest game-engine API
-  version: 0.1.0
+  version: 0.2.0
   description: |
     Game logic for T-Quest: check-ins, points, ranks, quests, badges, friends,
     leaderboards, and redemptions. Owner: game-engine (Tobi).
-    DRAFT. Numbers in x-rules are proposals; sponsors and data-platform must ack.
-    Auth: bearer token on every route except POST /redemptions/verify (store key).
-    Location is accepted only when the user has given consent.
+    DEMO. Every sponsor, store, spot, label and offer behind this API is a placeholder;
+    no partnership, endorsement or real discount is implied. Numbers in x-rules are proposals.
+    Auth (demo): bearer token on every route except POST /redemptions/verify (X-Store-Key).
+    The demo token IS the username ("Bearer ann"); real sessions are not built yet.
+    Location is accepted only when the user has given consent (today the client sends a consent flag).
+    Storage: in memory by default. With a database the service is read-only unless demo writes are on;
+    writes then answer 503 db_writes_disabled. Demo rows are stored as users demo_<name> with check-ins
+    flagged is_synthetic, and are removed by `python -m game_engine.demo_reset`.
+    Errors are {"detail": "<code>"} with the codes listed on each route.
+  x-changelog:
+    - '0.2.0: 8 named ranks; /me/rank returns name, avatar_key, next rank and points_to_next; badge slugs follow data-platform (line-<line>-complete, freedom-trail, rank-3..5, local-explorer); physical_rewards come from the physical_rewards table; quest type spots_near_stops; GET /healthz; 503 db_writes_disabled; demo-safe database mode; server port 8003'
+    - '0.1.0: first draft'
 servers:
   - url: http://localhost:8003
 security:
@@ -16,8 +25,11 @@ x-rules:
   checkin:
     max_distance_m: 75
     vehicle_seen_within_s: 300
+    vehicle_radius_m: 300
+    vehicle_check: on by default with the database (live vehicles table, matched by position); off in memory mode or with VEHICLE_CHECK=off
     cooldown_per_stop_s: 1800
     requires_location_consent: true
+    station_rule: a check-in at a platform counts for its parent station when badges and quests are checked
   points:
     first_visit_stop: 20
     repeat_visit_stop: 2
@@ -25,20 +37,47 @@ x-rules:
     daily_checkin_points_cap: 100
     complete_line: 300
     delay_compensation: 50
+    delay_compensation_rule: once per outage alert, only for users whose home_line is on an affected route (NO_SERVICE, SUSPENSION, SHUTTLE, SIGNIFICANT_DELAY); a job pays it, nothing runs it automatically
     ledger: append-only
   ranks:
-    - {rank: 1, min_points: 0,     discount_pct: 3}
-    - {rank: 2, min_points: 1000,  discount_pct: 5}
-    - {rank: 3, min_points: 4000,  discount_pct: 7}
-    - {rank: 4, min_points: 12000, discount_pct: 10}
-    - {rank: 5, min_points: 30000, discount_pct: 12, perk: one sponsor-funded free item per month}
+    - {rank: 1, name: Harbor Seal,         avatar_key: harbor-seal,         min_points: 0,     discount_pct: 3}
+    - {rank: 2, name: Town Crier,          avatar_key: town-crier,          min_points: 500,   discount_pct: 4}
+    - {rank: 3, name: Lamplighter,         avatar_key: lamplighter,         min_points: 1500,  discount_pct: 5}
+    - {rank: 4, name: Midnight Rider,      avatar_key: midnight-rider,      min_points: 4000,  discount_pct: 7}
+    - {rank: 5, name: Tea Party Raider,    avatar_key: tea-party-raider,    min_points: 8000,  discount_pct: 8}
+    - {rank: 6, name: Children of Liberty, avatar_key: children-of-liberty, min_points: 15000, discount_pct: 10}
+    - {rank: 7, name: Boston Lobstah,      avatar_key: boston-lobstah,      min_points: 25000, discount_pct: 11}
+    - {rank: 8, name: Patriot,             avatar_key: patriot,             min_points: 40000, discount_pct: 12}
+  rank_basis: lifetime points (positive ledger rows only); spending points never lowers the rank
+  badges:
+    line_complete: 'line-<line>-complete (line-red-complete, line-green-complete, line-blue-complete, line-orange-complete, line-mattapan-complete): every station of at least one route on that line (Green: one branch)'
+    freedom_trail: 'freedom-trail: every station in the Freedom Trail set (stops.is_freedom_trail plus freedom_trail_sites.nearest_stop_id); off until 2 or more stations are loaded'
+    rank: 'rank-3, rank-4, rank-5 on reaching that rank (ranks 1, 2, 6, 7 and 8 have no badge)'
+    quest: a quest can award its own badge (for example local-explorer)
+  quests:
+    criteria_shapes:
+      - '{"stops": [station ids]} visit every station'
+      - '{"stops": [station ids], "min_stops": N} visit any N of them'
+      - '{"type": "spots_near_stops", "min_stops": N} visit any N stations that have an active nearby spot (spot_stop_links joined to nearby_spots)'
+    paid_once_per_user: true
   redemption_limits:
     per_user_per_store_per_week: 1
     max_discount_value_usd: 5
     code_ttl_hours: 24
     single_use: true
-    funded_by: sponsor
+    funded_by: demo sponsor (placeholder)
+    store_key: X-Store-Key; sha256 hex of it must match stores.store_key_hash (or the env STORE_KEY in demo setups)
 paths:
+  /healthz:
+    get:
+      summary: Service status and which storage is in use
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Health'}
   /checkins:
     post:
       summary: Check in at a stop
@@ -53,9 +92,12 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/CheckinResult'}
-        '403': {description: Location consent missing}
-        '409': {description: Cooldown active for this stop}
-        '422': {description: Too far from stop, or no vehicle seen nearby}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {description: 'no_consent: location consent missing'}
+        '404': {description: 'unknown stop'}
+        '409': {description: 'cooldown: checked in at this stop in the last 30 minutes'}
+        '422': {description: 'too_far (more than 75 m from the stop) or no_vehicle (no live vehicle within 300 m in the last 5 minutes)'}
+        '503': {$ref: '#/components/responses/WritesDisabled'}
   /me/points:
     get:
       summary: Points balance and recent ledger entries
@@ -65,24 +107,28 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/PointsSummary'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
   /me/rank:
     get:
-      summary: Current rank, next rank, discount percent
+      summary: Current rank with name, avatar key, discount and the next rank
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Rank'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
   /me/collection:
     get:
-      summary: Collected stops, badges, and physical rewards earned
+      summary: Visited stations, badges, and the stickers and patches those badges unlock
+      description: physical_rewards holds the names from the physical_rewards table (by badge_id), without duplicates.
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Collection'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
   /quests:
     get:
       summary: Active quests, including sponsored ones
@@ -94,12 +140,13 @@ paths:
               schema:
                 type: array
                 items: {$ref: '#/components/schemas/Quest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
   /leaderboards:
     get:
-      summary: Leaderboard by scope and period
+      summary: Leaderboard by scope and period (demo users only; ties share a position)
       parameters:
-        - {name: scope, in: query, schema: {type: string, enum: [global, friends, line]}}
-        - {name: period, in: query, schema: {type: string, enum: [week, month, all]}}
+        - {name: scope, in: query, schema: {type: string, enum: [global, friends], default: global}, description: 'line is planned but not built: it answers 422'}
+        - {name: period, in: query, schema: {type: string, enum: [week, month, all], default: all}}
       responses:
         '200':
           description: OK
@@ -108,6 +155,8 @@ paths:
               schema:
                 type: array
                 items: {$ref: '#/components/schemas/LeaderboardRow'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '422': {description: 'bad scope or period'}
   /friends:
     get:
       summary: List friends
@@ -119,8 +168,9 @@ paths:
               schema:
                 type: array
                 items: {$ref: '#/components/schemas/Friend'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
     post:
-      summary: Add a friend by username
+      summary: Add a friend by username (mutual)
       requestBody:
         required: true
         content:
@@ -132,9 +182,13 @@ paths:
                 username: {type: string}
       responses:
         '201': {description: Friend added}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {description: already_friends}
+        '422': {description: cannot_friend_self}
+        '503': {$ref: '#/components/responses/WritesDisabled'}
   /redemptions:
     post:
-      summary: Spend points or use rank on a reward; returns a single-use code
+      summary: Use rank or points on an offer; returns a single-use code
       requestBody:
         required: true
         content:
@@ -143,15 +197,18 @@ paths:
               type: object
               required: [offer_id]
               properties:
-                offer_id: {type: string}
+                offer_id: {type: string, description: Offer id from insights-sponsors GET /offers}
       responses:
         '201':
           description: Code issued
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Redemption'}
-        '403': {description: Rank or badge requirement not met}
-        '409': {description: Weekly store limit reached, or out of stock}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {description: 'rank_too_low'}
+        '404': {description: unknown offer}
+        '409': {description: 'weekly_store_limit, out_of_stock, not_enough_points, not_started or ended'}
+        '503': {$ref: '#/components/responses/WritesDisabled'}
   /redemptions/verify:
     post:
       summary: Store scans or enters a code; marks it claimed
@@ -173,27 +230,51 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Redemption'}
-        '404': {description: Unknown code}
-        '410': {description: Code expired or already used}
+        '401': {description: bad store key}
+        '404': {description: unknown_code (or a code for another store)}
+        '410': {description: 'already_used or expired'}
+        '503': {$ref: '#/components/responses/WritesDisabled'}
 components:
   securitySchemes:
     bearerAuth: {type: http, scheme: bearer}
     storeKey: {type: apiKey, in: header, name: X-Store-Key}
+  responses:
+    Unauthorized:
+      description: Missing bearer token
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+    WritesDisabled:
+      description: 'db_writes_disabled: database mode is read-only unless GE_ALLOW_DB_WRITES=1'
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
   schemas:
+    Error:
+      type: object
+      properties:
+        detail: {type: string}
+    Health:
+      type: object
+      properties:
+        ok: {type: boolean}
+        store: {type: string, enum: [memory, postgres]}
+        writes: {type: boolean}
     CheckinRequest:
       type: object
       required: [stop_id, lat, lon, client_time]
       properties:
-        stop_id: {type: string}
+        stop_id: {type: string, description: MBTA stop or station id}
         lat: {type: number}
         lon: {type: number}
         client_time: {type: string, format: date-time}
         mode: {type: string, enum: [subway, bus]}
+        consent: {type: boolean, default: true, description: Location consent flag (stand-in until the consent table is read)}
     CheckinResult:
       type: object
       properties:
         checkin_id: {type: string}
-        points_awarded: {type: integer}
+        points_awarded: {type: integer, description: 'Includes quest and line-complete bonus points'}
         first_visit: {type: boolean}
         new_rank: {type: integer, nullable: true}
         badges_unlocked:
@@ -211,26 +292,33 @@ components:
             properties:
               at: {type: string, format: date-time}
               delta: {type: integer}
-              reason: {type: string}
+              reason: {type: string, description: 'first_visit, repeat_visit, quest:<id>, complete_line:<badge>, delay_compensation, redemption'}
     Rank:
       type: object
       properties:
         rank: {type: integer}
-        lifetime_points: {type: integer}
-        next_rank_at: {type: integer, nullable: true}
+        name: {type: string}
+        avatar_key: {type: string}
         discount_pct: {type: integer}
+        lifetime_points: {type: integer}
+        next_rank: {type: integer, nullable: true}
+        next_rank_name: {type: string, nullable: true}
+        next_rank_at: {type: integer, nullable: true, description: Lifetime points needed for the next rank}
+        points_to_next: {type: integer, nullable: true}
     Collection:
       type: object
       properties:
         stops:
           type: array
           items: {type: string}
+          description: Visited stations (a platform check-in counts for its station)
         badges:
           type: array
           items: {type: string}
         physical_rewards:
           type: array
           items: {type: string}
+          description: Names of stickers and patches unlocked by the badges
     Quest:
       type: object
       properties:
@@ -254,7 +342,7 @@ components:
     Redemption:
       type: object
       properties:
-        code: {type: string}
+        code: {type: string, description: 'Ten characters, no 0, O, 1 or I'}
         offer_id: {type: string}
         status: {type: string, enum: [issued, claimed, expired]}
         expires_at: {type: string, format: date-time}
