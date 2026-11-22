@@ -11,6 +11,11 @@ from unittest.mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+# The shared write rate limit (shared/tquest_http.py, default 60 a minute) is read once, when the app
+# is imported. Every test request comes from the same test client address, so a full run would hit it.
+# Raise it for tests only; the running service keeps its own RATE_WRITE_PER_MIN.
+os.environ.setdefault("RATE_WRITE_PER_MIN", "100000")
+
 URL = os.environ.get("GE_TEST_DATABASE_URL")
 try:
     import psycopg
