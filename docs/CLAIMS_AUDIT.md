@@ -36,4 +36,4 @@ Checked 2026-11-21 against the repo as it is now: README.md, PLAN.md, PITCH.md, 
 
 Test counts are not quoted in these five files (they live in `.work/STATE.md`), so there is nothing to check.
 
-Result: false 5 (all fixed), unverified 2 (softened or marked), everything else verified.
+Result: false 4 (all fixed), unverified 2 (softened or marked), everything else verified.
