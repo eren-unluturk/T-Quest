@@ -19,3 +19,6 @@ STOP
 **/.work/STOP
 **/.work/tmp/
 insights-sponsors/data/raw/
+
+# recorded demo videos (uploaded by hand for submission)
+docs/demo/

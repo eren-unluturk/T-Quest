@@ -42,6 +42,13 @@ Data comes from the real endpoints. The services run in dev mode (plain sandbox 
 - Rider data is synthetic; there are no real users yet. Sponsors, stores, offers and labels are demo placeholders. Rank percentages and the free item are placeholders.
 - Freedom Trail text and loading facts are hand-written and await a human check.
 
+## Recording the demo
+With the demo running (`node scripts/demo-up.mjs`), in a second terminal:
+```powershell
+node scripts/record-demo.mjs        # about 2.3 minutes; writes docs/demo/tquest-demo.webm
+```
+It signs in with a sandbox username, walks the six built screens with a caption strip under the phone frame (the frame stays 390x844; the video is 390x940), and ends with a closing card. Flags: `--url`, `--user`, `--out`, `--width`, `--height`, `--caption-height`, `--pace` (scales every pause). It uses Playwright from `web/node_modules` (run `npx playwright install chromium` once in `web/`). It faves one fact and unfaves it again, so no demo row is left behind. `docs/demo/` is gitignored; the video is uploaded by hand. Convert to MP4 yourself if needed (ffmpeg is not required by the script).
+
 ## Reset demo rows
 Only marked rows are removed: demo users (username starts with `demo_`) with their check-ins, points, badges, friends and redemptions, plus faves flagged `is_demo`. MBTA tables are never touched.
 ```powershell
