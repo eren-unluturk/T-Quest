@@ -5,7 +5,7 @@ Boston Hacks, Transit Gamification track, Best Use of Tiger Data subtrack. Worki
 > **Demo disclaimer.** T-Quest is a hackathon prototype. Every sponsor, store, team, discount and label is a demo placeholder. No partnership, endorsement or real discount is implied. We are not pursuing real partnerships. Rider data is synthetic (flagged `is_synthetic`); stops, routes, schedules and live vehicles are real MBTA data.
 
 ## 30-second hook
-A great many people ride the T every day and nothing happens when they do. (TODO: verify a ridership figure before quoting one.) T-Quest turns every stop into something to collect and every ride into progress: points, a travel rank, demo rewards at placeholder local spots, and a reason for visitors to step off the train. Underneath, one Tiger Data database holds the profiles and the live MBTA streams together.
+Many people ride the T every day and nothing happens when they do. T-Quest turns every stop into something to collect and every ride into progress: points, a travel rank, demo rewards at placeholder local spots, and a reason for visitors to step off the train. Underneath, one Tiger Data database holds the profiles and the live MBTA streams together.
 
 ## Problem and solution
 **Problem.** The T is a necessity: routine, waiting, friction, and nothing gained when it breaks. For tourists it is passive and disconnected from the city.

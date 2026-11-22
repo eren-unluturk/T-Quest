@@ -9,7 +9,7 @@
 T-Quest is a Pokemon-Go-style game layer over the MBTA, subway and bus. Riders check in at stops, collect them, track routes Strava-style, earn points, climb a travel rank and spend points on demo rewards (placeholder sponsors, see the disclaimer above). Every stop also shows what is nearby (food, coffee, shops), which riders can narrow by category and by verified community label. Tiger Data (Postgres + TimescaleDB) holds the relational profiles and the high-frequency MBTA streams in one database.
 
 ## The problem
-A great many people ride the MBTA every day (TODO: verify the ridership figure before quoting one). For residents it is a functional necessity: a predictable routine, platform waits, friction, and nothing gained when the T breaks. For tourists the T feels passive and disconnected from the city. The question we answer: how do we make the T ride something people look forward to? See [PITCH.md](PITCH.md) for our answers to the six track questions.
+Many people ride the MBTA every day. For residents it is a functional necessity: a predictable routine, platform waits, friction, and nothing gained when the T breaks. For tourists the T feels passive and disconnected from the city. The question we answer: how do we make the T ride something people look forward to? See [PITCH.md](PITCH.md) for our answers to the six track questions.
 
 ## Features
 

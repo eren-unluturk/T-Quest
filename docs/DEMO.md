@@ -84,7 +84,7 @@ VS Code task: "Demo: reset demo rows" (dry run).
 6. **game-engine in in-memory demo mode:** two check-ins, rank, quests. A repeat run within the cooldown shows HTTP 409; restart game-engine to reset.
 
 ## Where the Tiger Data numbers are
-`docs/TIGER_DATA_RESULTS.md` (also copied into the generated block in PITCH.md). Real-data compression is TODO: measure; the continuous-aggregate latency comparison is reported as measured.
+`docs/TIGER_DATA_RESULTS.md` (also copied into the generated block in PITCH.md). Real-data compression (one settled chunk per hypertable) and the continuous-aggregate latency comparison are reported there as measured.
 
 ## Verified (local, 2026-11-21)
 Run `node scripts/e2e-prod.mjs` (starts the three backends with `APP_ENV=prod`, a throwaway random `TOKEN_SECRET` and a throwaway CORS origin; game-engine in in-memory mode, so nothing is written to any database). Result: 47 of 47 checks passed.
