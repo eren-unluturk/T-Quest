@@ -3,6 +3,8 @@
 MAX_DISTANCE_M = 75
 VEHICLE_SEEN_WITHIN_S = 300
 VEHICLE_RADIUS_M = 300  # a live vehicle must be this close to the stop
+MAX_SPEED_KMH = 80   # two check-ins farther apart than this speed allows are refused (too_fast)
+SPEED_SLACK_M = 150  # GPS slack added to the allowed distance
 COOLDOWN_PER_STOP_S = 1800
 
 FIRST_VISIT_POINTS = 20

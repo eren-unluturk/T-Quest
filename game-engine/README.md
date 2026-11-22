@@ -53,6 +53,7 @@ curl -H "Authorization: Bearer ann" http://127.0.0.1:8003/me/rank
 |---|---|
 | `DATABASE_URL` | Set: use the database (read-only unless the next line is set). Not set: in-memory demo. |
 | `VEHICLE_CHECK` | `off` skips the live vehicle check. Default: on with the database, off in memory mode. |
+| `SPEED_CHECK` | `off` skips the speed check (a check-in that needs more than 80 km/h from the user's previous one is refused as `too_fast`). Default: on with the database, off in memory mode. `strict` turns it on. Uses server time only. |
 | `STORE_KEY` | Store key accepted by `POST /redemptions/verify` (memory-mode default: `dev-store-key`). With the database, a store's `X-Store-Key` must match its sha256 hash in `stores.store_key_hash`. |
 
 ## Demo

@@ -28,6 +28,11 @@ DEMO_OFFERS = {
 DEMO_QUESTS = [
     badges.Quest("q1", "Downtown loop", frozenset({"park", "downtown"}), 40, None, "sponsor1"),
 ]
+# spot id -> {station id: distance in metres}. Placeholder spots; no real business is implied.
+DEMO_SPOTS = {
+    "demo-cafe": {"name": "Sample Cafe (demo)", "stops": {"park": 60.0}},
+    "demo-bar": {"name": "Sample Bar (demo)", "stops": {"downtown": 90.0, "park": 280.0}},
+}
 
 
 def encode_reason(reason, ref_id=None):
@@ -46,6 +51,8 @@ class MemoryStore:
         self._visits = {}      # user -> {stop_id: [datetime]}
         self._badges = {}
         self._friends = {}
+        self._last = {}          # user -> (at, lat, lon) of the latest check-in
+        self._spot_visits = []   # (user, spot_id, stop_id, at)
         self._book = RedemptionBook()
 
     # reference data
@@ -80,6 +87,23 @@ class MemoryStore:
 
     def record_checkin(self, user, stop_id, lat, lon, client_time, at, points, mode=None):
         self._visits.setdefault(user, {}).setdefault(stop_id, []).append(at)
+        self._last[user] = (at, lat, lon)
+
+    def last_checkin(self, user):
+        """(at, lat, lon) of the user's latest check-in anywhere, or None."""
+        return self._last.get(user)
+
+    # spots (placeholder places near stops)
+    def spot_stops(self, spot_id):
+        """{station id: distance_m} for a spot, or None if the spot does not exist."""
+        spot = DEMO_SPOTS.get(spot_id)
+        return dict(spot["stops"]) if spot else None
+
+    def spot_visited_since(self, user, spot_id, since):
+        return any(u == user and s == spot_id and at >= since for u, s, _stop, at in self._spot_visits)
+
+    def record_spot_visit(self, user, spot_id, stop_id, at):
+        self._spot_visits.append((user, spot_id, stop_id, at))
 
     # points
     def ledger_entries(self, user):

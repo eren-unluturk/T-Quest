@@ -78,6 +78,26 @@ class RankTests(unittest.TestCase):
         self.assertEqual(rank_for(40000), (8, 12, None))
 
 
+class SpeedTests(unittest.TestCase):
+    def test_too_fast_rule(self):
+        from game_engine.checkin import too_fast
+        base = (NOW, 42.3564, -71.0624)
+        self.assertFalse(too_fast(None, NOW, 42.3564, -71.0624))                       # first check-in
+        self.assertFalse(too_fast(base, NOW + timedelta(seconds=1), 42.3564, -71.0624))  # same place
+        self.assertFalse(too_fast(base, NOW + timedelta(seconds=30), 42.3555, -71.0602))  # ~200 m in 30 s
+        self.assertFalse(too_fast(base, NOW + timedelta(minutes=10), 42.3736, -71.1190))  # ~5 km in 10 min = 30 km/h
+        self.assertTrue(too_fast(base, NOW + timedelta(seconds=60), 42.3736, -71.1190))   # ~5 km in 60 s = 300 km/h
+        self.assertTrue(too_fast(base, NOW, 42.3736, -71.1190))                           # same instant, far away
+
+    def test_validate_checkin_reports_too_fast(self):
+        args = dict(consent=True, user_lat=42.3736, user_lon=-71.1190, stop_lat=42.3736, stop_lon=-71.1190,
+                    now=NOW, last_vehicle_seen_at=NOW, last_checkin_at=None)
+        r = validate_checkin(previous_checkin=(NOW - timedelta(seconds=60), 42.3564, -71.0624), **args)
+        self.assertEqual((r.ok, r.reason, r.http_status), (False, "too_fast", 422))
+        self.assertTrue(validate_checkin(previous_checkin=None, **args).ok)    # check skipped
+        self.assertTrue(validate_checkin(previous_checkin=(NOW - timedelta(minutes=30), 42.3564, -71.0624), **args).ok)
+
+
 class RankInfoTests(unittest.TestCase):
     def test_names_and_next(self):
         info = rank_info(0)
