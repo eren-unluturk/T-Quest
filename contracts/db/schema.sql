@@ -1,5 +1,5 @@
 -- GENERATED FILE. Migrations in data-platform/migrations/ are the source of truth.
--- NOTE: this is a concatenation of migrations 0000 to 0013, NOT a pg_dump. It was built
+-- NOTE: this is a concatenation of migrations 0000 to 0014, NOT a pg_dump. It was built
 -- without a database. To replace it with a real dump, run from data-platform/:
 --   docker compose up -d; python -m data_platform.migrate
 --   docker compose exec db pg_dump -U postgres -d tquest --schema-only --no-owner > contracts-draft/db/schema.sql
@@ -1053,4 +1053,12 @@ INSERT INTO ranks (rank, min_lifetime_points, discount_pct, name, avatar_key) VA
 ON CONFLICT (rank) DO UPDATE
     SET min_lifetime_points = EXCLUDED.min_lifetime_points, discount_pct = EXCLUDED.discount_pct,
         name = EXCLUDED.name, avatar_key = EXCLUDED.avatar_key;
+
+-- ===== migrations/0014_all_sponsors_demo.sql =====
+-- Every sponsor and store in this project is a demo placeholder (we are not pursuing real partnerships).
+-- The dev seed rows predate the flag and defaulted to false; fix them and make true the default.
+UPDATE sponsors SET demo_placeholder = true WHERE demo_placeholder IS DISTINCT FROM true;
+UPDATE stores   SET demo_placeholder = true WHERE demo_placeholder IS DISTINCT FROM true;
+ALTER TABLE sponsors ALTER COLUMN demo_placeholder SET DEFAULT true;
+ALTER TABLE stores   ALTER COLUMN demo_placeholder SET DEFAULT true;
 

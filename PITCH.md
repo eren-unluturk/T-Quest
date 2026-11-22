@@ -124,14 +124,16 @@ What a program could look like:
 Subway and bus share the same model (a stop is a stop). Start with a handful of stations, then extend by line. UI accessibility decisions come from the design. TODO: confirm with Bryan and Isabella.
 
 ## 3-minute demo script
+
+What is live in the demo build: a web app with six screens built from the approved design, backed by real MBTA data and demo placeholders (sponsors, offers, labels). What is stubbed: sign in, check in, friends, leaderboard, quests and redemptions have no design yet and are plain pages. Rider data is synthetic. Nothing is deployed until the team does it by hand (docs/DEPLOY.md).
 | Time | Beat | Notes |
 |---|---|---|
 | 0:00 | Hook and problem | Use the 30-second hook above |
-| 0:30 | **[PLACEHOLDER: UI/Figma]** check in at a stop | Fill in from `design/` when it exists; do not invent screens |
-| 1:00 | **[PLACEHOLDER: UI/Figma]** nearby spots at Harvard, filter by category and label | UI from `design/`; data from the nearby endpoint; use the fictional "Sample ... (demo)" spots for label filters |
+| 0:30 | **[Web app: Home]** the Park Street scene with a real fact and rank (sign in with a sandbox name first); check-in is a plain stub with no design | Built from `design/canvas`; say it is a demo |
+| 1:00 | **[Web app: Explore]** demo spots, owner filter sheet (Sample spots show the labels) | UI from `design/`; data from the nearby endpoint; use the fictional "Sample ... (demo)" spots for label filters |
 | 1:30 | **[PLACEHOLDER: live data moment]** vehicles on a line right now | Real MBTA feed via the collector; TODO: pick the line and screen when the UI exists |
 | 2:00 | Tiger Data: compression and continuous aggregate numbers | Read from the generated block above |
-| 2:30 | **[PLACEHOLDER: UI/Figma]** rank, demo offer redemption, sticker or patch | UI from `design/`; say clearly that offers are demo placeholders |
+| 2:30 | **[Web app: Profile]** real rank and demo offers; redemption has no design yet (stub) | UI from `design/`; say clearly that offers are demo placeholders |
 | 2:50 | Close: what we would do next | More lines, tourist layer, a possible sponsor program (not pursued now) |
 
 ## Q&A prep

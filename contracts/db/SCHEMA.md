@@ -169,3 +169,6 @@ Tables `spot_categories`, `label_types`, `nearby_spots`, `spot_stop_links`, `spo
 
 ## Migration 0013
 `ranks.name` and `ranks.avatar_key` plus the 8 named ranks (matches game-engine config; makes a fresh database identical to the live one).
+
+## Migration 0014
+All sponsors and stores are demo placeholders; `demo_placeholder` now defaults to true.
