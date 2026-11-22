@@ -11,7 +11,7 @@ Make the T something riders look forward to: a Pokemon-Go-style game layer over 
 - Check-in, points, rank and leaderboard (game-engine) on real stops.
 - Nearby spots at a stop with category and label filters (demonstrated on fictional sample spots); three labeled demo placeholders.
 - Offers by rank tier, physical-reward catalog (stickers and patches).
-- UI from `design/`: six screens built in `web/`; stubs for screens without designs (see docs/APP_SCOPE.md).
+- UI from `design/`: six screens built in `web/` plus an admin-authored Analytics tab (live MBTA aggregates and a labeled demo rider block); stubs for screens without designs (see docs/APP_SCOPE.md).
 
 **Stretch**
 - Tourist content: stop facts, Freedom Trail, loading-screen facts, from open sources with attribution.
@@ -42,11 +42,12 @@ Roadmap checkbox progress (counted from each agent's `.work/ROADMAP.md`; checkbo
 |---|---|
 | `to:client-bryan` | 7 |
 | `to:client-isabella` | 6 |
-| `to:data-platform` | 2 |
-| `to:game-engine` | 1 |
+| `to:data-platform` | 3 |
+| `to:game-engine` | 2 |
+| `to:humans` | 1 |
 | `to:insights-sponsors` | 4 |
 
-Total open issues: 21.
+Total open issues: 24.
 <!-- AUTO:status:end -->
 
 ## Per-agent roadmap (hand-written, as of 2026-11-21)

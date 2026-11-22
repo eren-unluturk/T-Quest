@@ -37,3 +37,23 @@ Checked 2026-11-21 against the repo as it is now: README.md, PLAN.md, PITCH.md, 
 Test counts are not quoted in these five files (they live in `.work/STATE.md`), so there is nothing to check.
 
 Result: false 4 (all fixed), unverified 2 (softened or marked), everything else verified.
+
+## Update 2026-11-22 (Analytics tab)
+Re-checked README, PLAN, PITCH, DEMO, APP_SCOPE and REHEARSAL after adding the Analytics tab and switching the demo to the React app.
+
+| Claim | File | Evidence | Verdict |
+|---|---|---|---|
+| Analytics has three live blocks computed from Tiger Data and one demo rider block, each labeled | README, PITCH, DEMO, APP_SCOPE | `data-platform/src/data_platform/routes/analytics.py`, `web/src/screens/screens.test.tsx` (labels), screenshot `docs/screenshots/07-analytics.png` | verified |
+| The live blocks come from the `vehicles_route_5m` continuous aggregate and the live `vehicles` table | README, PITCH, DECISIONS | SQL in `routes/analytics.py` | verified |
+| Every number on Analytics comes from an API response, none hard-coded | README, APP_SCOPE | `web/src/app/analytics.ts` builds strings from the response; test checks no placeholder text | verified |
+| Analytics was designed by the admin and still needs Isabella's review | README, APP_SCOPE, DECISIONS | `design/canvas/Analytics.dc.html` header comment | verified |
+| Adding the tab changed only the bottom nav on existing screens | APP_SCOPE | `scripts/visual-diff.py` before/after run (nothing above the nav differed except a moving train dot on Home) | verified |
+| The hour-of-day view is thin until more days are collected | README, DEMO | endpoint returns `days` per hour; screen shows "up to N days" | verified |
+| The demo app we record is the React app in `web/` | README, DEMO, REHEARSAL | `scripts/record-demo.mjs` targets port 5173 | verified |
+| A verified ride appears in the video | DEMO | not when recorded overnight: no scheduled trains, so the video says so | unverified, documented in DEMO.md ("record during service hours") |
+| Traveled shows miles from rides | DEMO | stays at zero until clients send `route_id` on check-ins (issue #81 delivered the API side) | verified, stated as zero until then |
+| Response time of `/analytics/system` | (none quoted) | measured about a quarter of a second warm during development, not recorded in `docs/TIGER_DATA_RESULTS.md` | numbers removed from docs; TODO: measure |
+| Earlier prototype `client-bryan/demo` is not the app we demo | README, DEMO | no Analytics there | verified |
+
+Fixed in this pass: removed a response-time figure from DECISIONS and the Devpost suggestions (not in `docs/TIGER_DATA_RESULTS.md`), and removed pixel percentages from APP_SCOPE.
+

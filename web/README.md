@@ -35,3 +35,6 @@ Demo spots show "Demo"; "LOCALLY OWNED" appears only for a declared or certified
 
 ## Public hosting (future, not done)
 The demo runs locally. For the deferred public plan see `docs/FUTURE_PUBLIC_HOSTING.md` (untested). Vercel would use: root directory `web`, build command `npm run build`, output `dist`, set the three `VITE_*` variables.
+
+## Analytics tab
+`src/screens/screens.tsx` `AnalyticsScreen` loads data-platform `GET /analytics/system` (live MBTA data) and, separately, the demo rider endpoints, so the live blocks still show if the rider services are down. `src/app/analytics.ts` turns the responses into the strings and SVG geometry that the generated `AnalyticsMarkup` renders; it contains no hard-coded numbers. The design source is `design/canvas/Analytics.dc.html` (authored by the admin; see `docs/APP_SCOPE.md`).

@@ -18,8 +18,8 @@ const canvas = path.resolve(root, '..', 'design', 'canvas');
 const outDir = path.join(root, 'src', 'design', 'generated');
 mkdirSync(outDir, { recursive: true });
 
-const SCREENS = { Loading: 'Loading', Main: 'Home', Traveled: 'Traveled', Explore: 'Explore', Faves: 'Faves', Profile: 'Profile' };
-const ROUTES = { 'Loading.dc.html': '#/loading', 'Main.dc.html': '#/home', 'Traveled.dc.html': '#/traveled', 'Explore.dc.html': '#/explore', 'Faves.dc.html': '#/faves', 'Profile.dc.html': '#/profile' };
+const SCREENS = { Loading: 'Loading', Main: 'Home', Traveled: 'Traveled', Explore: 'Explore', Faves: 'Faves', Profile: 'Profile', Analytics: 'Analytics' };
+const ROUTES = { 'Loading.dc.html': '#/loading', 'Main.dc.html': '#/home', 'Traveled.dc.html': '#/traveled', 'Explore.dc.html': '#/explore', 'Faves.dc.html': '#/faves', 'Profile.dc.html': '#/profile', 'Analytics.dc.html': '#/analytics' };
 
 // Static placeholder text/attributes in the design that must come from real data. Expressions use v.<name>.
 const BINDINGS = {

@@ -2,7 +2,7 @@
 
 > Demo placeholder. No partnership, endorsement or real discount is implied. UI comes only from `design/`.
 
-> **Two clients.** This page describes the React port in `web/`. The app we demo is `client-bryan/demo` (vanilla JS + MapLibre, Boston GIS maps, ride verification), documented in `client-bryan/demo/README.md` and `docs/DEMO.md`. Since issue #80 the maps in `web/` Home and Traveled are the real GIS maps too (mounted from `client-bryan/map`); the placeholder-map notes below date from before that.
+> **Two clients.** This page describes the React app in `web/`, which is the app we demo and record (Boston GIS maps from `client-bryan/map`, plus the Analytics tab). The earlier vanilla prototype `client-bryan/demo` is documented in `client-bryan/demo/README.md`.
 
 ## What exists in `design/`
 | File | Contents |
@@ -31,6 +31,20 @@ No Figma export, no login, check-in, friends, leaderboard, quests, redemption or
 | Explore | data-platform `GET /stops/{id}`; insights `GET /stops/{id}/nearby` (category and label filters) |
 | Faves | insights `GET /me/faves`, `DELETE /me/faves/{id}` |
 | Profile | game-engine `GET /me/rank`, `GET /me/points`; insights `GET /rank-tiers`, `GET /offers?rank=`, `/stops/{id}/nearby` (sponsor names) |
+
+## Analytics tab (authored by the admin, not drawn by Isabella)
+Added 2026-11-22 as a fourth tab. `design/canvas/Analytics.dc.html` and `design/icons/nav-analytics.svg` were authored by the admin to match the approved canvas: same tokens (`design/tokens/colors.json`), fonts (Space Grotesk, Inter, Caveat, Fredoka), card radius and offset shadow, pill style and bubble nav icon. The nav in Home, Explore, Traveled and Profile was changed from three to four columns (`design/canvas/*.dc.html`), then `web/scripts/port-design.mjs` regenerated the components. Isabella should review it.
+
+| Block | Label on screen | Data |
+|---|---|---|
+| Right now: vehicles per subway line, active alerts, lines affected, feed freshness | Live MBTA data | data-platform `GET /analytics/system` (live `vehicles`, `active_alerts`) |
+| Last hours, vehicle reports per line (SVG line chart with a text alternative) | Live MBTA data | same endpoint, from the `vehicles_route_5m` continuous aggregate |
+| Busiest and quietest: hour-of-day bars (Boston time), busiest and quietest line | Live MBTA data | same endpoint; thin until more days are collected |
+| Your ride insights: stops collected, home line, points, leaderboard place | demo rider data | insights-sponsors `/analytics/me`, game-engine `/me/collection`, `/me/rank`, `/leaderboards` (in-memory demo data) |
+
+If the rider services fail, the live blocks still show and the rider block says it is unavailable. All numbers come from API responses; none is hard-coded.
+
+**Visual-diff check (2026-11-22).** `node scripts/shoot-web.mjs` took 390x844 screenshots of every existing screen before and after the change and `python scripts/visual-diff.py` compared them. Everything above the bottom nav matched (no pixel differences on Loading, Traveled, Explore, Faves and Profile; on Home only a moving train dot on the live map). The only changes are in the nav region. Analytics was compared side by side with Explore and Profile for header, margins, card and pill style.
 
 ## Stubs (no design yet; plain page that says "No design yet" and lists endpoints)
 | Screen | Endpoints it will use |

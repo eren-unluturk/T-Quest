@@ -59,3 +59,17 @@ export interface MyRank {
 export interface MyPoints { balance: number; lifetime: number; recent: { at: string; delta: number; reason: string }[] }
 export interface CheckinRequest { stop_id: string; lat: number; lon: number; client_time: string; mode?: 'subway' | 'bus' }
 export interface CheckinResult { checkin_id: string; points_awarded: number; first_visit: boolean; new_rank: number | null; badges_unlocked: string[] }
+
+// data-platform GET /analytics/system (live MBTA data computed from Tiger Data; contracts/api/data-platform.yaml)
+export interface HourPoint { hour: string; reports: number; partial: boolean }
+export interface LineActivity { line_id: string; name: string; color: string | null; vehicles_now: number; reports_24h: number; series: HourPoint[] }
+export interface HourOfDay { hour: number; avg_reports: number; days: number }
+export interface SystemSnapshot {
+  generated_at: string; last_vehicle_at: string | null; freshness_s: number | null;
+  active_alerts: number; lines_with_alerts: string[]; lines: LineActivity[]; hourly_profile: HourOfDay[];
+  busiest_hour: number | null; quietest_hour: number | null; busiest_line_24h: string | null; quietest_line_24h: string | null;
+}
+// insights-sponsors GET /analytics/me and game-engine GET /me/collection, /leaderboards (demo rider data)
+export interface MyAnalytics { stops_visited: number; unique_stops: number; lines_ridden: string[]; home_line: string | null }
+export interface MyCollection { stops: string[]; badges: string[] }
+export interface LeaderEntry { position: number; username: string; points: number }

@@ -55,6 +55,8 @@ async function main() {
   check('login issues a signed token (not the username)', login.status === 200 && login.json.token && login.json.token !== 'e2eRider1' && login.json.token.includes('.'));
   const token = login.json?.token;
   check('login response has CORS for the allowed origin', login.headers.get('access-control-allow-origin') === ORIGIN);
+  const an = await call('dp', '/analytics/system');
+  check('analytics snapshot is public, valid and has lines (live MBTA data)', an.status === 200 && Array.isArray(an.json?.lines) && an.json.lines.length > 0);
   const stops = await call('dp', '/stops?lat=42.3564&lon=-71.0624&radius_m=300&limit=5');
   check('list stops near Park Street (public, real MBTA data)', stops.status === 200 && stops.json.length > 0);
   const checkin = await call('ge', '/checkins', { method: 'POST', token, body: { stop_id: 'park', lat: 42.3564, lon: -71.0624, client_time: new Date().toISOString() } });

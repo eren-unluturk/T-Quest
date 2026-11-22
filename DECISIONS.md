@@ -104,3 +104,9 @@ Format: decision, alternatives, why. Append new entries; do not rewrite others'.
 - Why: the database holds our live data and credentials and a public host would need a connection to it; the images were never built; game-engine state is in memory by default; the default login is for local demos only. A local run keeps the live data live and exposes nothing.
 - Kept: the optional production mode (signed expiring tokens, exact CORS, rate limits, size limits, headers, fail-closed config), default off, checked by `scripts/e2e-prod.mjs`. A restricted database role was prototyped and removed; it is documented only.
 - Also: migration 0015 flags faves as demo rows so `scripts/reset-demo.mjs` can remove exactly the demo rows.
+
+## D19. Analytics tab: admin-authored UI, and the React app is the demo app (2026-11-22)
+- Decision: add a fourth tab, Analytics, designed by the admin (Eren's agent) in `design/canvas/Analytics.dc.html` with a matching nav icon `design/icons/nav-analytics.svg`, because the approved canvas has no screen that shows what the collected MBTA data tells riders. It reuses the canvas tokens, header, card, pill and nav patterns, and was checked by a before/after screenshot diff (only the nav region changed). It needs Isabella's review; if she redraws it, `web/scripts/port-design.mjs` regenerates the screen.
+- Data: `GET /analytics/system` (data-platform, read-only) computes vehicles per line now, reports per hour per line and hour-of-day activity from the `vehicles_route_5m` continuous aggregate and the live `vehicles` table. Live blocks are labeled "Live MBTA data"; rider insights come from the in-memory demo services and are labeled "demo rider data". No number is hard-coded.
+- The app we demo and record is now `web/` (it has the GIS maps from `client-bryan/map` and Analytics). `client-bryan/demo` stays as the earlier prototype.
+

@@ -2,7 +2,7 @@ import type { ApiConfig } from '../config';
 import { Session } from './session';
 import type {
   CategoryRef, CheckinRequest, CheckinResult, ContentItem, Fave, LabelType, Line, LoadingFact, LoginResponse, MyPoints, MyRank,
-  Nearby, Offer, RankTier, Stop, StopFacts, Travel, Vehicle,
+  Nearby, Offer, RankTier, Stop, StopFacts, Travel, Vehicle, LeaderEntry, MyAnalytics, MyCollection, SystemSnapshot,
 } from './types';
 
 export class ApiError extends Error {
@@ -40,6 +40,10 @@ export interface Api {
   myRank(): Promise<MyRank>;
   myPoints(): Promise<MyPoints>;
   checkin(body: CheckinRequest): Promise<CheckinResult>;
+  systemAnalytics(hours?: number): Promise<SystemSnapshot>;
+  myAnalytics(): Promise<MyAnalytics>;
+  myCollection(): Promise<MyCollection>;
+  leaderboard(): Promise<LeaderEntry[]>;
 }
 
 export function createApi(cfg: ApiConfig, session: Session, fetchImpl: typeof fetch = (...a) => fetch(...a), timeoutMs = 12000): Api {
@@ -114,5 +118,9 @@ export function createApi(cfg: ApiConfig, session: Session, fetchImpl: typeof fe
     myRank: () => request('ge', '/me/rank'),
     myPoints: () => request('ge', '/me/points'),
     checkin: (body) => request('ge', '/checkins', { method: 'POST', body }),
+    systemAnalytics: (hours = 6) => request('dp', `/analytics/system${qs({ hours })}`, { auth: false }),
+    myAnalytics: () => request('is', '/analytics/me'),
+    myCollection: () => request('ge', '/me/collection'),
+    leaderboard: () => request('ge', '/leaderboards'),
   };
 }

@@ -3,6 +3,7 @@
 "agent verified" means checked by an agent from the repo and by running the commands in this session. "you do this" needs a human.
 
 ## Done
+- [x] Analytics tab built, tested and screenshotted; new video recorded (overnight, so no verified ride in it; re-record in the day if you want one) (agent verified)
 - [x] Tests pass: `node --test tests/`, data-platform, insights-sponsors, game-engine, shared, web unit tests (agent verified)
 - [x] Web lint, type-check and build pass (agent verified)
 - [x] `node scripts/check-attribution.mjs` passes (agent verified)
@@ -18,7 +19,9 @@
 ## You do this
 - [ ] Re-run `bench_real` after the collector has run longer and replace the stale real-data numbers in `docs/TIGER_DATA_RESULTS.md` with settled-chunk figures, then `node scripts/sync-docs.mjs` (you do this)
 - [ ] Stop the collector only when you decide to (you do this)
-- [ ] Take screenshots or a screen recording of the app and fill the placeholders in `PITCH.md` (you do this)
+- [ ] Watch the new video, then upload it to YouTube (unlisted) if the agent did not, and put the link on Devpost (you do this; see docs/DEVPOST_TEXT_SUGGESTIONS.md)
+- [ ] Approve and apply the Devpost text suggestions in `docs/DEVPOST_TEXT_SUGGESTIONS.md` (you do this)
+- [ ] Ask Isabella to review the Analytics tab design (you do this)
 - [ ] Rehearse the 3-minute demo end to end with preflight green (you do this)
 - [ ] Confirm every teammate has pulled main and can run `node scripts/demo-up.mjs` (you do this)
 - [ ] Get the check-in screen design from Bryan and Isabella (currently a stub), or decide to demo without it (you do this)

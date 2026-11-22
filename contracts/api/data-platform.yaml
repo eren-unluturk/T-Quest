@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: T-Quest data-platform API
-  version: 0.1.0
+  version: 0.2.0
   description: |
     Read API for MBTA static and realtime data: routes, lines, stops, live
     vehicles, predictions and alerts. Owner: data-platform (Eren).
@@ -155,8 +155,67 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Travel'}
         '401': {description: Missing bearer token}
+  /analytics/system:
+    get:
+      summary: Live system snapshot of the MBTA subway (Live MBTA data, computed from Tiger Data)
+      description: |
+        Public, read-only, no rider data. "Reports" are vehicle position reports from the MBTA feed per hour
+        (from the continuous aggregate `vehicles_route_5m`), so more reports means more vehicles running.
+        vehicles_now counts distinct vehicles seen in the last 5 minutes. hourly_profile averages complete
+        hours of the last 3 days in Boston time; `days` says how many days each hour covers, so early on it is thin.
+      operationId: getSystemAnalytics
+      parameters:
+        - name: hours
+          in: query
+          description: Hours of per-line history in `series` (default 6)
+          schema: {type: integer, minimum: 1, maximum: 24, default: 6}
+      responses:
+        '200':
+          description: Snapshot
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SystemSnapshot'}
 components:
   schemas:
+    HourPoint:
+      type: object
+      required: [hour, reports, partial]
+      properties:
+        hour: {type: string, format: date-time}
+        reports: {type: integer}
+        partial: {type: boolean, description: The current hour is still filling}
+    LineActivity:
+      type: object
+      required: [line_id, name, vehicles_now, reports_24h, series]
+      properties:
+        line_id: {type: string}
+        name: {type: string}
+        color: {type: string, nullable: true}
+        vehicles_now: {type: integer}
+        reports_24h: {type: integer}
+        series: {type: array, items: {$ref: '#/components/schemas/HourPoint'}}
+    HourOfDay:
+      type: object
+      required: [hour, avg_reports, days]
+      properties:
+        hour: {type: integer, minimum: 0, maximum: 23, description: Boston time}
+        avg_reports: {type: number}
+        days: {type: integer}
+    SystemSnapshot:
+      type: object
+      required: [generated_at, active_alerts, lines_with_alerts, lines, hourly_profile]
+      properties:
+        generated_at: {type: string, format: date-time}
+        last_vehicle_at: {type: string, format: date-time, nullable: true}
+        freshness_s: {type: integer, nullable: true}
+        active_alerts: {type: integer}
+        lines_with_alerts: {type: array, items: {type: string}}
+        lines: {type: array, items: {$ref: '#/components/schemas/LineActivity'}}
+        hourly_profile: {type: array, items: {$ref: '#/components/schemas/HourOfDay'}}
+        busiest_hour: {type: integer, nullable: true}
+        quietest_hour: {type: integer, nullable: true}
+        busiest_line_24h: {type: string, nullable: true}
+        quietest_line_24h: {type: string, nullable: true}
     LineMiles:
       type: object
       required: [line_id, name, miles]

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSessionState } from './app/app';
 import {
-  CheckInStub, ExploreScreen, FavesScreen, HomeScreen, LoadingScreen, LoginStub, MoreStub, ProfileScreen, TraveledScreen,
+  AnalyticsScreen, CheckInStub, ExploreScreen, FavesScreen, HomeScreen, LoadingScreen, LoginStub, MoreStub, ProfileScreen, TraveledScreen,
 } from './screens/screens';
 
 function useHash(): string {
@@ -26,6 +26,7 @@ export default function App() {
     case 'explore': return <ExploreScreen />;
     case 'faves': return <FavesScreen />;
     case 'profile': return <ProfileScreen />;
+    case 'analytics': return <AnalyticsScreen />;
     case 'checkin': return <CheckInStub />;
     case 'more': return <MoreStub />;
     default: return <LoadingScreen />;

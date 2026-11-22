@@ -22,3 +22,8 @@ insights-sponsors/data/raw/
 
 # recorded demo videos (uploaded by hand for submission)
 docs/demo/
+
+# visual-diff baselines and review screenshots
+.work/baseline/
+.work/*.png
+.work/after/
