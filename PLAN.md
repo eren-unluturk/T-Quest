@@ -20,7 +20,7 @@ Make the T something riders look forward to: a Pokemon-Go-style game layer over 
 - Delay notifications and compensation points.
 
 **Future**
-- Per-token or paid tiers (out of scope now), real auth, bus-specific features beyond parity. Not pursuing real partnerships; all sponsors are demo placeholders.
+- Public hosting (Vercel plus a container host; see docs/FUTURE_PUBLIC_HOSTING.md), per-token or paid tiers (out of scope now), real auth, bus-specific features beyond parity. Not pursuing real partnerships; all sponsors are demo placeholders.
 
 ## Architecture and ownership
 See [README.md](README.md) for the diagram. Ownership is in `TEAM.md` and `team.json`: Eren owns data-platform and insights-sponsors plus root files and `contracts/db`, Tobi owns game-engine, Bryan and Isabella own their clients and `design/`. GitHub Issues is the only inter-agent channel.
@@ -50,7 +50,7 @@ Total open issues: 20.
 <!-- AUTO:status:end -->
 
 ## Per-agent roadmap (hand-written, as of 2026-11-21)
-- **data-platform:** schema 0000-0009 applied and verified on a live Tiger Cloud database; real static data loaded; collector running; benchmarks recorded in `docs/TIGER_DATA_RESULTS.md`. Left: Dockerfile and compose services (015). Some roadmap checkboxes still read "DB-unverified" and lag the verified state.
+- **data-platform:** schema 0000-0015 applied on a live Tiger Cloud database; real static data loaded; collector running; benchmarks recorded in `docs/TIGER_DATA_RESULTS.md`. Local demo tooling: `scripts/demo-up.mjs`, `scripts/preflight.mjs`, `scripts/reset-demo.mjs`. Left: re-measure compression on settled chunks (TODO: measure).
 - **insights-sponsors:** OpenAPI v0.5.0 published. Postgres backend serves stops, offers, physical rewards, nearby spots with category and label filters, and tourist content (ingested once). Consent, place visits, analytics and recommendations are still in memory (planned).
 - **game-engine:** service and rules done, with a Tiger Data (Postgres) store and 8 named ranks merged; its roadmap file is empty, so status comes from git history and its README.
 - **client-bryan, client-isabella:** their folders hold docs only. `web/` (admin branch work) builds the designed screens from `design/canvas`; they review it and own designs for the stubs and the Boston-GIS maps.
@@ -82,7 +82,7 @@ No open issues carry `priority:blocker`.
 | Real data volume is small (days of polling) so TimescaleDB gains are modest | Report numbers as measured, keep the collector running, no claims beyond `docs/TIGER_DATA_RESULTS.md` |
 | Sponsors read as real | Not pursuing real partnerships; all sponsors are demo placeholders, flagged `demo` in every response. Demo placeholder. No partnership, endorsement or real discount is implied. |
 | UI waits on designs | Designed screens are built; screens without designs are plain stubs; nobody invents UI |
-| Public deployment exposes the real database | Separate demo database, signed expiring tokens, exact CORS, rate limits, checklists in docs/DEPLOY.md; deployment is manual |
+| Public hosting would expose the real database | Deferred: the demo runs locally. Optional prod mode (signed tokens, exact CORS, rate limits) is kept, default off; the restricted-role idea is documented only. Checklist in docs/FUTURE_PUBLIC_HOSTING.md |
 | Ownership labels wrong or offensive | Real businesses carry no labels in the demo; labels show only if declared or certified, filtering is demonstrated on fictional sample spots, pending never exposed, correction and removal path in `docs/DATA_SOURCES.md` |
 | Source licenses | Official APIs and downloads only, per-record license and attribution, commercial_ok flag, checklist before any commercial launch |
 | Synthetic data mistaken for real | `is_synthetic` flag and explicit wording everywhere |

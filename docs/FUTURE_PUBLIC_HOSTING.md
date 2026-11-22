@@ -4,6 +4,9 @@
 
 > Demo placeholder. No partnership, endorsement or real discount is implied. Everything below is prepared but **not deployed**: no account, login or cloud command was run for you. The Dockerfiles are **untested** (Docker was not available when they were written), so do the local test in step 4 first.
 
+## Alternative: one database with a restricted role (documented only, not built)
+Instead of a separate demo database, hosts could connect to the one Tiger Data database with a dedicated account that can read the live MBTA data and write only demo rows: SELECT on the MBTA tables, views and continuous aggregates; INSERT (and UPDATE or DELETE only where the service needs it) on the app tables the demo writes (`users`, `rider_events`, `points_ledger`, `user_collections`, `badges`, `friends`, `redemptions`, `fact_faves`); no DDL, TRUNCATE or ownership; a connection limit and statement timeout. Hosts would get only that account's connection string, never the admin one. Migrations, seeding and the collector would keep running from the laptop with the admin connection. A prototype was started and then removed; nothing like this exists in the repo or the database, so it must be written and verified (including proving that writes to MBTA tables fail) before use. Sections 1 and 2 below describe the separate-database option.
+
 ## What gets deployed
 | Piece | Where | Source |
 |---|---|---|

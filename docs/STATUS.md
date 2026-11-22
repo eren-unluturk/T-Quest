@@ -12,7 +12,7 @@ Sources: agents' `.work/HANDOFF.md` and `ROADMAP.md`, git history, open issues. 
 
 ## Remaining
 1. Consent, place visits, route analytics and recommendations in insights-sponsors still run in memory; moving them to Postgres is planned.
-2. data-platform: Dockerfile and compose services (015); re-measure compression on settled chunks (TODO: measure).
+2. data-platform: re-measure compression on settled chunks (TODO: measure). Public hosting is deferred (docs/FUTURE_PUBLIC_HOSTING.md).
 3. Clients build from `design/` only.
 4. Add a real public contact for corrections before any public launch (see DATA_SOURCES.md).
 5. Open attribution-history decision (#23, #24).

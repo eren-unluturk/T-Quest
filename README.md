@@ -25,14 +25,14 @@ Status is derived from each agent's `.work/ROADMAP.md` and handoff notes. See [P
 - game-engine service (Tobi): check-in, points, rank, redemption, badges, quests, friends, leaderboards, home line and delay compensation rules, with an in-memory mode and a Tiger Data (Postgres) store, OpenAPI published.
 
 - **Web app (`web/`, Vite + React + TypeScript)**: the six designed screens (Loading, Home, Traveled, Explore, Faves, Profile) are ported from `design/canvas` and wired to the real endpoints; screens with no design (sign in, check in, friends, leaderboard, quests, redemptions) are plain stubs. See [docs/APP_SCOPE.md](docs/APP_SCOPE.md). Maps are placeholders.
-- **Public-demo hardening (prepared, not deployed):** signed short-lived demo tokens, restricted CORS, rate limits, security headers, a seed script for a separate demo database, and Dockerfiles (untested). See [docs/DEPLOY.md](docs/DEPLOY.md).
+- **Optional production mode (default off; not deployed):** signed short-lived tokens with a demo login, exact-origin CORS, rate limits, request-size limits, security headers and fail-closed configuration, checked locally by `node scripts/e2e-prod.mjs`. The demo itself runs in dev mode on a laptop. See "Future work: public hosting" below.
 
 **In progress**
 - Consent, place visits, personal analytics and recommendations in insights-sponsors still run on the in-memory backend with seed data; moving them to Postgres is planned, not done.
 - Rider travel (`GET /me/travel`: miles per line, traveled segments) is built in data-platform from check-in events; with no real riders yet it returns zeros except for synthetic test riders.
 
 **Planned**
-- Designs for the stub screens, Boston-GIS maps (Bryan), along-line ordering in Explore, and the actual deployment (done by hand from docs/DEPLOY.md).
+- Designs for the stub screens, Boston-GIS maps (Bryan), and along-line ordering in Explore. Public hosting is deferred (see "Future work: public hosting").
 - Community quests ("visit three local spots near stops") proposed to game-engine, delay and cancellation notifications.
 - Opt-in tracking of other places visited, with explicit consent (the consent table and gate exist).
 
@@ -80,13 +80,13 @@ In the demo no real business carries a label. In general, a label such as local/
 | Benchmarks | Python scripts using `EXPLAIN (ANALYZE)` | Compression ratio and aggregate-vs-raw timings | `data-platform/src/data_platform/{bench,bench_real,demo_measure,verify}.py` |
 | Auth (on main) | Demo bearer token: the token is the sandbox username. game-engine also accepts an `X-Store-Key` header for store verification | Identifies demo users. Not real authentication | `game-engine/src/game_engine/app.py`, `insights-sponsors/src/insights_sponsors/auth.py` |
 | CORS (on main) | FastAPI `CORSMiddleware` | data-platform allows any origin for GET; insights-sponsors is configurable by env; game-engine sets its own allowed headers | each service's `app.py` / `main.py` |
-| Hardening (in progress) | HMAC-signed short-lived tokens, rate limits, body-size limit, security headers | Prepared on branch `demo-deploy`, not merged to main | branch `demo-deploy`: `shared/tquest_auth.py`, `shared/tquest_http.py` |
-| Web app (in progress) | React 18, TypeScript, Vite, Vitest, ESLint | Front end ported from the approved design canvas. Local `web/` folder, not committed yet | `web/package.json` (uncommitted), `design/canvas/` |
+| Hardening (on main, optional production mode, default off) | HMAC-signed short-lived tokens, exact-origin CORS, rate limits, body-size limit, security headers, generic errors, fail-closed config | Dev mode is the default and is what the local demo uses; prod mode is set with `APP_ENV=prod` and checked locally by `scripts/e2e-prod.mjs` | `shared/tquest_auth.py`, `shared/tquest_http.py`, `shared/tests/` |
+| Web app (on main) | React 18, TypeScript, Vite, Vitest, ESLint | Front end ported from the approved design canvas, wired to the three backends; run with the Vite dev server | `web/`, `design/canvas/` |
 | Python tests | pytest, pytest-asyncio (data-platform), openapi-spec-validator, pyyaml, pglast (SQL syntax checks) | Unit, contract-conformance and migration-syntax tests; `db`-marked tests need a database | `*/tests/` |
 | Repo tooling tests | Node's built-in test runner (`node --test`) | Tests hooks, ownership guard, billing safety, attribution, docs sync | `tests/*.test.mjs` |
-| Linting | None configured for Python. ESLint only in the uncommitted `web/` | | |
-| Docker (services) | Dockerfiles for the three services | Prepared on branch `demo-deploy`, not merged to main | branch `demo-deploy`: `*/Dockerfile` |
-| Hosting | Vercel for the front end; a container or Python host for the three backends | Described in [docs/FRONTEND_INTEGRATION.md](docs/FRONTEND_INTEGRATION.md). **Prepared, not deployed.** | `docs/FRONTEND_INTEGRATION.md` |
+| Linting | None configured for Python. ESLint in `web/` | | |
+| Docker (services) | Dockerfiles for the three services | **Planned / future (not deployed, untested):** never built | `future-hosting/docker/` |
+| Hosting | Vercel for the front end; a container host for the three backends | **Planned / future (not deployed, untested).** The demo runs locally | [docs/FUTURE_PUBLIC_HOSTING.md](docs/FUTURE_PUBLIC_HOSTING.md), `future-hosting/` |
 | CI | GitHub Actions: one workflow, `route-issues` (labels agent-message issues) | No build or test CI | `.github/workflows/route-issues.yml` |
 
 ### How we use Tiger Data
@@ -131,12 +131,34 @@ All of this exists in `data-platform/migrations/`.
 
 | Layer | Built | In progress | Planned |
 |---|---|---|---|
-| Database | Migrations 0000-0012 on a live Tiger Cloud service; `verify` passed; aggregates, compression and retention policies | Real-data compression measurement | |
+| Database | Migrations 0000-0015 on a live Tiger Cloud service; `verify` passed; aggregates, compression and retention policies | Real-data compression measurement | |
 | Ingestion | MBTA static load, live collector, tourist content ingestion (run once) | | |
 | data-platform API | Read API for stops, routes, lines, vehicles, predictions, alerts, travel; contract published | | |
 | insights-sponsors | Content, offers, rank tiers, physical-reward catalog, nearby spots, tourist content on Postgres; faves endpoints; contract published | Consent, place visits, analytics, recommendations still on the in-memory backend | Move those to Postgres; community quests |
-| game-engine | Rules, in-memory and Postgres stores, contract published | Shared auth and hardening (`demo-deploy` branch) | Delay and cancellation notifications |
-| Front end | Approved design canvas in `design/canvas/` | `web/` React + Vite port (uncommitted) | Hosting on Vercel and a backend container host |
+| game-engine | Rules, in-memory and Postgres stores, contract published, shared auth and hardening (optional prod mode) | | Delay and cancellation notifications |
+| Front end | Approved design canvas in `design/canvas/`; `web/` React + Vite app with six designed screens and stubs for the rest | Designs for the stub screens | Public hosting (future, untested) |
+
+## Future work: public hosting
+We have **not** deployed the demo publicly. It runs locally on a laptop (see [docs/DEMO.md](docs/DEMO.md)).
+
+**The original plan.** Deploy the web app on Vercel and the three backends from Docker images on a container host, pointed at our Tiger Data database with the live MBTA data.
+
+**Security features built for that plan and kept as an optional production mode (default off, `APP_ENV=prod`):**
+- Implemented and tested (unit tests in `shared/tests/` and the service tests, plus `node scripts/e2e-prod.mjs` against local services with throwaway secrets): short-lived signed tokens with a demo login, exact-origin CORS allowlist, rate limiting, request-size limits, security headers, generic error responses, fail-closed configuration (prod refuses to start without a secret or with a wildcard origin).
+- Implemented and tested locally: demo rows are flagged (`is_synthetic`, `demo_` users, `is_demo` faves) and removable with `node scripts/reset-demo.mjs` (dry run by default).
+- Only documented, not built: a restricted database role (an account that can read the live data but write only demo rows). It was prototyped and then removed; it does not exist in the repo or the database.
+- Not verified at all: the Dockerfiles, the container host, Vercel, https and proxy behavior.
+
+**Why we run the demo locally.** The single database holds our live data and credentials, and public hosting would put a database connection on a public host. The container images were never tested. The game engine keeps its state in memory by default. The default login is for local demos only. A local run keeps the live data live and exposes nothing.
+
+**What it would take to go public** (full list in [docs/FUTURE_PUBLIC_HOSTING.md](docs/FUTURE_PUBLIC_HOSTING.md); untested files in [future-hosting/README.md](future-hosting/README.md)):
+- Create the restricted database role, or a separate database, so hosts never hold the admin connection string.
+- Build and test the three Docker images.
+- Set `APP_ENV=prod`, one shared `TOKEN_SECRET` and the exact front-end origin on all three backends.
+- Move game-engine state to the database with flagged demo rows, and review its reset path.
+- Replace the demo login with real authentication before any real rider data.
+- Deploy the web app with deployment protection on while testing.
+- Add a real public contact for corrections (see `docs/DATA_SOURCES.md`).
 
 ## Repo layout
 | Path | What |
@@ -144,6 +166,7 @@ All of this exists in `data-platform/migrations/`.
 | `data-platform/` | schema, migrations, MBTA loader and collector, read API, benchmarks |
 | `insights-sponsors/` | sponsors, offers, nearby spots, tourist content, analytics, recommendations |
 | `game-engine/` | points, ranks, check-ins, redemption, quests (Tobi) |
+| `future-hosting/` | untested files for the deferred public hosting (Dockerfiles, Vercel headers, demo-database seeding) |
 | `client-bryan/`, `client-isabella/` | client apps, UI only from `design/` |
 | `contracts/` | OpenAPI and database contracts |
 | `design/` | sketches and Figma links (source of truth for UI) |

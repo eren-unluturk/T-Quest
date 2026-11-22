@@ -144,6 +144,7 @@ What is live in the demo build: a web app with six screens built from the approv
 - **Where does the tourist content come from?** Official APIs and downloads of open sources, with license and attribution stored for each record; we do not scrape.
 - **Is compression a big win?** See the generated numbers: we report them as measured. The real-data run is small, so we do not claim more than it shows.
 - **Privacy?** Location tracking beyond check-ins is opt-in, revocable, coordinates are rounded, city analytics hide groups under three riders.
+- **Why isn't it deployed publicly?** A deliberate choice for a demo that runs on live data. Our single database holds the live MBTA stream and its credentials, and a public host would need a connection to it. The container images were never tested, the game engine keeps its state in memory by default, and the default login is for local demos only. Running locally keeps the live data live and exposes nothing. A production mode with signed tokens, exact CORS and rate limits exists but is off by default, and public hosting is documented as future work.
 - **Does it cost per token?** No. No LLM or API-key billing anywhere in the product.
 
 ## Team

@@ -98,3 +98,9 @@ Format: decision, alternatives, why. Append new entries; do not rewrite others'.
 - Postgres backend covers stops, offers, physical rewards and nearby spots; consent, place visits and analytics inputs still use the memory repository until prompt 016.
 - Redemption boundary (#5): game-engine owns redemptions and store verification; insights-sponsors serves the read-side catalog (offers, rank tiers, physical rewards with per-store in_stock) and the eligibility rule.
 - Why: lets riders filter by community while keeping ownership claims evidence-based.
+
+## D18. The demo runs locally; public hosting is deferred (2026-11-21)
+- Decision: the demo runs on the team laptop against our single Tiger Data database and the live collector, started with `node scripts/demo-up.mjs`. Public hosting (Vercel plus Docker images on a container host) is future work. Its untested files moved to `future-hosting/`, and the deploy guide is `docs/FUTURE_PUBLIC_HOSTING.md`.
+- Why: the database holds our live data and credentials and a public host would need a connection to it; the images were never built; game-engine state is in memory by default; the default login is for local demos only. A local run keeps the live data live and exposes nothing.
+- Kept: the optional production mode (signed expiring tokens, exact CORS, rate limits, size limits, headers, fail-closed config), default off, checked by `scripts/e2e-prod.mjs`. A restricted database role was prototyped and removed; it is documented only.
+- Also: migration 0015 flags faves as demo rows so `scripts/reset-demo.mjs` can remove exactly the demo rows.
