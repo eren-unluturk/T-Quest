@@ -9,16 +9,16 @@
 T-Quest is a Pokemon-Go-style game layer over the MBTA, subway and bus. Riders check in at stops, collect them, track routes Strava-style, earn points, climb a travel rank and spend points on demo rewards (placeholder sponsors, see the disclaimer above). Every stop also shows what is nearby (food, coffee, shops), which riders can narrow by category and by verified community label. Tiger Data (Postgres + TimescaleDB) holds the relational profiles and the high-frequency MBTA streams in one database.
 
 ## The problem
-Hundreds of thousands of people ride the MBTA every day. For residents it is a functional necessity: a predictable routine, platform waits, friction, and nothing gained when the T breaks. For tourists the T feels passive and disconnected from the city. The question we answer: how do we make the T ride something people look forward to? See [PITCH.md](PITCH.md) for our answers to the six track questions.
+A great many people ride the MBTA every day (TODO: verify the ridership figure before quoting one). For residents it is a functional necessity: a predictable routine, platform waits, friction, and nothing gained when the T breaks. For tourists the T feels passive and disconnected from the city. The question we answer: how do we make the T ride something people look forward to? See [PITCH.md](PITCH.md) for our answers to the six track questions.
 
 ## Features
 
 Status is derived from each agent's `.work/ROADMAP.md` and handoff notes. See [PLAN.md](PLAN.md) for the live checklist counts.
 
 **Built**
-- Tiger Data schema (migrations 0000-0014) applied to a live Tiger Cloud database: rider events, MBTA vehicles and predictions as hypertables (alerts are plain tables), continuous aggregates, compression policies. `python -m data_platform.verify` passed on the live database.
+- Tiger Data schema (migrations 0000-0015) applied to a live Tiger Cloud database: rider events, MBTA vehicles and predictions as hypertables (alerts are plain tables), continuous aggregates, compression policies. `python -m data_platform.verify` passed on the live database.
 - Real MBTA static data loaded (routes, lines, stops, schedules) and a standalone live collector for vehicles, predictions and alerts.
-- Benchmark commands and measured results: [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md). The real-data compression figures are TODO: measure.
+- Benchmark commands and measured results: [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md). Real-data compression and aggregate-vs-raw figures are measured there (one settled chunk per hypertable, so a small sample).
 - data-platform read API (FastAPI) and published contracts in `contracts/`.
 - insights-sponsors service, OpenAPI v0.5.0 published in `contracts/api/`: stop facts, Freedom Trail, loading-screen facts, tourist content with attribution, demo offers and rank tiers, physical-reward catalog, **nearby spots with category and label filters** (with a hand-written demo fun fact per spot), faved facts (`/me/faves`) and a general-fact fallback for stops with no history. Its Postgres backend serves stops, offers, physical rewards, nearby spots and tourist content.
 - Tourist content ingestion from official public APIs (Analyze Boston, Digital Commonwealth open-rights items, hand-written Freedom Trail facts), run once; counts in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
@@ -131,7 +131,7 @@ All of this exists in `data-platform/migrations/`.
 
 | Layer | Built | In progress | Planned |
 |---|---|---|---|
-| Database | Migrations 0000-0015 on a live Tiger Cloud service; `verify` passed; aggregates, compression and retention policies | Real-data compression measurement | |
+| Database | Migrations 0000-0015 on a live Tiger Cloud service; `verify` passed; aggregates, compression and retention policies | | |
 | Ingestion | MBTA static load, live collector, tourist content ingestion (run once) | | |
 | data-platform API | Read API for stops, routes, lines, vehicles, predictions, alerts, travel; contract published | | |
 | insights-sponsors | Content, offers, rank tiers, physical-reward catalog, nearby spots, tourist content on Postgres; faves endpoints; contract published | Consent, place visits, analytics, recommendations still on the in-memory backend | Move those to Postgres; community quests |

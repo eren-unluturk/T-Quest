@@ -5,12 +5,12 @@ Boston Hacks, Transit Gamification track, Best Use of Tiger Data subtrack. Worki
 > **Demo disclaimer.** T-Quest is a hackathon prototype. Every sponsor, store, team, discount and label is a demo placeholder. No partnership, endorsement or real discount is implied. We are not pursuing real partnerships. Rider data is synthetic (flagged `is_synthetic`); stops, routes, schedules and live vehicles are real MBTA data.
 
 ## 30-second hook
-Hundreds of thousands of people ride the T every day and nothing happens when they do. T-Quest turns every stop into something to collect and every ride into progress: points, a travel rank, demo rewards at placeholder local spots, and a reason for visitors to step off the train. Underneath, one Tiger Data database holds the profiles and the live MBTA streams together.
+A great many people ride the T every day and nothing happens when they do. (TODO: verify a ridership figure before quoting one.) T-Quest turns every stop into something to collect and every ride into progress: points, a travel rank, demo rewards at placeholder local spots, and a reason for visitors to step off the train. Underneath, one Tiger Data database holds the profiles and the live MBTA streams together.
 
 ## Problem and solution
 **Problem.** The T is a necessity: routine, waiting, friction, and nothing gained when it breaks. For tourists it is passive and disconnected from the city.
 
-**Solution.** A Pokemon-Go-style layer over subway and bus. Check in at stops and collect them, track routes Strava-style, earn points, level a travel rank that unlocks tiered discounts, and redeem demo rewards near stops. At every stop riders can browse what is nearby and filter by category and verified community label. Tourists get stop facts, Freedom Trail spots and Boston history. When your home line goes down, you get compensation points.
+**Solution.** A Pokemon-Go-style layer over subway and bus. Check in at stops and collect them, track routes Strava-style, earn points, level a travel rank that unlocks tiered discounts, and redeem demo rewards near stops. At every stop riders can browse what is nearby and filter by category and verified community label. Tourists get stop facts, Freedom Trail spots and Boston history. When your home line goes down, you get compensation points (the rule is built in game-engine; there is no screen for it yet).
 
 ## The six guiding questions
 1. **What aspect of riding can be more exciting?** The wait and the trip become progress: stops to collect, routes to complete, ranks to reach, and loading-screen facts about where you are.
@@ -18,7 +18,7 @@ Hundreds of thousands of people ride the T every day and nothing happens when th
 3. **How do we encourage community engagement?** Community quests that send riders to local businesses near stops, and nearby-spot filters for verified community labels so riders could support the communities they care about. In the demo no real business carries a label; filtering is shown on fictional "Sample ... (demo)" spots. Labels would appear only when declared by the business or listed in an official directory.
 4. **How do we introduce it and make it widely accessible?** Works for subway and bus from day one, uses open MBTA data, no special hardware, opt-in location. Rollout: start with a few stations and partner stores, expand by line. TODO: confirm accessibility approach with the design.
 5. **What incentivizes residents to use it?** Points and rank, tiered demo discounts (placeholder percentages from game-engine's rank table; the top rank unlocks a placeholder free item), friends and leaderboards, physical stickers and patches for the bag, and compensation points when the home line has an outage.
-6. **How does it make the T better for all riders?** Delay and cancellation notifications, compensation when service fails, and aggregate, privacy-protected ridership insights that can inform service. TODO: confirm exact claims with data-platform before presenting.
+6. **How does it make the T better for all riders?** Delay and cancellation notifications (planned, not built), compensation points when service fails (rule built, no screen), and aggregate, privacy-protected ridership insights that can inform service. TODO: confirm exact claims with data-platform before presenting.
 
 ## Why Tiger Data
 Mapping the four selling points to what we built (measured numbers are in the generated block below and nowhere else):
@@ -123,8 +123,8 @@ What a program could look like:
 
 ## Community and tourist engagement
 - Tourist content (stop facts, Freedom Trail, history) comes from open civic and cultural-heritage sources with attribution displayed. Any fast-fact text is our own wording.
-- Community quests such as "visit three local spots near stops" send riders to local businesses.
-- Opt-in tracking of other places visited, with explicit consent, revocable at any time, which deletes the stored visits.
+- Community quests such as "visit three local spots near stops" are proposed; game-engine has one demo quest today.
+- Opt-in tracking of other places visited, with explicit consent, revocable at any time, which deletes the stored visits (built on the in-memory backend with seed data; not yet on Postgres).
 
 ## Accessibility and rollout
 Subway and bus share the same model (a stop is a stop). Start with a handful of stations, then extend by line. UI accessibility decisions come from the design. TODO: confirm with Bryan and Isabella.
