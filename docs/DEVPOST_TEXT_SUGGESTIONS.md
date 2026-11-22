@@ -13,7 +13,7 @@ Add after "Explore":
 - The Analytics tab reads one new endpoint, `GET /analytics/system`, which runs a handful of read-only queries against the `vehicles_route_5m` continuous aggregate and the live `vehicles` table in a single database round trip.
 
 ## "Tiger Data results" (keep as is; optional sentence)
-- The same continuous aggregate that gave the 84.2x speedup in our benchmark now powers the live Analytics tab, so the number is not just a benchmark: the app reads from it.
+- The same continuous aggregate that gave the 57.6x speedup in our benchmark now powers the live Analytics tab, so the number is not just a benchmark: the app reads from it.
 
 ## "Challenges" (optional bullet)
 - Designing a screen with no existing design: the admin authored the Analytics tab and its nav icon from the approved canvas tokens and verified with a before/after screenshot diff that no existing screen changed except the nav. It still needs Isabella's review.

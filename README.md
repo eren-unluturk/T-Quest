@@ -103,7 +103,7 @@ All of this exists in `data-platform/migrations/`.
 - **SQL recommendations:** drafts in `insights-sponsors/sql/recs_*.sql`. Today recommendations are served by the in-memory backend with seed data; running them on Postgres is planned, not done.
 - **Measured numbers** (all from [docs/TIGER_DATA_RESULTS.md](docs/TIGER_DATA_RESULTS.md), never edited by hand):
   - Synthetic data: 250,000 `rider_events` compress 5.9x on total hypertable size (96.0 MB to 16.2 MB). Aggregate-vs-raw speedups on that small set range from 0.8x to 1.6x, reported as measured with no claim of a win.
-  - Real data: on live MBTA `vehicles` (733,219 rows, about 2.3 days), the `vehicles_route_5m` aggregate ran 84.2x faster than the raw table (19.86 ms vs 1671.22 ms, server-side). Compression of one settled chunk per hypertable, on-disk size including indexes: `vehicles` 15.3x (148.9 MB to 9.7 MB), `predictions` 24.3x (236.5 MB to 9.7 MB). One chunk of about a day each, so a small sample.
+  - Real data (measured Nov 22): on live MBTA `vehicles` (1,243,142 rows, about 2.7 days), the `vehicles_route_5m` aggregate ran 57.6x faster than the raw table (49.28 ms vs 2840.62 ms, server-side, warm cache). Compression of one settled day-chunk per hypertable, on-disk size including indexes: `vehicles` 11.3x (110.4 MB to 9.7 MB), `predictions` 16.2x (158.0 MB to 9.7 MB). One chunk of about a day each, so a small sample. An earlier run on Nov 21 gave 84.2x and 15.3x / 24.3x on a smaller table; the uncompressed size then included index bloat from repeated compress cycles, so the Nov 22 figures replace them.
 
 ### Data sources
 

@@ -84,18 +84,18 @@ Source of every number in this section: REAL data from the MBTA V3 API (`/vehicl
 
 | Table | Rows |
 |---|---|
-| `vehicles` (positions, 2026-11-19 19:37 to 2026-11-22 02:13 UTC, about 2.3 days) | 733,219 |
-| `predictions` | 1,015,921 |
-| `alerts` | 94 |
-| `alert_entities` | 324 |
-| `vehicles_route_5m` aggregate buckets | 9,082 |
+| `vehicles` (positions, 2026-11-19 19:37 to 2026-11-22 13:19 UTC, about 2.7 days) | 1,243,142 |
+| `predictions` | 2,059,674 |
+| `alerts` | 106 |
+| `alert_entities` | 352 |
+| `vehicles_route_5m` aggregate buckets | 17,563 |
 
 ##### Compression (settled chunk only; on-disk size of the chunk including indexes and toast, from `chunks_detailed_size`)
 
 | Hypertable | Chunk measured | Rows in chunk | Size uncompressed | Size compressed | Ratio |
 |---|---|---|---|---|---|
-| `vehicles` | 2026-11-21 (UTC day) | 416,348 | 148.9 MB | 9.7 MB | 15.3x |
-| `predictions` | 2026-11-21 (UTC day) | 640,018 | 236.5 MB | 9.7 MB | 24.3x |
+| `vehicles` | 2026-11-21 (UTC day) | 416,348 | 110.4 MB | 9.7 MB | 11.3x |
+| `predictions` | 2026-11-21 (UTC day) | 640,018 | 158.0 MB | 9.7 MB | 16.2x |
 
 Method: the 2026-11-21 chunk of each hypertable had stopped receiving writes (its range ended at 00:00 UTC). It was decompressed, its on-disk size (table + indexes + toast) was read from `chunks_detailed_size`, it was compressed again, and the size was read again. The live chunk (2026-11-22) was not touched. The two older chunks are tiny (a first, partial collection day) and were left out. We do not quote the `hypertable_compression_stats` ratio or a whole-table ratio, because the stats "before" figure and the mix of compressed and live chunks make them misleading. One chunk per hypertable over about one day of data is a small sample; larger volumes may behave differently.
 
@@ -103,7 +103,7 @@ Method: the 2026-11-21 chunk of each hypertable had stopped receiving writes (it
 
 | Continuous aggregate `vehicles_route_5m` (ms) | Raw `vehicles` (ms) | Speedup |
 |---|---|---|
-| 19.86 | 1671.22 | 84.2x |
+| 49.28 | 2840.62 | 57.6x |
 
 Cache state: one warm-up run, then five timed runs, aggregate refreshed first, collector running. Settled chunks were compressed; the live chunk was not.
 

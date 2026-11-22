@@ -11,7 +11,7 @@ Checked 2026-11-21 against the repo as it is now: README.md, PLAN.md, PITCH.md, 
 | Migrations 0000-0015 applied on a live Tiger Cloud database | README, PLAN | `schema_migrations` read-only query | false (said 0000-0014 in one place); fixed |
 | Real-data compression figures are "TODO: measure" | README | now measured in `docs/TIGER_DATA_RESULTS.md` | false (stale); fixed |
 | "Real-data compression measurement" still in progress | README | measured 2026-11-21 | false (stale); fixed |
-| Real data: 733,219 vehicles, 84.2x aggregate speedup, 15.3x / 24.3x chunk compression | README | copied from `docs/TIGER_DATA_RESULTS.md` | verified |
+| Real data: 1,243,142 vehicles, 57.6x aggregate speedup, 11.3x / 16.2x chunk compression | README | copied from `docs/TIGER_DATA_RESULTS.md` | verified |
 | Synthetic: 250,000 rider_events compress 5.9x | README | `docs/TIGER_DATA_RESULTS.md` (synthetic section, not re-measured) | verified (copied) |
 | Hypertables: rider_events, points_ledger, vehicles, predictions, place_visits | README | migrations; `timescaledb_information.hypertables` | verified |
 | Continuous aggregates and compression/retention policies as listed | README, PITCH | migrations 0003-0009; jobs query (compress after 1 day) | verified |
