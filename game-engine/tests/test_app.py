@@ -62,6 +62,10 @@ class AppTests(unittest.TestCase):
         self.assertEqual((rk["rank"], rk["name"], rk["points_to_next"]), (1, "Harbor Seal", 480))
         self.assertEqual(self.c.get("/me/collection", headers=H("ann")).json()["stops"], ["park"])
 
+    def test_checkin_accepts_optional_route_id(self):
+        r = self.c.post("/checkins", json=dict(PARK, route_id="Red"), headers=H("rita"))
+        self.assertEqual(r.status_code, 201)
+
     def test_cooldown_too_far_unknown_consent(self):
         self.c.post("/checkins", json=PARK, headers=H("ann"))
         self.assertEqual(self.c.post("/checkins", json=PARK, headers=H("ann")).status_code, 409)

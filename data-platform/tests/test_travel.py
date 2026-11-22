@@ -62,3 +62,19 @@ def test_travel_auth_and_unknown_user():
     assert c.get("/me/travel").status_code == 401
     r = c.get("/me/travel", headers={"Authorization": "Bearer nobody_" + uuid.uuid4().hex})
     assert r.status_code == 200 and r.json()["total_miles"] == 0 and r.json()["traveled_segments"] == []
+
+
+def test_resolve_user_falls_back_to_demo_prefix(monkeypatch):
+    from data_platform.routes import travel
+    seen = []
+    ids = {"demo_ann": uuid.UUID(int=7)}
+
+    def fake_fetch_one(sql, params):
+        seen.append(params[0])
+        return {"id": ids[params[0]]} if params[0] in ids else None
+
+    monkeypatch.setattr(travel.db, "fetch_one", fake_fetch_one)
+    assert travel.resolve_user("ann") == uuid.UUID(int=7)
+    assert seen == ["ann", "demo_ann"]
+    assert travel.resolve_user("demo_ann") == uuid.UUID(int=7)
+    assert travel.resolve_user("nobody") is None

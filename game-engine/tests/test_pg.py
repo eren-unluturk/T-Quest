@@ -4,6 +4,7 @@ Everything happens inside one transaction that is rolled back at the end, so
 the shared database is left unchanged.
 """
 import hashlib
+from datetime import datetime
 import os
 import sys
 import unittest
@@ -333,3 +334,16 @@ class PgTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_route_id_is_validated_and_stored(self):
+        self.assertTrue(self.store.route_serves_stop("Red", "place-pktrm"))
+        self.assertFalse(self.store.route_serves_stop("Orange", "place-pktrm"))
+        self.assertFalse(self.store.route_serves_stop("no-such-route", "place-pktrm"))
+        u = "pytest-route"
+        body = {"stop_id": "place-pktrm", "lat": 42.3564, "lon": -71.0624, "client_time": "2026-11-21T12:00:00"}
+        bad = self.c.post("/checkins", json=dict(body, route_id="Orange"), headers=H(u))
+        self.assertEqual((bad.status_code, bad.json()["detail"]), (422, "bad_route"))
+        self.store.record_checkin(u, "place-pktrm", 42.3564, -71.0624, None, datetime.now(), 20, "subway", "Red")
+        self.assertEqual(self.conn.execute(
+            "select route_id from rider_events where event_type='checkin' and user_id = (select id from users where username = %s)",
+            ("demo_" + u,)).fetchone()[0], "Red")

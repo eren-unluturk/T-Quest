@@ -18,6 +18,8 @@ import tquest_auth
 
 router = APIRouter()
 
+DEMO_PREFIX = "demo_"  # same prefix as game-engine's PgStore
+
 SEGMENTS_SQL = """
 WITH ev AS (
     SELECT route_id, stop_id, time,
@@ -110,7 +112,10 @@ def resolve_user(token: str) -> UUID | None:
         return UUID(token)
     except ValueError:
         pass
+    # game-engine stores demo riders as "demo_<name>"; accept the plain sandbox name too
     row = db.fetch_one("SELECT id FROM users WHERE username = %s", (token,))
+    if row is None and not token.startswith(DEMO_PREFIX):
+        row = db.fetch_one("SELECT id FROM users WHERE username = %s", (DEMO_PREFIX + token,))
     return row["id"] if row else None
 
 

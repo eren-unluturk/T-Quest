@@ -231,11 +231,18 @@ class PgStore:
         self._catalog_at = time.time()
         return self._catalog
 
-    def record_checkin(self, user, stop_id, lat, lon, client_time, at, points, mode=None):
+    def route_serves_stop(self, route_id, stop_id):
+        """True if the MBTA route stops at this stop or at its parent station (route_stops)."""
+        row = self._q("select 1 from route_stops rs join stops s on s.id = %s "
+                      "where rs.route_id = %s and rs.stop_id in (s.id, s.parent_station) limit 1",
+                      (stop_id, route_id), one=True)
+        return row is not None
+
+    def record_checkin(self, user, stop_id, lat, lon, client_time, at, points, mode=None, route_id=None):
         self._w()
-        self._q("insert into rider_events (time, user_id, event_type, stop_id, mode, lat, lon, client_time, "
-                "points_awarded, is_synthetic) values (%s,%s,'checkin',%s,%s,%s,%s,%s,%s,true)",
-                (at, self._uid(user), stop_id, mode, lat, lon, client_time, points))
+        self._q("insert into rider_events (time, user_id, event_type, stop_id, route_id, mode, lat, lon, client_time, "
+                "points_awarded, is_synthetic) values (%s,%s,'checkin',%s,%s,%s,%s,%s,%s,%s,true)",
+                (at, self._uid(user), stop_id, route_id, mode, lat, lon, client_time, points))
 
     def last_checkin(self, user):
         """(at, lat, lon) of the user's latest check-in anywhere, or None."""

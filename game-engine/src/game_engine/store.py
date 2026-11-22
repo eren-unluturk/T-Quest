@@ -95,7 +95,11 @@ class MemoryStore:
     def visited_stops(self, user):
         return {s for s, v in self._visits.get(user, {}).items() if v}
 
-    def record_checkin(self, user, stop_id, lat, lon, client_time, at, points, mode=None):
+    def route_serves_stop(self, route_id, stop_id):
+        """Memory mode has no route data: accept any route id."""
+        return True
+
+    def record_checkin(self, user, stop_id, lat, lon, client_time, at, points, mode=None, route_id=None):
         self._visits.setdefault(user, {}).setdefault(stop_id, []).append(at)
         self._last[user] = (at, lat, lon)
 

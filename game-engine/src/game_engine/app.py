@@ -106,6 +106,7 @@ class CheckinRequest(BaseModel):
     lon: float
     client_time: datetime
     mode: str | None = None
+    route_id: str | None = Field(default=None, max_length=64)  # MBTA route the rider is on (for /me/travel); must serve the stop
     consent: bool = True  # stand-in until the consent table is wired
     accuracy_m: float | None = None  # reported GPS accuracy; worse than 50 m is refused (poor_gps)
     samples: list[GpsSample] | None = Field(default=None, max_length=10)  # 3 to 10 readings over a few seconds
@@ -148,6 +149,8 @@ def post_checkin(body: CheckinRequest, user: str = Depends(current_user)):
     stop = st.stop(body.stop_id)
     if stop is None:
         raise HTTPException(404, "unknown stop")
+    if body.route_id is not None and not st.route_serves_stop(body.route_id, body.stop_id):
+        raise HTTPException(422, "bad_route")
     with LOCK:
         t = now()
         history = st.checkins_at_stop(user, body.stop_id)
@@ -177,7 +180,7 @@ def post_checkin(body: CheckinRequest, user: str = Depends(current_user)):
         pts = checkin_points(first_visit=first, repeats_today_at_stop=repeats_today,
                              checkin_points_today=today_pts)
         old_rank = rank_for(lifetime_of(entries))[0]
-        st.record_checkin(user, body.stop_id, body.lat, body.lon, body.client_time, t, pts, body.mode or stop.get("mode"))
+        st.record_checkin(user, body.stop_id, body.lat, body.lon, body.client_time, t, pts, body.mode or stop.get("mode"), body.route_id)
         if pts:
             st.add_points(user, t, pts, "first_visit" if first else "repeat_visit")
 
