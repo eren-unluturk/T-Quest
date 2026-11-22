@@ -27,3 +27,4 @@ docs/demo/
 .work/baseline/
 .work/*.png
 .work/after/
+.work/*.jpg
