@@ -20,6 +20,12 @@ DEMO_STOPS = {
     "alewife": {"lat": 42.3954, "lon": -71.1425, "mode": "subway"},
     "downtown": {"lat": 42.3555, "lon": -71.0602, "mode": "subway"},
     "south-station": {"lat": 42.3519, "lon": -71.0552, "mode": "subway"},
+    # Real MBTA station ids the web app sends (coordinates from the stops table), so check-in works in memory mode.
+    "place-pktrm": {"lat": 42.3564, "lon": -71.0624, "mode": "subway"},
+    "place-harsq": {"lat": 42.373362, "lon": -71.118956, "mode": "subway"},
+    "place-davis": {"lat": 42.39674, "lon": -71.121815, "mode": "subway"},
+    "place-fenwy": {"lat": 42.345403, "lon": -71.104213, "mode": "subway"},
+    "place-kencl": {"lat": 42.348949, "lon": -71.095169, "mode": "subway"},
 }
 DEMO_OFFERS = {
     "o1": {"store_id": "s1", "title": "5% off a coffee", "min_rank": 1},

@@ -237,6 +237,29 @@
       ],
       "dependsOrder": "parallel",
       "problemMatcher": []
+    },
+    {
+      "label": "Demo: start",
+      "type": "shell",
+      "command": "node scripts/demo-up.mjs",
+      "problemMatcher": [],
+      "isBackground": true,
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Demo: preflight",
+      "type": "shell",
+      "command": "node scripts/preflight.mjs",
+      "problemMatcher": []
+    },
+    {
+      "label": "Demo: reset demo rows",
+      "type": "shell",
+      "command": "node scripts/reset-demo.mjs",
+      "problemMatcher": []
     }
   ]
 }

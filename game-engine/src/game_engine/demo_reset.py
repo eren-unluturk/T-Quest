@@ -4,7 +4,7 @@
     GE_ALLOW_DB_WRITES=1 python -m game_engine.demo_reset
 
 Demo rows are the rows of users whose username starts with "demo_" (every user
-the service creates), plus their rider_events (is_synthetic = true). It never
+the service creates), plus their rider_events (is_synthetic = true) and the faves flagged is_demo. It never
 touches other users. points_ledger is append-only (trigger), so, like
 data_platform.bench --cleanup, the guard is lifted only for this delete, inside
 one transaction: if anything fails, everything including the trigger rolls back.
@@ -23,6 +23,7 @@ TABLES = [  # (label, count/delete sql with %(p)s = demo prefix)
     ("redemptions", "redemptions WHERE user_id IN (SELECT id FROM users WHERE starts_with(username, %(p)s))"),
     ("points_ledger", "points_ledger WHERE user_id IN (SELECT id FROM users WHERE starts_with(username, %(p)s))"),
     ("users", "users WHERE starts_with(username, %(p)s)"),
+    ("fact_faves", "fact_faves WHERE is_demo"),  # insights-sponsors faves; column added by migration 0015
 ]
 
 
@@ -48,8 +49,15 @@ def run(conn, dry_run=False, allow_writes=None):
 
 def main(argv):
     import psycopg
+    try:  # use the repo's .env when DATABASE_URL is not already set (python-dotenv is optional)
+        from dotenv import find_dotenv, load_dotenv
+        load_dotenv(find_dotenv(usecwd=True))
+    except ImportError:
+        pass
     conn = psycopg.connect(os.environ["DATABASE_URL"], autocommit=False, connect_timeout=15)
     try:
+        if "--dry-run" not in argv:  # always show what is about to go before deleting
+            print("about to remove", run(conn, dry_run=True))
         counts = run(conn, dry_run="--dry-run" in argv)
         conn.commit()
     except Exception:

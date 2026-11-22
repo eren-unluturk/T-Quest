@@ -7,6 +7,8 @@ repository this class extends. Label policy: nearby-spot labels are read ONLY fr
 from datetime import datetime, timezone
 from uuid import UUID
 
+import threading
+
 import psycopg
 from psycopg.rows import dict_row
 
@@ -32,10 +34,22 @@ class PostgresRepository(MemoryRepository):
         self._url = database_url or settings.database_url
         if not self._url:
             raise RuntimeError("DATABASE_URL is not set")
+        self._tl = threading.local()
 
     def _q(self, sql: str, params=None) -> list[dict]:
-        with psycopg.connect(self._url, row_factory=dict_row) as conn:
-            return conn.execute(sql, params).fetchall()
+        """Read query on a connection reused per worker thread (a new connection to the cloud database costs
+        a full round trip, and one request runs several queries). Reconnects once if the connection went away."""
+        for attempt in (0, 1):
+            conn = getattr(self._tl, "conn", None)
+            try:
+                if conn is None or conn.closed or conn.broken:
+                    conn = psycopg.connect(self._url, row_factory=dict_row, autocommit=True, connect_timeout=10)
+                    self._tl.conn = conn
+                return conn.execute(sql, params).fetchall()
+            except psycopg.OperationalError:
+                self._tl.conn = None
+                if attempt:
+                    raise
 
     # stops
     def get_stop(self, stop_id: str) -> Stop | None:

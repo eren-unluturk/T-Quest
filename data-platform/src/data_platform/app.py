@@ -22,10 +22,15 @@ app.include_router(travel.router)
 
 @app.get("/health")
 def health() -> dict:
+    ok = False
+    last_vehicle_at = None
     try:
         with db.connect(connect_timeout=3) as conn:
             conn.execute("SELECT 1")
-        ok = True
+            ok = True
+            # Freshness of the live feed: newest vehicle row (recent chunks only, so this stays cheap).
+            row = conn.execute("SELECT max(time) FROM vehicles WHERE time > now() - interval '1 day'").fetchone()
+            last_vehicle_at = row[0].isoformat() if row and row[0] else None
     except Exception:
-        ok = False
-    return {"status": "ok", "db": ok}
+        pass
+    return {"status": "ok", "db": ok, "last_vehicle_at": last_vehicle_at}
