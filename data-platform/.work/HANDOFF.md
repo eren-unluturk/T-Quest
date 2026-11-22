@@ -32,3 +32,6 @@
 
 ## Update (issues #43/#44, sources)
 - data-platform: `GET /me/travel` (routes/travel.py, tests/test_travel.py), migration 0012 (nearby_spots.fun_fact, fact_faves). insights-sponsors v0.7.0: /me/faves, Spot.fun_fact, stop-facts fallback. Historic-inventory source dropped (code and rows removed); ingestion User-Agent T-Quest-Hackathon/1.0. #43 and #44 stay open (unlocked_spots writer in game-engine, #64; along-line ordering). Counts: docs/DATA_SOURCES.md.
+
+## Update (public-demo work, merged to main)
+- Added shared/ (signed-token auth, hardening), demo login on insights (POST /auth/demo-login), scripts/seed-demo-db.mjs (+ data_platform.seed_demo), Dockerfiles (untested), web/ app, docs/DEPLOY.md, docs/APP_SCOPE.md, scripts/e2e-prod.mjs (47/47). Migrations 0013 (rank names) and 0014 (all sponsors demo). Deployment is manual: docs/DEPLOY.md. Not verified: Docker builds, hosts, Vercel, seed script against a real second DB.

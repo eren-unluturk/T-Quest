@@ -45,3 +45,6 @@ STOPPED SAFELY at 2026-11-21 13:20 (planner). See .work/HANDOFF.md.
 
 # STATE (final pass)
 - Tests: insights-sponsors 211 pass, data-platform 136 pass, node 58 pass. Demo cold start OK.
+
+# STATE (demo-deploy merged)
+- main has the public-demo work; all suites green (shared 14, data-platform 147, insights 217, game-engine 64, node 58, web 28).
