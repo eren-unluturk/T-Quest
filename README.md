@@ -141,20 +141,18 @@ All of this exists in `data-platform/migrations/`.
 | Front end | Approved design canvas in `design/canvas/`; `web/` React + Vite app with six designed screens and stubs for the rest | Designs for the stub screens | Public hosting (future, untested) |
 
 ## Screenshots
-Taken from the local demo app (`node scripts/screenshots-demo.mjs`). The check-in screen has no approved design yet (the tap-in sheet and ride stamp are a proposal), and friends, leaderboard, quests and redemptions have no screens.
+Taken from the React app (`node scripts/shoot-web.mjs`) running locally against our Tiger Data database, with a sandbox username. The check-in screen has no approved design yet (Home has a tap-in button that is a proposal), and friends, leaderboard, quests and redemptions have no screens. The Analytics tab was designed by the admin to match the canvas (see [docs/APP_SCOPE.md](docs/APP_SCOPE.md)).
 
 | | |
 |---|---|
 | ![Loading](docs/screenshots/01-loading.png) | Loading: a Boston fun fact with its source |
-| ![Home map](docs/screenshots/02-home-map.png) | Home: live MBTA stations and trains from Tiger Data on a Boston map |
-| ![Home 3D](docs/screenshots/03-home-3d.png) | Home in 3D with landmark buildings from Boston open data |
-| ![Tap in](docs/screenshots/04-tap-in-sheet.png) | Tap in at a station and choose where you get off (proposal, not in the canvas) |
-| ![Ride verified](docs/screenshots/05-ride-verified.png) | A ride verified against the real MBTA schedule, with demo points |
-| ![Traveled](docs/screenshots/06-traveled.png) | Traveled: verified rides and unlocked spots |
-| ![Explore](docs/screenshots/07-explore.png) | Explore: nearby spots and perks from fictional demo businesses |
-| ![Filters](docs/screenshots/08-explore-filters.png) | Explore filters by line and ownership label (demo data) |
-| ![Faves](docs/screenshots/09-faves.png) | Faves: facts you starred |
-| ![User page](docs/screenshots/10-user-page.png) | User page: rank, points and demo perks |
+| ![Home](docs/screenshots/02-home.png) | Home: rank and points, a stop fact, and the live Boston map with MBTA lines and trains |
+| ![Traveled](docs/screenshots/03-traveled.png) | Traveled: the real network with miles per line and unlocked spots |
+| ![Explore](docs/screenshots/04-explore.png) | Explore: nearby spots from fictional demo businesses |
+| ![Faves](docs/screenshots/05-faves.png) | Faves: facts you starred |
+| ![Profile](docs/screenshots/06-profile.png) | Profile: rank and demo perks |
+| ![Analytics](docs/screenshots/07-analytics.png) | Analytics, live MBTA data: vehicles per line right now and the last hours, from the Tiger Data aggregate |
+| ![Analytics insights](docs/screenshots/08-analytics-insights.png) | Analytics: busiest and quietest hours, then demo rider insights (labeled demo data) |
 
 ## Future work: public hosting
 We have **not** deployed the demo publicly. It runs locally on a laptop (see [docs/DEMO.md](docs/DEMO.md)).
