@@ -1,4 +1,4 @@
-# Build from the repo root:  docker build -f data-platform/Dockerfile -t tquest-data-platform .
+# Build from the repo root:  docker build -f future-hosting/docker/data-platform.Dockerfile -t tquest-data-platform .
 # UNTESTED: Docker was not available when this was written.
 FROM python:3.12-slim-bookworm
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PORT=8001 APP_ENV=prod

@@ -37,8 +37,8 @@ Every service uses the same dev scheme: `Authorization: Bearer <username>`. The 
 ## CORS
 data-platform allows any origin (GET). insights-sponsors allows GET, POST, DELETE with `Authorization` and `Content-Type`; set `CORS_ORIGINS=https://your-app.vercel.app` in its environment to restrict it. game-engine does not send CORS headers yet (issue to Tobi); until it does, call it through the Vite proxy or a server-side function.
 
-## Hosting
-Vercel hosts the front end only. The three Python services need a host of their own (any container or Python host) reachable over https from the Vercel origin (browsers block http calls from an https page), with `DATABASE_URL` set as an environment variable on the host. Start commands (from each service folder, `PYTHONPATH=src` for the first two): `uvicorn data_platform.app:app`, `DATA_BACKEND=postgres uvicorn insights_sponsors.main:app`, `uvicorn game_engine.app:app`. Dockerfiles are not written yet (data-platform queue item 015). The shared database holds real MBTA data and the demo rows; do not point a public deployment at it without reviewing access.
+## Hosting (future, not done)
+Planned, not deployed (see docs/FUTURE_PUBLIC_HOSTING.md): Vercel would host the front end only. The three Python services need a host of their own (any container or Python host) reachable over https from the Vercel origin (browsers block http calls from an https page), with `DATABASE_URL` set as an environment variable on the host. Start commands (from each service folder, `PYTHONPATH=src` for the first two): `uvicorn data_platform.app:app`, `DATA_BACKEND=postgres uvicorn insights_sponsors.main:app`, `uvicorn game_engine.app:app`. Dockerfiles exist in `future-hosting/docker/` but are untested. The shared database holds real MBTA data and the demo rows; do not point a public deployment at it without reviewing access.
 
 ## Screen to endpoint map
 Screens are the files in `design/canvas/`.

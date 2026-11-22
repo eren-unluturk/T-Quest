@@ -1,4 +1,4 @@
-# Build from the repo root:  docker build -f insights-sponsors/Dockerfile -t tquest-insights .
+# Build from the repo root:  docker build -f future-hosting/docker/insights-sponsors.Dockerfile -t tquest-insights .
 # UNTESTED: Docker was not available when this was written.
 FROM python:3.12-slim-bookworm
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PORT=8002 APP_ENV=prod DATA_BACKEND=postgres

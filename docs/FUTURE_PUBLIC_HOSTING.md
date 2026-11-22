@@ -1,14 +1,16 @@
-# Deploy the public demo (step by step, done by you)
+# Future work: public hosting (UNTESTED, deferred)
+
+> We run the demo locally instead; see `docs/DEMO.md`. This page is the plan for going public later. Nothing below has been run. Files referenced here live in `future-hosting/`.
 
 > Demo placeholder. No partnership, endorsement or real discount is implied. Everything below is prepared but **not deployed**: no account, login or cloud command was run for you. The Dockerfiles are **untested** (Docker was not available when they were written), so do the local test in step 4 first.
 
 ## What gets deployed
 | Piece | Where | Source |
 |---|---|---|
-| Demo database (separate Tiger Data service) | Tiger Cloud | `scripts/seed-demo-db.mjs` fills it |
-| data-platform API | a container host | `data-platform/Dockerfile` |
-| insights-sponsors API | a container host | `insights-sponsors/Dockerfile` |
-| game-engine API | a container host | `game-engine/Dockerfile` |
+| Demo database (separate Tiger Data service) | Tiger Cloud | `future-hosting/scripts/seed-demo-db.mjs` fills it |
+| data-platform API | a container host | `future-hosting/docker/data-platform.Dockerfile` |
+| insights-sponsors API | a container host | `future-hosting/docker/insights-sponsors.Dockerfile` |
+| game-engine API | a container host | `future-hosting/docker/game-engine.Dockerfile` |
 | Web app | Vercel | `web/` |
 
 The deployed backends must use the **demo** database only. Never put the real database URL on any host.
@@ -19,8 +21,8 @@ Create a new, empty service in Tiger Cloud (free plan is fine; do not reuse the 
 ## 2. Seed the demo database from your machine
 Put the demo connection string in your local `.env` as `DEMO_DATABASE_URL` (never commit it). It must differ from `DATABASE_URL`; the script refuses to run otherwise and never prints connection strings.
 ```
-node scripts/seed-demo-db.mjs --dry-run     # shows the plan, writes nothing
-node scripts/seed-demo-db.mjs               # applies migrations, copies the MBTA stops/routes snapshot, loads the demo catalog, spots, labels, ranks, content
+node future-hosting/scripts/seed-demo-db.mjs --dry-run     # shows the plan, writes nothing
+node future-hosting/scripts/seed-demo-db.mjs               # applies migrations, copies the MBTA stops/routes snapshot, loads the demo catalog, spots, labels, ranks, content
 ```
 It copies only static MBTA data (lines, routes, stops, route_stops). No vehicles, predictions, alerts or rider data. Afterwards check in the Tiger Cloud console that the `stops`, `nearby_spots` and `content_items` tables have rows.
 
@@ -29,11 +31,11 @@ It copies only static MBTA data (lines, routes, stops, route_stops). No vehicles
 - `CORS_ORIGINS`: the exact front-end URL, for example `https://your-app.vercel.app` (no wildcard, no trailing path). Prod refuses to start with a wildcard.
 
 ## 4. Test the images locally (Docker needed)
-From the repo root:
+From the repo root (copy `future-hosting/docker/dockerignore.txt` to `.dockerignore` first):
 ```
-docker build -f data-platform/Dockerfile -t tquest-data-platform .
-docker build -f insights-sponsors/Dockerfile -t tquest-insights .
-docker build -f game-engine/Dockerfile -t tquest-game-engine .
+docker build -f future-hosting/docker/data-platform.Dockerfile -t tquest-data-platform .
+docker build -f future-hosting/docker/insights-sponsors.Dockerfile -t tquest-insights .
+docker build -f future-hosting/docker/game-engine.Dockerfile -t tquest-game-engine .
 ```
 Run each with `-e APP_ENV=prod -e TOKEN_SECRET=... -e CORS_ORIGINS=... -e DATABASE_URL=<demo URL> -p <port>:<port>` and open `/health` (game-engine: `/healthz`). Fix anything that fails and tell the team.
 
@@ -54,7 +56,7 @@ Any host that runs Docker images works (build context is the repo root; Dockerfi
 The services use https from the host's front door; the web app needs https base URLs. Check `https://<service>/health` on each. `GET /docs` is intentionally off in prod.
 
 ## 6. Deploy the web app on Vercel
-New project from the repo, **Root Directory** `web`, framework Vite, build `npm run build`, output `dist`. Environment variables:
+New project from the repo, **Root Directory** `web` (copy `future-hosting/vercel.json` into `web/`), framework Vite, build `npm run build`, output `dist`. Environment variables:
 ```
 VITE_DATA_PLATFORM_URL=https://<data-platform host>
 VITE_INSIGHTS_URL=https://<insights host>

@@ -33,5 +33,5 @@ If a variable is missing in a production build the app shows which one instead o
 ## Data honesty in the app
 Demo spots show "Demo"; "LOCALLY OWNED" appears only for a declared or certified label returned by the API; pending labels are never returned. Attribution appears under the phone frame wherever content is shown, with the demo footer and data credits.
 
-## Deploy
-See `docs/DEPLOY.md`. Vercel: root directory `web`, build command `npm run build`, output `dist`, set the three `VITE_*` variables.
+## Public hosting (future, not done)
+The demo runs locally. For the deferred public plan see `docs/FUTURE_PUBLIC_HOSTING.md` (untested). Vercel would use: root directory `web`, build command `npm run build`, output `dist`, set the three `VITE_*` variables.

@@ -1,4 +1,4 @@
-# Build from the repo root:  docker build -f game-engine/Dockerfile -t tquest-game-engine .
+# Build from the repo root:  docker build -f future-hosting/docker/game-engine.Dockerfile -t tquest-game-engine .
 # UNTESTED: Docker was not available when this was written.
 # Database mode is read-only unless GE_ALLOW_DB_WRITES=1 (see game-engine/README.md); on the demo host it targets the DEMO database only.
 FROM python:3.12-slim-bookworm
