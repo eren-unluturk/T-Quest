@@ -1,0 +1,24 @@
+# Docker build context is the repo root. Keep secrets, caches, tests data and the front end out of images.
+.git
+.github
+.githooks
+.env
+.env.*
+!.env.example
+.team
+.vscode
+.claude
+**/.claude
+**/.venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.work
+insights-sponsors/data/raw
+web
+design
+docs
+tests
+client-bryan
+client-isabella

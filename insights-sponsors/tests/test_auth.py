@@ -37,6 +37,37 @@ def test_dev_mode_returns_user_id(auth_client, auth_headers):
     assert r.json() == {"user_id": "user-1"}
 
 
-def test_strict_mode_501(auth_client, auth_headers, monkeypatch):
-    monkeypatch.setattr(settings, "auth_mode", "strict")
-    assert auth_client.get("/whoami", headers=auth_headers).status_code == 501
+def test_prod_requires_signed_tokens(auth_client, auth_headers, monkeypatch):
+    import tquest_auth as A
+
+    monkeypatch.setenv("APP_ENV", "prod")
+    monkeypatch.setenv("TOKEN_SECRET", "k" * 32)
+    assert auth_client.get("/whoami", headers=auth_headers).status_code == 401  # plain username refused
+    good = {"Authorization": "Bearer " + A.issue_token("riderOne", "k" * 32)}
+    assert auth_client.get("/whoami", headers=good).json() == {"user_id": "riderOne"}
+    expired = {"Authorization": "Bearer " + A.issue_token("riderOne", "k" * 32, ttl_s=1, now=1)}
+    assert auth_client.get("/whoami", headers=expired).status_code == 401
+    tampered = {"Authorization": good["Authorization"][:-3] + "AAA"}
+    assert auth_client.get("/whoami", headers=tampered).status_code == 401
+    wrong = {"Authorization": "Bearer " + A.issue_token("riderOne", "z" * 32)}
+    assert auth_client.get("/whoami", headers=wrong).status_code == 401
+    assert auth_client.get("/whoami").status_code == 401
+
+
+def test_demo_login_issues_working_token(client, monkeypatch):
+    import tquest_auth as A
+
+    monkeypatch.setenv("APP_ENV", "prod")
+    monkeypatch.setenv("TOKEN_SECRET", "k" * 32)
+    r = client.post("/auth/demo-login", json={"username": "riderTwo"})
+    assert r.status_code == 200 and r.json()["username"] == "riderTwo" and r.json()["expires_in"] > 0
+    assert A.verify_token(r.json()["token"], "k" * 32) == "riderTwo"
+    assert client.get("/categories", headers={"Authorization": "Bearer " + r.json()["token"]}).status_code == 200
+    for bad in ("ab", "has space", "a@b.com", "x" * 40, ""):
+        assert client.post("/auth/demo-login", json={"username": bad}).status_code == 422
+
+
+def test_login_unavailable_in_prod_without_secret(client, monkeypatch):
+    monkeypatch.setenv("APP_ENV", "prod")
+    monkeypatch.delenv("TOKEN_SECRET", raising=False)
+    assert client.post("/auth/demo-login", json={"username": "riderTwo"}).status_code == 503

@@ -30,6 +30,7 @@ def _visit_body() -> dict:
 BODIES = {
     ("/consent", "post"): {"scope": "place_visits", "policy_version": CURRENT_POLICY_VERSION},
     ("/place-visits", "post"): _visit_body,
+    ("/auth/demo-login", "post"): {"username": "demoRider1"},
 }
 
 
@@ -58,7 +59,7 @@ def is_public(path: str, method: str) -> bool:
 
 
 def test_operations_found():
-    assert len(OPERATIONS) == 24
+    assert len(OPERATIONS) == 25
 
 
 @pytest.mark.parametrize("path,method", OPERATIONS, ids=[f"{m.upper()} {p}" for p, m in OPERATIONS])

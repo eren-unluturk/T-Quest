@@ -49,15 +49,13 @@ async def lifespan(_app):
 
 app = FastAPI(title="T-Quest game-engine", version="0.2.0", lifespan=lifespan)
 
-# CORS so a browser app (Vite, Vercel) can call this API. Demo default: any origin, no cookies.
-# Set CORS_ORIGINS="https://my-app.example,http://localhost:5173" to allow only those sites.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[o.strip() for o in os.environ.get("CORS_ORIGINS", "*").split(",") if o.strip()],
-    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "X-Store-Key"],
-    allow_credentials=False,
-)
+# CORS (CORS_ORIGINS; exact origins required when APP_ENV=prod), rate limits, body limit, security headers and
+# generic errors come from shared/tquest_http.py, the same hardening every service uses.
+from . import _shared  # noqa: E402,F401
+import tquest_auth  # noqa: E402
+import tquest_http  # noqa: E402
+
+tquest_http.harden(app, extra_headers=("X-Store-Key",))
 
 LOCK = threading.RLock()
 _store = None
@@ -85,9 +83,10 @@ def now():
 
 
 def current_user(authorization: str = Header(default="")):
-    if not authorization.lower().startswith("bearer ") or not authorization[7:].strip():
-        raise HTTPException(401, "missing bearer token")
-    user = authorization[7:].strip()
+    try:
+        user = tquest_auth.user_from_authorization(authorization)
+    except tquest_auth.AuthError:
+        raise HTTPException(401, "invalid or missing credentials")
     get_store().ensure_user(user)
     return user
 

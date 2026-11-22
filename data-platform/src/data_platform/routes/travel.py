@@ -12,7 +12,9 @@ from uuid import UUID
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
 
+from .. import _shared  # noqa: F401
 from .. import db
+import tquest_auth
 
 router = APIRouter()
 
@@ -141,9 +143,11 @@ def build_travel(uid: UUID) -> Travel:
 
 @router.get("/me/travel", response_model=Travel, operation_id="myTravel")
 def my_travel(authorization: Annotated[str | None, Header()] = None):
-    if not authorization or not authorization.lower().startswith("bearer "):
-        raise HTTPException(401, "missing bearer token")
-    uid = resolve_user(authorization[7:].strip())
+    try:
+        username = tquest_auth.user_from_authorization(authorization)
+    except tquest_auth.AuthError:
+        raise HTTPException(401, "invalid or missing credentials")
+    uid = resolve_user(username)
     if uid is None:  # a rider with no events yet: zero state, so a new account does not break the screen
         return build_travel(UUID(int=0))
     return build_travel(uid)
