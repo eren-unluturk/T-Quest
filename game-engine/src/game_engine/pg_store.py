@@ -1,12 +1,24 @@
 """PgStore: the game-engine data layer on the shared Tiger Data database.
 
-Tables written (owned by game-engine per contracts/db/SCHEMA.md): users,
-rider_events, points_ledger, user_collections, badges, friends, redemptions.
-Tables only read: stops, vehicles, offers, stores, quests.
+DEMO-SAFE by design:
+- Read-only unless the caller passes allow_writes=True (the app sets that only
+  when env GE_ALLOW_DB_WRITES=1).
+- Every user the service creates is a DEMO user: the database username is
+  "demo_" + the name the client sent. Every other row (points_ledger,
+  user_collections, friends, redemptions) hangs off a demo user, and every
+  check-in row in rider_events is written with is_synthetic = true. So
+  `python -m game_engine.demo_reset` can remove all of it, and real analytics
+  (which filter NOT is_synthetic) never see it.
+- Only demo users are read back (leaderboards, friends), so real users are never exposed.
+
+Tables written: users, rider_events, points_ledger, user_collections, badges
+(slug rows only), friends, redemptions. Tables only read: stops, vehicles,
+offers, stores, quests, spot_stop_links, nearby_spots, physical_rewards,
+freedom_trail_sites, routes, route_stops. All sponsors, stores and spots in the
+database are demo placeholders.
 
 Pass a connection to PgStore(conn). With autocommit on, each statement is saved
-at once (production). With autocommit off, nothing is saved until commit(), so
-tests can roll back.
+at once. With autocommit off, nothing is saved until commit(), so tests can roll back.
 """
 import hashlib
 import os
@@ -20,6 +32,12 @@ from .redemption import RedemptionError
 from .store import encode_reason
 
 _ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+DEMO_PREFIX = "demo_"
+NIL_UUID = "00000000-0000-0000-0000-000000000000"
+
+
+class ReadOnlyStore(Exception):
+    """A write was attempted while database writes are switched off."""
 
 
 def _naive(dt):
@@ -64,11 +82,16 @@ def connect(url=None):
 class PgStore:
     name = "postgres"
 
-    def __init__(self, conn):
+    def __init__(self, conn, allow_writes=False):
         self.conn = conn
+        self.can_write = bool(allow_writes)
         self._ids = {}
         self._catalog = None
         self._catalog_at = 0
+
+    def _w(self):
+        if not self.can_write:
+            raise ReadOnlyStore("database writes are off (set GE_ALLOW_DB_WRITES=1 to allow demo writes)")
 
     def _q(self, sql, params=(), one=False, many=False):
         with self.conn.cursor() as cur:
@@ -108,7 +131,9 @@ class PgStore:
         {"stops": ["place-x", ...]}                      visit every listed station
         {"stops": [...], "min_stops": 3}                  visit any 3 of them
         {"type": "spots_near_stops", "min_stops": 3}      visit any 3 stations that have a nearby spot
-                                                          (stations come from spot_stop_links)
+                                                          (stations come from spot_stop_links joined to active, not removed
+                                                          nearby_spots: the same set GET /stops/{id}/nearby returns with no
+                                                          filters. Read from the shared tables, no HTTP call at check-in.)
         """
         rows = self._q("select id, title, criteria, reward_points, reward_badge_id, sponsor_id "
                        "from quests where active and (starts_at is null or starts_at <= now()) "
@@ -150,29 +175,35 @@ class PgStore:
                 "min_rank": row[3] or 1, "points_cost": row[4] or 0, "stock": row[5],
                 "starts_at": row[7], "ends_at": row[8]}
 
-    # users
-    def ensure_user(self, user):
-        if user in self._ids:
-            return self._ids[user]
-        self._q("insert into users (username) values (%s) on conflict (username) do nothing", (user,))
-        row = self._q("select id from users where username=%s", (user,), one=True)
-        self._ids[user] = str(row[0])
-        return self._ids[user]
-
+    # users (demo users only: the database name is "demo_" + client name)
     def _uid(self, user):
-        return self.ensure_user(user)
+        name = DEMO_PREFIX + user
+        if name in self._ids:
+            return self._ids[name]
+        row = self._q("select id from users where username=%s", (name,), one=True)
+        if row is None and self.can_write:
+            self._q("insert into users (username, display_name) values (%s, %s) on conflict (username) do nothing",
+                    (name, "Demo " + user))
+            row = self._q("select id from users where username=%s", (name,), one=True)
+        if row is None:          # read-only and unknown: matches nothing, creates nothing
+            return NIL_UUID
+        self._ids[name] = str(row[0])
+        return self._ids[name]
+
+    def ensure_user(self, user):
+        return self._uid(user)
 
     # check-ins
     def checkins_at_stop(self, user, stop_id):
         rows = self._q("select time from rider_events where user_id=%s and stop_id=%s and event_type='checkin' "
-                       "and not is_synthetic order by time", (self._uid(user), stop_id), many=True)
+                       "order by time", (self._uid(user), stop_id), many=True)
         return [_naive(r[0]) for r in rows]
 
     def visited_stops(self, user):
         """Visited STATIONS: a platform check-in counts for its parent station."""
         rows = self._q("select distinct coalesce(s.parent_station, s.id) from rider_events e "
-                       "join stops s on s.id = e.stop_id where e.user_id=%s and e.event_type='checkin' "
-                       "and not e.is_synthetic", (self._uid(user),), many=True)
+                       "join stops s on s.id = e.stop_id where e.user_id=%s and e.event_type='checkin'",
+                       (self._uid(user),), many=True)
         return {r[0] for r in rows}
 
     def catalog(self):
@@ -199,8 +230,9 @@ class PgStore:
         return self._catalog
 
     def record_checkin(self, user, stop_id, lat, lon, client_time, at, points, mode=None):
+        self._w()
         self._q("insert into rider_events (time, user_id, event_type, stop_id, mode, lat, lon, client_time, "
-                "points_awarded) values (%s,%s,'checkin',%s,%s,%s,%s,%s,%s)",
+                "points_awarded, is_synthetic) values (%s,%s,'checkin',%s,%s,%s,%s,%s,%s,true)",
                 (at, self._uid(user), stop_id, mode, lat, lon, client_time, points))
 
     # points
@@ -210,15 +242,19 @@ class PgStore:
         return tuple(LedgerEntry(_naive(r[0]), r[1], _decode_reason(r[2], r[3], r[4])) for r in rows)
 
     def add_points(self, user, at, delta, reason, ref_type=None, ref_id=None):
+        self._w()
         self._q("insert into points_ledger (at, user_id, delta, reason, ref_type, ref_id) values (%s,%s,%s,%s,%s,%s)",
                 (at, self._uid(user), delta, reason, ref_type, ref_id))
 
     def all_ledgers(self):
+        """Ledgers of DEMO users only (real users are never exposed), keyed by the client name."""
         rows = self._q("select u.username, l.at, l.delta, l.reason, l.ref_type, l.ref_id "
-                       "from points_ledger l join users u on u.id = l.user_id order by l.at", many=True)
+                       "from points_ledger l join users u on u.id = l.user_id "
+                       "where starts_with(u.username, %s) order by l.at", (DEMO_PREFIX,), many=True)
         out = {}
         for name, at, delta, reason, rt, rid in rows:
-            out.setdefault(name, []).append(LedgerEntry(_naive(at), delta, _decode_reason(reason, rt, rid)))
+            out.setdefault(name.removeprefix(DEMO_PREFIX), []).append(
+                LedgerEntry(_naive(at), delta, _decode_reason(reason, rt, rid)))
         return {k: tuple(v) for k, v in out.items()}
 
     # badges
@@ -227,6 +263,7 @@ class PgStore:
         return {r[0] for r in rows}
 
     def add_badge(self, user, badge_id, at, source):
+        self._w()
         self._q("insert into badges (id, name, kind) values (%s,%s,%s) on conflict (id) do nothing",
                 (badge_id, badge_id, _badge_kind(badge_id)))
         self._q("insert into user_collections (user_id, badge_id, earned_at, source) values (%s,%s,%s,%s) "
@@ -236,6 +273,7 @@ class PgStore:
     def add_friend(self, user, other):
         if user == other:
             return "self"
+        self._w()
         a, b = self._uid(user), self._uid(other)
         row = self._q("select 1 from friends where user_id=%s and friend_id=%s", (a, b), one=True)
         if row:
@@ -246,10 +284,11 @@ class PgStore:
     def friends(self, user):
         rows = self._q("select u.username from friends f join users u on u.id=f.friend_id where f.user_id=%s "
                        "order by u.username", (self._uid(user),), many=True)
-        return [r[0] for r in rows]
+        return [r[0].removeprefix(DEMO_PREFIX) for r in rows]
 
     # redemptions
     def issue_redemption(self, *, user, offer_id, offer, user_rank, balance, now):
+        self._w()
         uid = self._uid(user)
         if user_rank < offer["min_rank"]:
             raise RedemptionError("rank_too_low", 403)
@@ -289,6 +328,7 @@ class PgStore:
         raise RedemptionError("try_again", 503)
 
     def verify_redemption(self, *, code, store_id, store_key, now):
+        self._w()
         sid = _uuid_or_none(store_id)
         row = self._q("select id, store_id, offer_id, status, expires_at from redemptions where code=%s",
                       (code,), one=True)
