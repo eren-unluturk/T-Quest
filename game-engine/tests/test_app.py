@@ -26,6 +26,24 @@ class AppTests(unittest.TestCase):
         appmod.set_store(MemoryStore())
         self.c = TestClient(appmod.app)
 
+    def test_cors_preflight_and_headers(self):
+        """A browser app on another origin can call the API (preflight answers 200 with the allow headers)."""
+        origin = "http://localhost:5173"
+        pre = self.c.options("/me/rank", headers={
+            "Origin": origin, "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "authorization,content-type"})
+        self.assertEqual(pre.status_code, 200)
+        self.assertEqual(pre.headers["access-control-allow-origin"], "*")
+        self.assertIn("authorization", pre.headers["access-control-allow-headers"].lower())
+        pre2 = self.c.options("/redemptions/verify", headers={
+            "Origin": origin, "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "x-store-key,content-type"})
+        self.assertEqual(pre2.status_code, 200)
+        self.assertIn("x-store-key", pre2.headers["access-control-allow-headers"].lower())
+        r = self.c.get("/me/rank", headers={"Origin": origin, **H("ann")})
+        self.assertEqual((r.status_code, r.headers["access-control-allow-origin"]), (200, "*"))
+        self.assertNotIn("access-control-allow-credentials", r.headers)
+
     def test_needs_token(self):
         self.assertEqual(self.c.get("/me/points").status_code, 401)
 
