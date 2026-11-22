@@ -1,0 +1,13 @@
+/* GENERATED from the helmet styles in design/canvas/*.dc.html */
+body{margin:0}
+a{color:#1D3557}a:hover{color:#457B9D}
+.tq-nav a{transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.tq-nav a:hover{transform:translateY(-5px) rotate(-5deg)}
+.tq-nav a:active{transform:scale(.86)}
+@keyframes tq-wiggle{0%,100%{transform:rotate(-7deg) scale(1)}50%{transform:rotate(7deg) scale(1.07)}}
+@keyframes tq-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes tq-twinkle{0%,100%{transform:scale(.6) rotate(0);opacity:.5}50%{transform:scale(1.1) rotate(45deg);opacity:1}}
+.tq-on .tq-ic{animation:tq-wiggle 2.2s ease-in-out infinite}
+.tq-off .tq-ic{animation:tq-bob 3s ease-in-out infinite}
+.tq-spark{animation:tq-twinkle 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.tq-on .tq-ic,.tq-off .tq-ic,.tq-spark{animation:none}}
